@@ -1,0 +1,200 @@
+{
+	"name": {
+		"en": "Simple gauge",
+		"nl": "Eenvoudige meter"
+	},
+	"height": 255,
+	"settings": [
+		{
+			"id": "datasource",
+			"type": "autocomplete",
+			"title": {
+				"en": "Datasource",
+				"nl": "Databron"
+			}
+		},
+		{
+			"id": "segments",
+			"type": "number",
+			"title": {
+				"en": "Number of segments",
+				"nl": "Aantal segmenten"
+			},
+			"min": 1,
+			"max": 10,
+			"value": 4
+		},
+		{
+			"id": "refreshSeconds",
+			"type": "number",
+			"title": {
+				"en": "Refresh interval (seconds)",
+				"nl": "Verversingsinterval (seconden)"
+			},
+			"min": 1,
+			"value": 5
+		},
+		{
+			"id": "min",
+			"type": "number",
+			"title": {
+				"en": "Minimum value (leave empty to use datasource range)",
+				"nl": "Minimumwaarde (leeglaten om bereik van databron te gebruiken)"
+			}
+		},
+		{
+			"id": "isMinNegative",
+			"type": "checkbox",
+			"title": {
+				"en": "Minimum value is negative (if not using datasource range)",
+				"nl": "Minimumwaarde is negatief (indien geen gebruik databron bereik)"
+			},
+			"value": false
+		},
+		{
+			"id": "max",
+			"type": "number",
+			"title": {
+				"en": "Maximum value (leave empty to use datasource range)",
+				"nl": "Maximumwaarde (leeglaten om bereik van databron te gebruiken)"
+			}
+		},
+		{
+			"id": "isMaxNegative",
+			"type": "checkbox",
+			"title": {
+				"en": "Maximum value is negative (if not using datasource range)",
+				"nl": "Maximumwaarde is negatief (indien geen gebruik databron bereik)"
+			},
+			"value": false
+		},
+		{
+			"id": "style",
+			"type": "dropdown",
+			"title": {
+				"en": "Style",
+				"nl": "Stijl"
+			},
+			"value": "style",
+			"values": [
+				{
+					"id": "style1",
+					"title": {
+						"en": "Style 1",
+						"nl": "Stijl 1"
+					}
+				},
+				{
+					"id": "style2",
+					"title": {
+						"en": "Style 2",
+						"nl": "Stijl 2"
+					}
+				}
+			]
+		},
+		{
+			"id": "color1",
+			"type": "dropdown",
+			"title": {
+				"en": "Color 1",
+				"nl": "Kleur 1"
+			},
+			"values": [
+				{ "id": "", "title": { "en": "None", "nl": "Geen" } },
+				{ "id": "#00ff00", "title": { "en": "Green", "nl": "Groen" } },
+				{ "id": "#ff0000", "title": { "en": "Red", "nl": "Rood" } },
+				{ "id": "#ffff00", "title": { "en": "Yellow", "nl": "Geel" } },
+				{ "id": "#0000ff", "title": { "en": "Blue", "nl": "Blauw" } },
+				{ "id": "#ffa500", "title": { "en": "Orange", "nl": "Oranje" } },
+				{ "id": "#808080", "title": { "en": "Gray", "nl": "Grijs" } },
+				{ "id": "#800080", "title": { "en": "Purple", "nl": "Paars" } },
+				{ "id": "#a52a2a", "title": { "en": "Brown", "nl": "Bruin" } },
+				{ "id": "#ffffff", "title": { "en": "White", "nl": "Wit" } },
+				{ "id": "#000000", "title": { "en": "Black", "nl": "Zwart" } },
+				{ "id": "#00ffff", "title": { "en": "Cyan", "nl": "Cyaan" } },
+				{ "id": "#ff00ff", "title": { "en": "Magenta", "nl": "Magenta" } },
+				{ "id": "#32cd32", "title": { "en": "Lime Green", "nl": "Limoengroen" } },
+				{ "id": "#ff4500", "title": { "en": "Orange Red", "nl": "Oranjerood" } },
+				{ "id": "#1e90ff", "title": { "en": "Dodger Blue", "nl": "Hemelsblauw" } },
+				{ "id": "#4b0082", "title": { "en": "Indigo", "nl": "Indigo" } },
+				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
+				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
+				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+			]
+		},
+		{
+			"id": "color2",
+			"type": "dropdown",
+			"title": {
+				"en": "Color 2",
+				"nl": "Kleur 2"
+			},
+			"values": [
+				{ "id": "", "title": { "en": "None", "nl": "Geen" } },
+				{ "id": "#00ff00", "title": { "en": "Green", "nl": "Groen" } },
+				{ "id": "#ff0000", "title": { "en": "Red", "nl": "Rood" } },
+				{ "id": "#ffff00", "title": { "en": "Yellow", "nl": "Geel" } },
+				{ "id": "#0000ff", "title": { "en": "Blue", "nl": "Blauw" } },
+				{ "id": "#ffa500", "title": { "en": "Orange", "nl": "Oranje" } },
+				{ "id": "#808080", "title": { "en": "Gray", "nl": "Grijs" } },
+				{ "id": "#800080", "title": { "en": "Purple", "nl": "Paars" } },
+				{ "id": "#a52a2a", "title": { "en": "Brown", "nl": "Bruin" } },
+				{ "id": "#ffffff", "title": { "en": "White", "nl": "Wit" } },
+				{ "id": "#000000", "title": { "en": "Black", "nl": "Zwart" } },
+				{ "id": "#00ffff", "title": { "en": "Cyan", "nl": "Cyaan" } },
+				{ "id": "#ff00ff", "title": { "en": "Magenta", "nl": "Magenta" } },
+				{ "id": "#32cd32", "title": { "en": "Lime Green", "nl": "Limoengroen" } },
+				{ "id": "#ff4500", "title": { "en": "Orange Red", "nl": "Oranjerood" } },
+				{ "id": "#1e90ff", "title": { "en": "Dodger Blue", "nl": "Hemelsblauw" } },
+				{ "id": "#4b0082", "title": { "en": "Indigo", "nl": "Indigo" } },
+				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
+				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
+				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+			]
+		},
+		{
+			"id": "color3",
+			"type": "dropdown",
+			"title": {
+				"en": "Color 3",
+				"nl": "Kleur 3"
+			},
+			"values": [
+				{ "id": "", "title": { "en": "None", "nl": "Geen" } },
+				{ "id": "#00ff00", "title": { "en": "Green", "nl": "Groen" } },
+				{ "id": "#ff0000", "title": { "en": "Red", "nl": "Rood" } },
+				{ "id": "#ffff00", "title": { "en": "Yellow", "nl": "Geel" } },
+				{ "id": "#0000ff", "title": { "en": "Blue", "nl": "Blauw" } },
+				{ "id": "#ffa500", "title": { "en": "Orange", "nl": "Oranje" } },
+				{ "id": "#808080", "title": { "en": "Gray", "nl": "Grijs" } },
+				{ "id": "#800080", "title": { "en": "Purple", "nl": "Paars" } },
+				{ "id": "#a52a2a", "title": { "en": "Brown", "nl": "Bruin" } },
+				{ "id": "#ffffff", "title": { "en": "White", "nl": "Wit" } },
+				{ "id": "#000000", "title": { "en": "Black", "nl": "Zwart" } },
+				{ "id": "#00ffff", "title": { "en": "Cyan", "nl": "Cyaan" } },
+				{ "id": "#ff00ff", "title": { "en": "Magenta", "nl": "Magenta" } },
+				{ "id": "#32cd32", "title": { "en": "Lime Green", "nl": "Limoengroen" } },
+				{ "id": "#ff4500", "title": { "en": "Orange Red", "nl": "Oranjerood" } },
+				{ "id": "#1e90ff", "title": { "en": "Dodger Blue", "nl": "Hemelsblauw" } },
+				{ "id": "#4b0082", "title": { "en": "Indigo", "nl": "Indigo" } },
+				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
+				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
+				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+			]
+		}
+	],
+	"api": {
+		"getSettings": {
+			"method": "GET",
+			"path": "/"
+		},
+		"log": {
+			"method": "POST",
+			"path": "/log"
+		}
+	}
+}

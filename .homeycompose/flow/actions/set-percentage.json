@@ -1,0 +1,33 @@
+{
+	"title": {
+		"en": "Set percentage"
+	},
+	"titleFormatted": {
+		"en": "[Percentage] Set [[percentage]]% for [[identifier]]",
+		"nl": "[Percentage] Zet [[percentage]]% voor [[identifier]]"
+	},
+	"hint": {
+		"en": "Set a percentage that can be used in Advanced Gauge widgets.",
+		"nl": "Zet een percentage dat gebruikt kan worden in Geavanceerde Meter widgets."
+	},
+	
+	"args": [
+		{
+			"type": "number",
+			"name": "percentage",
+			"placeholder": {
+				"en": "percentage"
+			},
+			"min": 0,
+			"max": 100,
+			"step": 1
+		},
+		{
+			"type": "text",
+			"name": "identifier",
+			"placeholder": {
+				"en": "identifier"
+			}
+		}
+	]
+}

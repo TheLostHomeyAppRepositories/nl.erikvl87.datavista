@@ -1,0 +1,71 @@
+{
+	"name": {
+		"en": "Advanced gauge",
+		"nl": "Geavanceerde meter"
+	},
+	"height": 255,
+	"settings": [
+		{
+			"id": "datasource",
+			"type": "autocomplete",
+			"title": {
+				"en": "Datasource",
+				"nl": "Databron"
+			}
+		},
+		{
+			"id": "configsource",
+			"type": "autocomplete",
+			"title": {
+				"en": "Config source",
+				"nl": "Configuratiebron"
+			}
+		},
+		{
+			"id": "segments",
+			"type": "number",
+			"title": {
+				"en": "Number of segments",
+				"nl": "Aantal segmenten"
+			},
+			"min": 1,
+			"max": 10,
+			"value": 4
+		},
+		{
+			"id": "style",
+			"type": "dropdown",
+			"title": {
+				"en": "Style",
+				"nl": "Stijl"
+			},
+			"value": "style",
+			"values": [
+				{
+					"id": "style1",
+					"title": {
+						"en": "Style 1",
+						"nl": "Stijl 1"
+					}
+				},
+				{
+					"id": "style2",
+					"title": {
+						"en": "Style 2",
+						"nl": "Stijl 2"
+					}
+				}
+			]
+		}
+	],
+	"api": {
+		"getSettings": {
+			"method": "GET",
+			"path": "/"
+		},
+		"log": {
+			"method": "POST",
+			"path": "/log"
+		}
+	}
+}

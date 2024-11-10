@@ -1,0 +1,903 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "nl.erikvl87.datavista",
+  "version": "0.1.0",
+  "support": "https://github.com/Erikvl87/nl.erikvl87.datavista",
+  "homeyCommunityTopicId": 121482,
+  "bugs": {
+    "url": "https://github.com/Erikvl87/nl.erikvl87.datavista/issues"
+  },
+  "source": "https://github.com/Erikvl87/nl.erikvl87.datavista",
+  "compatibility": ">=12.1.2",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "DataVista"
+  },
+  "description": {
+    "en": "DataVista provides customizable widgets to display real-time data, including gauges, percentages, dates, and labels.",
+    "nl": "DataVista biedt aanpasbare widgets om real-time data weer te geven, waaronder meters, percentages, datums en labels."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:api"
+  ],
+  "brandColor": "#1E3A8A",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Erik van Leeuwen",
+    "email": "homey@erikvl87.nl"
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "erikvl87"
+      }
+    }
+  },
+  "api": {
+    "getTimeAndLanguage": {
+      "method": "GET",
+      "path": "/getTimeAndLanguage"
+    },
+    "dataTypes": {
+      "method": "GET",
+      "path": "/dataTypes"
+    },
+    "deleteData": {
+      "method": "DELETE",
+      "path": "/data/:id"
+    },
+    "updateGauge": {
+      "method": "PUT",
+      "path": "/gauge/:id"
+    },
+    "addGauge": {
+      "method": "POST",
+      "path": "/gauge"
+    }
+  },
+  "esm": true,
+  "flow": {
+    "actions": [
+      {
+        "title": {
+          "en": "Set gauge configuration"
+        },
+        "titleFormatted": {
+          "en": "[Gauge configuration] Set axes color to [[color1]] at value [[colorOffset1]], [[color2]] at [[colorOffset2]], [[color3]] value [[colorOffset3]], [[color4]] at [[colorOffset4]], [[color5]]  at [[colorOffset5]] for configuration id [[identifier]]",
+          "nl": "[Meter configuratie] Zet as kleuren naar [[color1]] op waarde [[colorOffset1]], [[color2]] at [[colorOffset2]], [[color3]] at [[colorOffset3]], [[color4]] at [[colorOffset4]], [[color5]] at [[colorOffset5]] voor configuratie id [[identifier]]"
+        },
+        "hint": {
+          "en": "Set configuration that can be used in Advanced Gauge widgets.",
+          "nl": "Zet configuratie die gebruikt kan worden in Geavanceerde Meter widgets."
+        },
+        "args": [
+          {
+            "type": "color",
+            "name": "color1"
+          },
+          {
+            "type": "number",
+            "name": "colorOffset1",
+            "placeholder": {
+              "en": "value",
+              "nl": "waarde"
+            },
+            "required": false
+          },
+          {
+            "type": "color",
+            "name": "color2",
+            "required": false
+          },
+          {
+            "type": "number",
+            "name": "colorOffset2",
+            "placeholder": {
+              "en": "value",
+              "nl": "waarde"
+            },
+            "required": false
+          },
+          {
+            "type": "color",
+            "name": "color3",
+            "required": false
+          },
+          {
+            "type": "number",
+            "name": "colorOffset3",
+            "placeholder": {
+              "en": "value",
+              "nl": "waarde"
+            },
+            "required": false
+          },
+          {
+            "type": "color",
+            "name": "color4",
+            "required": false
+          },
+          {
+            "type": "number",
+            "name": "colorOffset4",
+            "placeholder": {
+              "en": "value",
+              "nl": "waarde"
+            },
+            "required": false
+          },
+          {
+            "type": "color",
+            "name": "color5",
+            "required": false
+          },
+          {
+            "type": "number",
+            "name": "colorOffset5",
+            "placeholder": {
+              "en": "value",
+              "nl": "waarde"
+            },
+            "required": false
+          },
+          {
+            "type": "text",
+            "name": "identifier",
+            "placeholder": {
+              "en": "identifier"
+            }
+          }
+        ],
+        "id": "set-gauge-configuration"
+      },
+      {
+        "title": {
+          "en": "Set percentage"
+        },
+        "titleFormatted": {
+          "en": "[Percentage] Set [[percentage]]% for [[identifier]]",
+          "nl": "[Percentage] Zet [[percentage]]% voor [[identifier]]"
+        },
+        "hint": {
+          "en": "Set a percentage that can be used in Advanced Gauge widgets.",
+          "nl": "Zet een percentage dat gebruikt kan worden in Geavanceerde Meter widgets."
+        },
+        "args": [
+          {
+            "type": "number",
+            "name": "percentage",
+            "placeholder": {
+              "en": "percentage"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
+          },
+          {
+            "type": "text",
+            "name": "identifier",
+            "placeholder": {
+              "en": "identifier"
+            }
+          }
+        ],
+        "id": "set-percentage"
+      },
+      {
+        "title": {
+          "en": "Set range"
+        },
+        "titleFormatted": {
+          "en": "[Range] Set range from [[min]] to [[max]] with value [[value]] (label [[label]]) for [[identifier]]",
+          "nl": "[Bereik] Zet bereik van [[min]] tot [[max]] met waarde [[value]] (label [[label]]) voor [[identifier]]"
+        },
+        "hint": {
+          "en": "Set a range that can be used in Advanced Gauge widgets.",
+          "nl": "Zet een bereik dat gebruikt kan worden in Geavanceerde Meter widgets."
+        },
+        "args": [
+          {
+            "type": "number",
+            "name": "min",
+            "placeholder": {
+              "en": "Min"
+            }
+          },
+          {
+            "type": "number",
+            "name": "max",
+            "placeholder": {
+              "en": "Max"
+            }
+          },
+          {
+            "type": "number",
+            "name": "value",
+            "placeholder": {
+              "en": "Value"
+            }
+          },
+          {
+            "type": "text",
+            "name": "label",
+            "required": false,
+            "placeholder": {
+              "en": "Label"
+            }
+          },
+          {
+            "type": "text",
+            "name": "identifier",
+            "placeholder": {
+              "en": "identifier"
+            }
+          }
+        ],
+        "id": "set-range"
+      }
+    ]
+  },
+  "widgets": {
+    "advanced-gauge": {
+      "name": {
+        "en": "Advanced gauge",
+        "nl": "Geavanceerde meter"
+      },
+      "height": 255,
+      "settings": [
+        {
+          "id": "datasource",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource",
+            "nl": "Databron"
+          }
+        },
+        {
+          "id": "configsource",
+          "type": "autocomplete",
+          "title": {
+            "en": "Config source",
+            "nl": "Configuratiebron"
+          }
+        },
+        {
+          "id": "segments",
+          "type": "number",
+          "title": {
+            "en": "Number of segments",
+            "nl": "Aantal segmenten"
+          },
+          "min": 1,
+          "max": 10,
+          "value": 4
+        },
+        {
+          "id": "style",
+          "type": "dropdown",
+          "title": {
+            "en": "Style",
+            "nl": "Stijl"
+          },
+          "value": "style",
+          "values": [
+            {
+              "id": "style1",
+              "title": {
+                "en": "Style 1",
+                "nl": "Stijl 1"
+              }
+            },
+            {
+              "id": "style2",
+              "title": {
+                "en": "Style 2",
+                "nl": "Stijl 2"
+              }
+            }
+          ]
+        }
+      ],
+      "api": {
+        "getSettings": {
+          "method": "GET",
+          "path": "/"
+        },
+        "log": {
+          "method": "POST",
+          "path": "/log"
+        }
+      },
+      "id": "advanced-gauge"
+    },
+    "simple-gauge": {
+      "name": {
+        "en": "Simple gauge",
+        "nl": "Eenvoudige meter"
+      },
+      "height": 255,
+      "settings": [
+        {
+          "id": "datasource",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource",
+            "nl": "Databron"
+          }
+        },
+        {
+          "id": "segments",
+          "type": "number",
+          "title": {
+            "en": "Number of segments",
+            "nl": "Aantal segmenten"
+          },
+          "min": 1,
+          "max": 10,
+          "value": 4
+        },
+        {
+          "id": "refreshSeconds",
+          "type": "number",
+          "title": {
+            "en": "Refresh interval (seconds)",
+            "nl": "Verversingsinterval (seconden)"
+          },
+          "min": 1,
+          "value": 5
+        },
+        {
+          "id": "min",
+          "type": "number",
+          "title": {
+            "en": "Minimum value (leave empty to use datasource range)",
+            "nl": "Minimumwaarde (leeglaten om bereik van databron te gebruiken)"
+          }
+        },
+        {
+          "id": "isMinNegative",
+          "type": "checkbox",
+          "title": {
+            "en": "Minimum value is negative (if not using datasource range)",
+            "nl": "Minimumwaarde is negatief (indien geen gebruik databron bereik)"
+          },
+          "value": false
+        },
+        {
+          "id": "max",
+          "type": "number",
+          "title": {
+            "en": "Maximum value (leave empty to use datasource range)",
+            "nl": "Maximumwaarde (leeglaten om bereik van databron te gebruiken)"
+          }
+        },
+        {
+          "id": "isMaxNegative",
+          "type": "checkbox",
+          "title": {
+            "en": "Maximum value is negative (if not using datasource range)",
+            "nl": "Maximumwaarde is negatief (indien geen gebruik databron bereik)"
+          },
+          "value": false
+        },
+        {
+          "id": "style",
+          "type": "dropdown",
+          "title": {
+            "en": "Style",
+            "nl": "Stijl"
+          },
+          "value": "style",
+          "values": [
+            {
+              "id": "style1",
+              "title": {
+                "en": "Style 1",
+                "nl": "Stijl 1"
+              }
+            },
+            {
+              "id": "style2",
+              "title": {
+                "en": "Style 2",
+                "nl": "Stijl 2"
+              }
+            }
+          ]
+        },
+        {
+          "id": "color1",
+          "type": "dropdown",
+          "title": {
+            "en": "Color 1",
+            "nl": "Kleur 1"
+          },
+          "values": [
+            {
+              "id": "",
+              "title": {
+                "en": "None",
+                "nl": "Geen"
+              }
+            },
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#ffffff",
+              "title": {
+                "en": "White",
+                "nl": "Wit"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            }
+          ]
+        },
+        {
+          "id": "color2",
+          "type": "dropdown",
+          "title": {
+            "en": "Color 2",
+            "nl": "Kleur 2"
+          },
+          "values": [
+            {
+              "id": "",
+              "title": {
+                "en": "None",
+                "nl": "Geen"
+              }
+            },
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#ffffff",
+              "title": {
+                "en": "White",
+                "nl": "Wit"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            }
+          ]
+        },
+        {
+          "id": "color3",
+          "type": "dropdown",
+          "title": {
+            "en": "Color 3",
+            "nl": "Kleur 3"
+          },
+          "values": [
+            {
+              "id": "",
+              "title": {
+                "en": "None",
+                "nl": "Geen"
+              }
+            },
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#ffffff",
+              "title": {
+                "en": "White",
+                "nl": "Wit"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            }
+          ]
+        }
+      ],
+      "api": {
+        "getSettings": {
+          "method": "GET",
+          "path": "/"
+        },
+        "log": {
+          "method": "POST",
+          "path": "/log"
+        }
+      },
+      "id": "simple-gauge"
+    }
+  }
+}

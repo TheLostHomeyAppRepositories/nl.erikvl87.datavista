@@ -1,0 +1,51 @@
+{
+	"title": {
+		"en": "Set range"
+	},
+	"titleFormatted": {
+		"en": "[Range] Set range from [[min]] to [[max]] with value [[value]] (label [[label]]) for [[identifier]]",
+		"nl": "[Bereik] Zet bereik van [[min]] tot [[max]] met waarde [[value]] (label [[label]]) voor [[identifier]]"
+	},
+	"hint": {
+		"en": "Set a range that can be used in Advanced Gauge widgets.",
+		"nl": "Zet een bereik dat gebruikt kan worden in Geavanceerde Meter widgets."
+	},
+	"args": [
+		{
+			"type": "number",
+			"name": "min",
+			"placeholder": {
+				"en": "Min"
+			}
+		},
+		{
+			"type": "number",
+			"name": "max",
+			"placeholder": {
+				"en": "Max"
+			}
+		},
+		{
+			"type": "number",
+			"name": "value",
+			"placeholder": {
+				"en": "Value"
+			}
+		},
+		{
+			"type": "text",
+			"name": "label",
+			"required": false,
+			"placeholder": {
+			  "en": "Label"
+			}
+		  },
+		{
+			"type": "text",
+			"name": "identifier",
+			"placeholder": {
+				"en": "identifier"
+			}
+		}
+	]
+}
