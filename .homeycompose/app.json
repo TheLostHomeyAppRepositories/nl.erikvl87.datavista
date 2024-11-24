@@ -1,61 +1,67 @@
 {
-	"id": "nl.erikvl87.datavista",
-	"version": "0.1.0",
-	"support": "https://github.com/Erikvl87/nl.erikvl87.datavista",
-	"homeyCommunityTopicId": 121482,
-	"bugs": {
-		"url": "https://github.com/Erikvl87/nl.erikvl87.datavista/issues"
-	},
-	"source": "https://github.com/Erikvl87/nl.erikvl87.datavista",
-	"compatibility": ">=12.1.2",
-	"sdk": 3,
-	"platforms": ["local"],
-	"name": {
-		"en": "DataVista"
-	},
-	"description": {
-		"en": "DataVista provides customizable widgets to display real-time data, including gauges, percentages, dates, and labels.",
-		"nl": "DataVista biedt aanpasbare widgets om real-time data weer te geven, waaronder meters, percentages, datums en labels."
-	},
-	"category": ["tools"],
-	"permissions": ["homey:manager:api"],
-	"brandColor": "#1E3A8A",
-	"images": {
-		"small": "/assets/images/small.png",
-		"large": "/assets/images/large.png",
-		"xlarge": "/assets/images/xlarge.png"
-	},
-	"author": {
-		"name": "Erik van Leeuwen",
-		"email": "homey@erikvl87.nl"
-	},
-	"contributing": {
-		"donate": {
-			"paypal": {
-				"username": "erikvl87"
-			}
-		}
-	},
-	"api": {
-		"getTimeAndLanguage": {
-			"method": "GET",
-			"path": "/getTimeAndLanguage"
-		},
-		"dataTypes": {
-			"method": "GET",
-			"path": "/dataTypes"
-		},
-		"deleteData": {
-			"method": "DELETE",
-			"path": "/data/:id"
-		},
-		"updateGauge": {
-			"method": "PUT",
-			"path": "/gauge/:id"
-		},
-		"addGauge": {
-			"method": "POST",
-			"path": "/gauge"
-		}
-	}
+  "id": "nl.erikvl87.datavista",
+  "version": "0.1.1",
+  "support": "https://github.com/Erikvl87/nl.erikvl87.datavista",
+  "homeyCommunityTopicId": 121482,
+  "bugs": {
+    "url": "https://github.com/Erikvl87/nl.erikvl87.datavista/issues"
+  },
+  "source": "https://github.com/Erikvl87/nl.erikvl87.datavista",
+  "compatibility": ">=12.1.2",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "DataVista"
+  },
+  "description": {
+    "en": "DataVista provides customizable widgets to display real-time data, including gauges, percentages, dates, and labels.",
+    "nl": "DataVista biedt aanpasbare widgets om real-time data weer te geven, waaronder meters, percentages, datums en labels."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:api"
+  ],
+  "brandColor": "#1E3A8A",
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Erik van Leeuwen",
+    "email": "homey@erikvl87.nl"
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "erikvl87"
+      }
+    }
+  },
+  "api": {
+    "getTimeAndLanguage": {
+      "method": "GET",
+      "path": "/getTimeAndLanguage"
+    },
+    "dataTypes": {
+      "method": "GET",
+      "path": "/dataTypes"
+    },
+    "deleteData": {
+      "method": "DELETE",
+      "path": "/data/:id"
+    },
+    "updateGauge": {
+      "method": "PUT",
+      "path": "/gauge/:id"
+    },
+    "addGauge": {
+      "method": "POST",
+      "path": "/gauge"
+    }
+  }
 }

@@ -1,5 +1,8 @@
 {
   "0.1.0": {
     "en": "Initial version introducing gauge widgets"
+  },
+  "0.1.1": {
+    "en": "Fix default gauge style and initial gauge animation when no datasource is configured"
   }
 }
