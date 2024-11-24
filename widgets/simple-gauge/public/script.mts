@@ -24,7 +24,7 @@ class AdvancedGaugeWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
 	private data: SimpleGaugeWidgetPayload;
-	private spinnerTimeout: NodeJS.Timeout | null = null;
+	private spinnerTimeout: NodeJS.Timeout | null | undefined;
 	private refreshInterval: NodeJS.Timeout | null = null;
 	private colors: { offset: number; color: string }[];
 	private chart!: echarts.ECharts;
@@ -49,9 +49,12 @@ class AdvancedGaugeWidgetScript {
 			];
 		} else {
 			this.colors = [];
-			if (this.settings.color1 != null && this.settings.color1 != '') this.colors.push({ offset: 0, color: this.settings.color1 });
-			if (this.settings.color2 != null && this.settings.color2 != '') this.colors.push({ offset: 0.5, color: this.settings.color2 });
-			if (this.settings.color3 != null && this.settings.color3 != '') this.colors.push({ offset: 1, color: this.settings.color3 });
+			if (this.settings.color1 != null && this.settings.color1 != '')
+				this.colors.push({ offset: 0, color: this.settings.color1 });
+			if (this.settings.color2 != null && this.settings.color2 != '')
+				this.colors.push({ offset: 0.5, color: this.settings.color2 });
+			if (this.settings.color3 != null && this.settings.color3 != '')
+				this.colors.push({ offset: 1, color: this.settings.color3 });
 		}
 	}
 
@@ -247,6 +250,7 @@ class AdvancedGaugeWidgetScript {
 	private async startSpinning(): Promise<void> {
 		if (this.spinnerTimeout != null) return;
 
+		await this.log('Starting spinner');
 		const interval = 1000;
 		let value = 0;
 		const step = 25;
@@ -285,8 +289,6 @@ class AdvancedGaugeWidgetScript {
 	}
 
 	private async syncData(): Promise<void> {
-		this.chart = window.echarts.init(document.getElementById('gauge'));
-
 		const capabilityId = this.settings.datasource?.id;
 		const deviceId = this.settings.datasource?.deviceId;
 		const payload = (await this.homey.api(
@@ -297,6 +299,8 @@ class AdvancedGaugeWidgetScript {
 
 		if (payload !== null) {
 			await this.log('Received payload', payload);
+			await this.stopSpinning();
+
 			this.data = {
 				min: this.settings.min != null && this.settings.min !== '' ? this.settings.min : payload.min ?? 0,
 				max: this.settings.max != null && this.settings.max !== '' ? this.settings.max : payload.max ?? 100,
@@ -310,18 +314,18 @@ class AdvancedGaugeWidgetScript {
 			await this.log('The payload is null');
 			await this.startSpinning();
 		}
-
-		this.homey.ready();
 	}
 
 	/**
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
+		this.chart = window.echarts.init(document.getElementById('gauge'));
 		this.homey.ready();
+
 		if (this.settings.datasource?.id == null) {
-			await this.startSpinning();
 			await this.log('No datasource selected');
+			await this.startSpinning();
 			return;
 		}
 

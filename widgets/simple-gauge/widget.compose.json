@@ -46,8 +46,8 @@
 			"id": "isMinNegative",
 			"type": "checkbox",
 			"title": {
-				"en": "Minimum value is negative (if not using datasource range)",
-				"nl": "Minimumwaarde is negatief (indien geen gebruik databron bereik)"
+				"en": "Manual minimum value is negative",
+				"nl": "Handmatige minimumwaarde is negatief"
 			},
 			"value": false
 		},
@@ -63,8 +63,8 @@
 			"id": "isMaxNegative",
 			"type": "checkbox",
 			"title": {
-				"en": "Maximum value is negative (if not using datasource range)",
-				"nl": "Maximumwaarde is negatief (indien geen gebruik databron bereik)"
+				"en": "Manual maximum value is negative",
+				"nl": "Handmatige maximumwaarde is negatief"
 			},
 			"value": false
 		},
@@ -75,7 +75,7 @@
 				"en": "Style",
 				"nl": "Stijl"
 			},
-			"value": "style",
+			"value": "style1",
 			"values": [
 				{
 					"id": "style1",
