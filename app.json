@@ -17,8 +17,8 @@
     "en": "DataVista"
   },
   "description": {
-    "en": "DataVista provides customizable widgets to display real-time data, including gauges, percentages, dates, and labels.",
-    "nl": "DataVista biedt aanpasbare widgets om real-time data weer te geven, waaronder meters, percentages, datums en labels."
+    "en": "Customizable real-time data widgets for your dashboards.",
+    "nl": "Aanpasbare real-time data widgets voor je dashboards."
   },
   "category": [
     "tools"
