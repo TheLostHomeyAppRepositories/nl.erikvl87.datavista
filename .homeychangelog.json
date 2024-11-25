@@ -4,5 +4,8 @@
   },
   "0.1.1": {
     "en": "Fix default gauge style and initial gauge animation when no datasource is configured"
+  },
+  "0.2.0": {
+    "en": "Update widget previews and heights"
   }
 }
