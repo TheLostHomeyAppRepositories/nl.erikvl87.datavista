@@ -166,7 +166,7 @@ class ColorStopsManager {
 	}
 }
 
-class SimpleGaugeWidgetScript {
+class AdvancedGaugeWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
 	private data: widgetDataDto;
@@ -176,7 +176,7 @@ class SimpleGaugeWidgetScript {
 	private chart!: echarts.ECharts;
 
 	/**
-	 * Creates a new instance of the SimpleGaugeWidgetScript class.
+	 * Creates a new instance of the AdvancedGaugeWidgetScript class.
 	 * @param homey The Homey widget.
 	 */
 	constructor(homey: HomeyWidget) {
@@ -517,4 +517,4 @@ interface ModuleWindow extends Window {
 declare const window: ModuleWindow;
 
 window.onHomeyReady = async (homey: HomeyWidget): Promise<void> =>
-	await new SimpleGaugeWidgetScript(homey).onHomeyReady();
+	await new AdvancedGaugeWidgetScript(homey).onHomeyReady();

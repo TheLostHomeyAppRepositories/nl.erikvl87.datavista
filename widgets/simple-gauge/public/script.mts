@@ -20,7 +20,7 @@ type Settings = {
 	isMaxNegative: boolean;
 };
 
-class AdvancedGaugeWidgetScript {
+class SimpleGaugeWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
 	private data: SimpleGaugeWidgetPayload;
@@ -346,4 +346,4 @@ interface ModuleWindow extends Window {
 declare const window: ModuleWindow;
 
 window.onHomeyReady = async (homey: HomeyWidget): Promise<void> =>
-	await new AdvancedGaugeWidgetScript(homey).onHomeyReady();
+	await new SimpleGaugeWidgetScript(homey).onHomeyReady();
