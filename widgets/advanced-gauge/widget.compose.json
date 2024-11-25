@@ -3,7 +3,6 @@
 		"en": "Advanced gauge",
 		"nl": "Geavanceerde meter"
 	},
-	"height": 255,
 	"settings": [
 		{
 			"id": "datasource",

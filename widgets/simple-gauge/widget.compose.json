@@ -3,7 +3,6 @@
 		"en": "Simple gauge",
 		"nl": "Eenvoudige meter"
 	},
-	"height": 255,
 	"settings": [
 		{
 			"id": "datasource",

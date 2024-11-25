@@ -87,15 +87,16 @@ class SimpleGaugeWidgetScript {
 					series: [
 						{
 							type: 'gauge',
-							startAngle: 225,
-							endAngle: -45,
+							startAngle: -180,
+							endAngle: 0,
 							splitNumber: this.settings.segments,
 							radius: '100%',
+							center: ['50%', '180px'],
 							detail: {
 								valueAnimation: true,
 								formatter: this.spinnerTimeout == null ? detailFormatter : 'Configure me',
 								fontSize: 20,
-								offsetCenter: [0, '90%'],
+								offsetCenter: [0, '20%'],
 								color: homeyTextColor,
 							},
 
@@ -103,6 +104,13 @@ class SimpleGaugeWidgetScript {
 								itemStyle: {
 									color: homeyTextColor,
 								},
+							},
+							splitLine: {
+								distance: 7,
+								length: 10,
+							},
+							axisTick: {
+								distance: 7,
 							},
 							axisLabel: {
 								formatter: (value: number): string => {
@@ -152,15 +160,16 @@ class SimpleGaugeWidgetScript {
 					series: [
 						{
 							type: 'gauge',
-							startAngle: 225,
-							endAngle: -45,
+							startAngle: -180,
+							endAngle: 0,
 							splitNumber: this.settings.segments,
 							radius: '100%',
+							center: ['50%', '180px'],
 							detail: {
 								valueAnimation: true,
 								formatter: this.spinnerTimeout == null ? detailFormatter : 'Configure me',
 								fontSize: 20,
-								offsetCenter: [0, '0%'],
+								offsetCenter: [0, '-10%'],
 								color: homeyTextColor,
 							},
 
@@ -168,11 +177,11 @@ class SimpleGaugeWidgetScript {
 								show: false,
 							},
 							splitLine: {
-								distance: 10,
+								distance: 15,
 								length: 10,
 							},
 							axisTick: {
-								distance: 10,
+								distance: 15,
 							},
 							axisLabel: {
 								distance: 15,
@@ -204,9 +213,10 @@ class SimpleGaugeWidgetScript {
 						},
 						{
 							type: 'gauge',
-							startAngle: 225,
-							endAngle: -45,
+							startAngle: -180,
+							endAngle: 0,
 							radius: '90%',
+							center: ['50%', '180px'],
 							min: this.data.min,
 							max: this.data.max,
 							itemStyle: {
@@ -321,8 +331,8 @@ class SimpleGaugeWidgetScript {
 	 */
 	public async onHomeyReady(): Promise<void> {
 		this.chart = window.echarts.init(document.getElementById('gauge'));
-		this.homey.ready();
-
+		const height = this.settings.style === 'style1' ? 200 : 165;
+		this.homey.ready( { height });
 		if (this.settings.datasource?.id == null) {
 			await this.log('No datasource selected');
 			await this.startSpinning();

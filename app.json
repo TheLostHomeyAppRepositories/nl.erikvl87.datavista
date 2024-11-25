@@ -253,7 +253,6 @@
         "en": "Advanced gauge",
         "nl": "Geavanceerde meter"
       },
-      "height": 255,
       "settings": [
         {
           "id": "datasource",
@@ -325,7 +324,6 @@
         "en": "Simple gauge",
         "nl": "Eenvoudige meter"
       },
-      "height": 255,
       "settings": [
         {
           "id": "datasource",
