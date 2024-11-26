@@ -3,6 +3,7 @@ import type { SimpleGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
 
 type Settings = {
+	transparent: boolean;
 	datasource?: {
 		deviceId: string;
 		id: string;
@@ -330,6 +331,10 @@ class SimpleGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
+		if(!this.settings.transparent) {
+			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
+			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+		}
 		this.chart = window.echarts.init(document.getElementById('gauge'));
 		const height = this.settings.style === 'style1' ? 200 : 165;
 		this.homey.ready( { height });

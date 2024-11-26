@@ -7,6 +7,7 @@ import type { RangeData } from '../../../datavistasettings/rangeSettings.mjs';
 import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
 
 type Settings = {
+	transparent: boolean;
 	datasource?: {
 		id: string;
 		name: string;
@@ -434,6 +435,11 @@ class AdvancedGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
+		if(!this.settings.transparent) {
+			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
+			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+		}
+	
 		this.chart = window.echarts.init(document.getElementById('gauge'));
 		const height = this.settings.style === 'style1' ? 200 : 165;
 		this.homey.ready({ height });

@@ -3,6 +3,7 @@
 		"en": "Advanced gauge",
 		"nl": "Geavanceerde meter"
 	},
+	"transparent": true,
 	"settings": [
 		{
 			"id": "datasource",
@@ -55,6 +56,15 @@
 					}
 				}
 			]
+		},
+		{
+			"id": "transparent",
+			"type": "checkbox",
+			"title": {
+				"en": "Transparent background",
+				"nl": "Transparante achtergrond"
+			},
+			"value": false
 		}
 	],
 	"api": {
