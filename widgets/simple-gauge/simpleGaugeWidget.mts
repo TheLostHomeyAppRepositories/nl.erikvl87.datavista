@@ -30,36 +30,45 @@ export default class SimpleGaugeWidget {
 
 	private async setup(): Promise<void> {
 		const devices = await this.homeyApi.devices.getDevices();
-		
-		this.widget.registerSettingAutocompleteListener(
-			'datasource',
-			async (query: string) => {
-				const results: {
-					name: string;
-					description: string;
-					id: string;
-					deviceId: string;
-				}[] = [];
-				for (const [_key, device] of Object.entries(devices)) {
-					for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
-						if (capability.type === 'number') {
-							results.push({
-								name: capability.title,
-								description: `${device.name} (${capability.value ?? 'unset'}${capability.units ? ` ${capability.units}` : ''})`,
-								id: capability.id,
-								deviceId: device.id,
-							});
-						}
+
+		this.widget.registerSettingAutocompleteListener('datasource', async (query: string) => {
+			const results: {
+				name: string;
+				description: string;
+				id: string;
+				deviceId: string;
+				deviceName: string;
+			}[] = [];
+			for (const [_key, device] of Object.entries(devices)) {
+				for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
+					if (capability.type === 'number') {
+						results.push({
+							name: capability.title,
+							description: `${device.name} (${capability.value ?? 'unset'}${
+								capability.units ? ` ${capability.units}` : ''
+							})`,
+							deviceName: device.name,
+							id: capability.id,
+							deviceId: device.id,
+						});
 					}
 				}
+			}
 
-				const filteredResults = results
-					.filter(result => {
-						return result.name.toLowerCase().includes(query.toLowerCase());
-					})
-					.sort((a, b) => a.name.localeCompare(b.name));
-				return filteredResults;
-			},
-		);
+			const filteredResults = results.filter(result => {
+				const queryParts = query.toLowerCase().split(' ');
+				return queryParts.every(part => 
+					result.name.toLowerCase().includes(part) || 
+					result.deviceName.toLowerCase().includes(part)
+				);
+			}).sort((a, b) => a.name.localeCompare(b.name));
+
+			return filteredResults.map(({ name, description, id, deviceId }) => ({
+				name,
+				description,
+				id,
+				deviceId,
+			}));
+		});
 	}
 }
