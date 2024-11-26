@@ -7,5 +7,11 @@
   },
   "0.2.0": {
     "en": "Update widget previews and heights"
+  },
+  "0.2.1": {
+    "en": "Added a fully transparant option, improved capability search and fixed an issue while saving app settings"
+  },
+  "0.2.2": {
+    "en": "Added a fully transparant option, improved capability search and fixed an issue while saving app settings"
   }
 }
