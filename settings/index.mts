@@ -172,19 +172,33 @@ class SettingsScript {
 			colorOffset5: this.convertToNumber(colorInputs[4].offset.value),
 		};
 
+		colorInputs.forEach(({ offset }, index) => {
+			offset.value = `${(settings as any)[`colorOffset${index + 1}`] ?? ''}`;
+		});
+		
+
 		await this.homey.api('PUT', `/gauge/${key}`, settings, async (err: string, result: boolean) => {
 			if (err || !result) {
 				await this.homey.alert('Failed to save data');
+			} else {
+				await this.homey.alert('Data saved successfully');
 			}
 		});
 	}
 
-	private convertToNumber(value: string): number {
-		const number = Number(value);
-		if (isNaN(number)) {
-			throw new Error(`Invalid number: ${value}`);
+	private convertToNumber(value: string | null | undefined): number | undefined {
+		if (value == null || String(value).trim() === '') {
+			return undefined;
 		}
-		return number;
+
+		if (String(value).includes(','))
+			value = value.replace(',', '.');
+		const numberValue = parseFloat(value);
+		if (isNaN(numberValue)) {
+			return undefined;
+		}
+
+		return numberValue;
 	}
 
 	private AddListenerToRemoveButton(element: HTMLElement, key: string): void {
