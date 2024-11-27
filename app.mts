@@ -72,13 +72,11 @@ export default class DataVista extends Homey.App {
 
 		const rangeSettings = new AdvancedGaugeWidgetSettings(existingData.identifier, data);
 		rangeSettings.setSettings(this.homey);
-		this.homey.api.realtime(`settings/${key}`, null);
 		return true;
 	}
 
 	public addGauge(key: string, data: AdvancedGaugeWidgetData): void {
 		const rangeSettings = new AdvancedGaugeWidgetSettings(key, data);
 		rangeSettings.setSettings(this.homey);
-		this.homey.api.realtime(`settings/${key}`, null);
 	}
 }
