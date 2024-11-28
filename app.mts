@@ -7,6 +7,7 @@ import AdvancedGaugeWidget from './widgets/advanced-gauge/advancedGaugeWidget.mj
 import ActionSetGaugeConfiguration from './actions/actionSetGaugeConfiguration.mjs';
 import SimpleGaugeWidget from './widgets/simple-gauge/simpleGaugeWidget.mjs';
 import { AdvancedGaugeWidgetData, AdvancedGaugeWidgetSettings } from './datavistasettings/advancedGaugeWidgetSettings.mjs';
+import progressBarWidget from './widgets/progress-bar/progressBarWidget.mjs';
 
 export default class DataVista extends Homey.App {
 	homeyApi!: ExtendedHomeyAPIV3Local;
@@ -24,6 +25,7 @@ export default class DataVista extends Homey.App {
 		await ActionSetRange.initialize(this.homey, this.log, this.error);
 		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
 		await AdvancedGaugeWidget.initialize(this.homey, this.log, this.error);
+		await progressBarWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
 
 		await ActionSetGaugeConfiguration.initialize(this.homey, this.log, this.error);
 		await ActionSetGaugeConfiguration.initialize(this.homey, this.log, this.error);

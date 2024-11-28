@@ -29,6 +29,7 @@ declare module 'homey-api' {
 		zone: string;
 		capabilities: string[];
 		capabilitiesObj: { [key: string]: CapabilitiesObject };
+		iconObj?: { id: string, url: string; };
 		getZone(): Promise<ExtendedZone>;
 	}
 

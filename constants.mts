@@ -6,3 +6,5 @@ export enum DATA_TYPE_IDS {
 export enum WIDGET_TYPE_IDS {
 	GAUGE = "gauge"
 }
+
+export const DATAVISTA_APP_NAME = 'DataVista';
