@@ -28,10 +28,12 @@ After adding it, you can customize the widget to display the progress of specifi
 
 The widget has the following configurable settings:
 
-<table><thead><tr><th width="258">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*</em> or a <em>device capability</em> to display on the progress bar.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Transparent Background</strong></td><td>Choose whether the widget’s background is a solid color tile or transparent, blending seamlessly with the dashboard.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the device icon.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
+<table><thead><tr><th width="146">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*</em> or a <em>device capability</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Transparent Background</strong></td><td>Choose whether the widget’s background is a solid color tile or transparent, blending seamlessly with the dashboard.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
 
 {% hint style="warning" %}
-To use a **DataVista percentage value** set via a **DataVista action card**, you must first create a flow that sets this value. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
+To use a **DataVista percentage value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
+
+<img src="../.gitbook/assets/actioncard-set-percentage (2).jpg" alt="" data-size="original">
 {% endhint %}
 
 ## FAQ
@@ -44,7 +46,7 @@ If the progress bar is animating in steps from 0 to 25, 50, 75, and 100, and the
 
 ### How can I set a single color for the progress bar?
 
-To use a single color for the entire progress bar, select the same color for both **`Color 1`** and **Color 2** in the widget settings. This will ensure the progress bar displays the same color at all values.
+To use a single color for the entire progress bar, select the same color for both **Color 1** and **Color 2** in the widget settings. This will ensure the progress bar displays the same color at all values.
 
 ### Why can I only select from a pre-determined list of colors?
 
