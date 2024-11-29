@@ -13,5 +13,8 @@
   },
   "0.2.2": {
     "en": "Added a fully transparant option, improved capability search and fixed an issue while saving app settings"
+  },
+  "0.3.0": {
+    "en": "Added a progress bar widget"
   }
 }
