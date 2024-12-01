@@ -6,6 +6,7 @@ import type { PercentageData } from '../../../datavistasettings/percentageSettin
 type Settings = {
 	datasource?: {
 		deviceId: string;
+		deviceName: string;
 		id: string;
 		name: string;
 		type: 'capability' | 'advanced';
@@ -15,6 +16,8 @@ type Settings = {
 	color1: string;
 	color2: string;
 	showIcon: boolean;
+	showName: boolean;
+	overwriteName: string;
 };
 
 class ProgressBarWidgetScript {
@@ -114,6 +117,7 @@ class ProgressBarWidgetScript {
 		if (payload !== null && payload.value !== null) {
 			await this.log('Received payload', payload);
 			await this.stopConfigurationAnimation();
+			this.updateName(payload.name);
 			this.updateProgress(payload.value);
 		} else {
 			await this.log('The payload is null');
@@ -184,6 +188,19 @@ class ProgressBarWidgetScript {
 		}
 	}
 
+	updateName(name: string): void {
+		const titleEl = document.querySelector('.title')! as HTMLElement;
+
+		name = this.settings.overwriteName ? this.settings.overwriteName : name;
+
+		if (this.settings.showName === true) {
+			titleEl.textContent = name;
+			titleEl.style.display = 'block';
+		} else {
+			titleEl.style.display = 'none';
+		}
+	}
+
 	private async startConfigurationAnimation(): Promise<void> {
 		if (this.configurationAnimationTimeout != null) return;
 		const interval = 1500;
@@ -199,6 +216,7 @@ class ProgressBarWidgetScript {
 			this.updateProgress(value);
 			this.configurationAnimationTimeout = setTimeout(update, interval);
 		};
+		this.updateName('Configure me');
 		this.configurationAnimationTimeout = setTimeout(update, interval);
 	}
 
@@ -242,10 +260,10 @@ class ProgressBarWidgetScript {
 		}
 
 		this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
-		await this.log('Settings', this.settings);
 
 		if (this.settings.datasource != null) await this.syncData();
-		this.homey.ready();
+
+		this.homey.ready({ height: this.settings.showName ? 65 : 40 });
 
 		if (this.settings.datasource == null) {
 			await this.startConfigurationAnimation();

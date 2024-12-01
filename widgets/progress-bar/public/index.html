@@ -3,9 +3,25 @@
 		<style>
 			.homey-widget {
 				width: 100%;
+				flex-direction: column;
+				padding: 10px;
+			}
+
+			.container {
+				width: 100%;
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				height: 25px;
+			}
+
+			.title {
+				margin-top: 5px;
+				width: 100%;
+				text-align: left;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
 			}
 
 			#progress {
@@ -21,7 +37,7 @@
 			}
 
 			.progress-container {
-				width: 300px;
+				width: 100%;
 				text-align: center;
 			}
 
@@ -49,7 +65,6 @@
 			}
 
 			#icon {
-				display: none;
 				width: 20px;
 				height: 20px;
 				background-size: contain;
@@ -61,17 +76,20 @@
 	</head>
 
 	<body class="homey-widget">
-			<div style="display: flex; align-items: center;">
-				<div id="icon" class=""></div>
+		<div class="container">
+			<div style="display: flex; align-items: center">
+				<div id="icon" style="display: none;"></div>
 				<div id="progressPercentage" class="homey-text-small-light">0%</div>
 			</div>
-		<div class="progress-container">
-			<div class="bar-container" style="background-color: var(--homey-color-mono-200);">
-				<div id="progressBackground" style="background-color: var(--homey-color-mono-200);">
-					<div id="progressBar"></div>
+			<div class="progress-container">
+				<div class="bar-container" style="background-color: var(--homey-color-mono-200)">
+					<div id="progressBackground" style="background-color: var(--homey-color-mono-200)">
+						<div id="progressBar"></div>
+					</div>
 				</div>
 			</div>
 		</div>
+		<div class="title homey-text-small-light" style="display: none;"></div>
 		<script defer src="script.mjs"></script>
 	</body>
 </html>

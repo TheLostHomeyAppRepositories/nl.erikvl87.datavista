@@ -1,6 +1,8 @@
+import { DATAVISTA_APP_NAME } from '../../constants.mjs';
 import type { ApiRequest } from '../../types.mjs';
 
 export type progressBarWidgetPayload = {
+	name: string,
 	value: number | null;
 	iconUrl?: string | null;
 };
@@ -31,6 +33,7 @@ class progressBarWidgetApi {
 		const payload: progressBarWidgetPayload = {
 			value: capability.value as number,
 			iconUrl,
+			name: `${device.name} - ${capability.title}`
 		};
 
 		if (capability.min !== undefined && capability.min == 0 && capability.max !== undefined && capability.max == 1) {
@@ -44,6 +47,7 @@ class progressBarWidgetApi {
 		const payload: progressBarWidgetPayload = {
 			value: data.settings.percentage,
 			iconUrl: null,
+			name: `${DATAVISTA_APP_NAME} - ${data.identifier}`
 		};
 
 		return payload;

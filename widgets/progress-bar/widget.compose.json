@@ -4,7 +4,6 @@
 		"nl": "Voortgangsbalk"
 	},
 	"transparent": true,
-	"height": 50,
 	"settings": [
 		{
 			"id": "datasource",
@@ -41,6 +40,23 @@
 				"nl": "Toon icoon (indien beschikbaar)"
 			},
 			"value": true
+		},
+		{
+			"id": "showName",
+			"type": "checkbox",
+			"title": {
+				"en": "Show name",
+				"nl": "Toon naam"
+			},
+			"value": true
+		},
+		{
+			"id": "overwriteName",
+			"type": "text",
+			"title": {
+				"en": "Overwrite name",
+				"nl": "Naam overschrijven"
+			}
 		},
 		{
 			"id": "color1",
