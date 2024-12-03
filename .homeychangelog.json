@@ -19,5 +19,8 @@
   },
   "0.3.1": {
     "en": "Added the option to show or hide the device & capability name from the progress bar"
+  },
+  "0.4.0": {
+    "en": "Added a toggle switch widget"
   }
 }
