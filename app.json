@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.erikvl87.datavista",
   "version": "0.3.1",
-  "support": "https://github.com/Erikvl87/nl.erikvl87.datavista",
+  "support": "https://datavista.erikvl87.nl/",
   "homeyCommunityTopicId": 121482,
   "bugs": {
     "url": "https://github.com/Erikvl87/nl.erikvl87.datavista/issues"
@@ -68,6 +68,37 @@
   "esm": true,
   "flow": {
     "actions": [
+      {
+        "title": {
+          "en": "Set boolean",
+          "nl": "Zet boolean"
+        },
+        "titleFormatted": {
+          "en": "[Boolean] Set [[value]] for [[identifier]]",
+          "nl": "[Boolean] Zet [[value]] voor [[identifier]]"
+        },
+        "hint": {
+          "en": "Set a boolean that can be used in Toggle Switch widgets.",
+          "nl": "Zet een boolean die gebruikt kan worden in Schakelaar widgets."
+        },
+        "args": [
+          {
+            "type": "checkbox",
+            "name": "value",
+            "title": {
+              "en": "value"
+            }
+          },
+          {
+            "type": "text",
+            "name": "identifier",
+            "placeholder": {
+              "en": "identifier"
+            }
+          }
+        ],
+        "id": "set-boolean"
+      },
       {
         "title": {
           "en": "Set gauge configuration"
@@ -701,6 +732,10 @@
           "method": "GET",
           "path": "/advanced"
         },
+        "getIcon": {
+          "method": "GET",
+          "path": "/icon"
+        },
         "log": {
           "method": "POST",
           "path": "/log"
@@ -1295,6 +1330,385 @@
         }
       },
       "id": "simple-gauge"
+    },
+    "toggle-switch": {
+      "name": {
+        "en": "Toggle switch",
+        "nl": "Schakelaar"
+      },
+      "transparent": true,
+      "height": 40,
+      "settings": [
+        {
+          "id": "datasource",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource",
+            "nl": "Databron"
+          }
+        },
+        {
+          "id": "refreshSeconds",
+          "type": "number",
+          "title": {
+            "en": "Refresh interval (seconds)",
+            "nl": "Verversingsinterval (seconden)"
+          },
+          "min": 2,
+          "value": 5
+        },
+        {
+          "id": "overwriteName",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name",
+            "nl": "Naam overschrijven"
+          }
+        },
+        {
+          "id": "trueColor",
+          "type": "dropdown",
+          "title": {
+            "en": "Color if true",
+            "nl": "Kleur indien waar"
+          },
+          "values": [
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            }
+          ],
+          "value": "#32cd32"
+        },
+        {
+          "id": "falseColor",
+          "type": "dropdown",
+          "title": {
+            "en": "Color if false",
+            "nl": "Kleur indien onwaar"
+          },
+          "values": [
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            }
+          ],
+          "value": "#ff0000"
+        },
+        {
+          "id": "faTrueValue",
+          "type": "text",
+          "title": {
+            "en": "FA icon code if true",
+            "nl": "FA icoon code indien waar"
+          },
+          "value": "f00c"
+        },
+        {
+          "id": "faFalseValue",
+          "type": "text",
+          "title": {
+            "en": "FA icon code if false",
+            "nl": "FA icoon code indien onwaar"
+          },
+          "value": "f00d"
+        },
+        {
+          "id": "showIcon",
+          "type": "checkbox",
+          "title": {
+            "en": "Show icon (if available)",
+            "nl": "Toon icoon (indien beschikbaar)"
+          },
+          "value": true
+        },
+        {
+          "id": "transparent",
+          "type": "checkbox",
+          "title": {
+            "en": "Transparent background",
+            "nl": "Transparante achtergrond"
+          },
+          "value": false
+        }
+      ],
+      "api": {
+        "getCapabilityBoolean": {
+          "method": "GET",
+          "path": "/capability"
+        },
+        "getAdvancedBoolean": {
+          "method": "GET",
+          "path": "/advanced"
+        },
+        "getIcon": {
+          "method": "GET",
+          "path": "/icon"
+        },
+        "log": {
+          "method": "POST",
+          "path": "/log"
+        }
+      },
+      "id": "toggle-switch"
     }
   }
 }

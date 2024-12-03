@@ -56,7 +56,7 @@
 				width: 50px;
 				margin-right: 5px;
 			}
-			.input-group input {
+			.input-group input:not([type="checkbox"]) {
 				flex: 1;
 			}
 			.input-group input.hex {
@@ -184,6 +184,7 @@
 				<div class="dropdown-content">
 					<a href="#" data-target="#percentage-container">Percentages</a>
 					<a href="#" data-target="#range-container">Ranges</a>
+					<a href="#" data-target="#boolean-container">Booleans</a>
 				</div>
 			</div>
 			<div class="dropdown">
@@ -196,12 +197,17 @@
 
 		<div id="percentage-container" class="tab-content">
 			<div class="container-header">Percentages</div>
-			<p>View and manage all percentage data created by flows, which can be utilized in Advanced Gauge widgets.</p>
+			<p>View and manage all percentage data created by flows, which can be utilized in DataVista widgets.</p>
 			<div class="content"></div>
 		</div>
 		<div id="range-container" class="tab-content">
 			<div class="container-header">Ranges</div>
-			<p>View and manage all range data created by flows, which can be utilized in Advanced Gauge widgets.</p>
+			<p>View and manage all range data created by flows, which can be utilized in DataVista widgets.</p>
+			<div class="content"></div>
+		</div>
+		<div id="boolean-container" class="tab-content">
+			<div class="container-header">Booleans</div>
+			<p>View and manage all boolean data created by flows, which can be utilized in DataVista widgets.</p>
 			<div class="content"></div>
 		</div>
 		<div id="gauge-container" class="tab-content">
@@ -273,6 +279,31 @@
 					<div class="data-field-row">
 						<div class="input-group">
 							<label>Last updated:</label>
+							<input id="last-updated-label" type="text" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="boolean-template">
+			<div class="data-row">
+				<div class="data-label">
+					<div class="data-field-row">
+						<div class="input-group">
+							<div class="identifier-label"></div>
+							<button class="remove-button homey-button-danger-small">Remove</button>
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Value:</label>
+							<input id="boolean-input" type="checkbox" disabled />
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Last Updated:</label>
 							<input id="last-updated-label" type="text" readonly />
 						</div>
 					</div>

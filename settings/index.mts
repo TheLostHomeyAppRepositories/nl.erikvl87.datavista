@@ -3,6 +3,7 @@ import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
 import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../datavistasettings/advancedGaugeWidgetSettings.mjs';
+import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
 
 class SettingsScript {
 	private homey: HomeySettings;
@@ -44,6 +45,13 @@ class SettingsScript {
 		minInput.value = `${data.settings.min}`;
 		maxInput.value = `${data.settings.max}`;
 		valueInput.value = `${data.settings.value}`;
+		return element;
+	}
+
+	private createBooleanElement(data: BaseSettings<BooleanData>, key: string): HTMLElement {
+		const element = this.createElement('boolean-template', data, key);
+		const booleanInput = element.querySelector('#boolean-input') as HTMLInputElement;
+		booleanInput.checked = data.settings.value;
 		return element;
 	}
 
@@ -268,10 +276,12 @@ class SettingsScript {
 
 		const percentageContent = document.querySelector('#percentage-container .content') as HTMLElement;
 		const rangeContent = document.querySelector('#range-container .content') as HTMLElement;
+		const booleanContent = document.querySelector('#boolean-container .content') as HTMLElement;
 		const gaugeContent = document.querySelector('#gauge-container .content') as HTMLElement;
 
 		percentageContent.innerHTML = ''; // Clear existing percentages
 		rangeContent.innerHTML = ''; // Clear existing ranges
+		booleanContent.innerHTML = ''; // Clear existing ranges
 		gaugeContent.innerHTML = ''; // Clear existing gauges
 
 		const dataKeys = Object.keys(settings).filter(key => dataTypeIds.some(id => key.startsWith(`${id}-`)));
@@ -303,6 +313,12 @@ class SettingsScript {
 								element = this.createRangeElement(settings as BaseSettings<RangeData>, key);
 								this.AddListenerToRemoveButton(element, key);
 								rangeContent.appendChild(element);
+								break;
+							}
+							case 'boolean': {
+								element = this.createBooleanElement(settings as BaseSettings<BooleanData>, key);
+								this.AddListenerToRemoveButton(element, key);
+								booleanContent.appendChild(element);
 								break;
 							}
 							case 'gauge': {

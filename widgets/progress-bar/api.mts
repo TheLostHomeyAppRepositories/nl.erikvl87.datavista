@@ -53,6 +53,11 @@ class progressBarWidgetApi {
 		return payload;
 	}
 
+	public async getIcon({ homey, query }: ApiRequest): Promise<string> {
+		const svgSource = await homey.app.getSvgForUrl(query.url, query.color);
+		return svgSource;
+	}
+
 	public async log({ homey, body }: ApiRequest): Promise<void> {
 		homey.app.log(`[${this.constructor.name}]: ${body.message}`, ...body.optionalParams);
 	}

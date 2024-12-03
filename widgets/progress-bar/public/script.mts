@@ -128,70 +128,31 @@ class ProgressBarWidgetScript {
 	async updateIcon(iconUrl: string): Promise<void> {
 		if (this.settings.showIcon === false) return;
 		if (this.iconUrl === iconUrl) return;
+		this.iconUrl = iconUrl;
 
-		const response = await fetch(iconUrl);
-		if (!response.ok || !response.headers.get('content-type')?.includes('image/svg+xml')) {
-			// throw new Error('Invalid response while fetching icon');
-		} else {
-			let iconSvgSource = await response.text();
-			const iconEl = document.getElementById('icon')!;
+		const widgetDiv = document.querySelector('.homey-widget')!;
+		const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
+		const rgbMatch = bgColor.match(/\d+/g)!;
+		const [r, g, b, a = 1] = rgbMatch.map(Number);
+		const isTransparent = a === 0;
+		const isWhitish = r > 240 && g > 240 && b > 240;
+		const color =
+			isTransparent || !isWhitish
+				? getComputedStyle(document.documentElement).getPropertyValue('--homey-text-color').trim()
+				: null;
 
-			const widgetDiv = document.querySelector('.homey-widget')!;
-			const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
-			const rgbMatch = bgColor.match(/\d+/g);
+		let url = `/icon?url=${iconUrl}`;
+		if (color != null) url += `&color=${encodeURIComponent(color)}`;
 
-			if (rgbMatch) {
-				const [r, g, b, a = 1] = rgbMatch.map(Number);
-
-				await this.log('Background color', r, g, b, a);
-				const isTransparent = a === 0;
-				const isWhitish = r > 240 && g > 240 && b > 240;
-
-				if (isTransparent || !isWhitish) {
-					const color = getComputedStyle(document.documentElement).getPropertyValue('--homey-text-color').trim();
-					const parser = new DOMParser();
-					const svgDoc = parser.parseFromString(iconSvgSource, 'image/svg+xml');
-					const elementsToUpdate = svgDoc.querySelectorAll(
-						'[fill]:not([fill="none"]), [stroke]:not([stroke="none"]), rect, text, path',
-					);
-
-					elementsToUpdate.forEach(el => {
-						if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') {
-							el.setAttribute('fill', color);
-						}
-						if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
-							el.setAttribute('stroke', color);
-						}
-						if (el.tagName === 'rect' || el.tagName === 'text') {
-							const style = el.getAttribute('style');
-							if (style && style.includes('fill:')) {
-								el.setAttribute('style', style.replace(/fill:[^;"]*;?/, `fill:${color};`));
-							}
-						}
-					});
-
-					const paths = svgDoc.querySelectorAll('path');
-					paths.forEach(path => {
-						if (!path.hasAttribute('fill')) {
-							path.setAttribute('fill', color);
-						}
-					});
-
-					iconSvgSource = new XMLSerializer().serializeToString(svgDoc.documentElement);
-				}
-			}
-
-			void this.log('Icon source', iconSvgSource);
-
-			iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(iconSvgSource)}")`;
-			iconEl.style.display = 'block';
-		}
+		const result = (await this.homey.api('GET', url)) as string;
+		const iconEl = document.getElementById('icon')!;
+		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
+		iconEl.style.display = 'block';
 	}
 
-	updateName(name: string): void {
+	updateName(name: string, overwritable: boolean = true): void {
 		const titleEl = document.querySelector('.title')! as HTMLElement;
-
-		name = this.settings.overwriteName ? this.settings.overwriteName : name;
+		name = overwritable && this.settings.overwriteName ? this.settings.overwriteName : name;
 
 		if (this.settings.showName === true) {
 			titleEl.textContent = name;

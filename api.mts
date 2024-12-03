@@ -20,7 +20,6 @@ class AppApi {
 		const key = params.id;
 
 		homey.app.log('incoming update gauge', key, body);
-		// create a new AdvancedGaugeWidgetData with the data from body but also validate it
 		let data: AdvancedGaugeWidgetData;
 		try {
 			data = {
@@ -40,8 +39,6 @@ class AppApi {
 			return false;
 		}
 
-		// for every color that has been set, check if the colors are valid hex colors
-		// if they are not, return false
 		const colorKeys: (keyof AdvancedGaugeWidgetData)[] = ['color1', 'color2', 'color3', 'color4', 'color5'];
 		for (const colorKey of colorKeys) {
 			const colorValue = data[colorKey] as string;
