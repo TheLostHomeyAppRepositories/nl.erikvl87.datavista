@@ -22,7 +22,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding it, you can customize the widget to display the progress of specific devices or metrics based on your needs.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark.png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light.png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../.gitbook/assets/preview-dark (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1).png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
 
 ## Configuring the widget
 

@@ -8,6 +8,7 @@
 
 * [Progress bar](widgets/progress-bar.md)
 * [Gauge](widgets/gauge.md)
+* [Toggle switch](widgets/toggle-switch.md)
 
 ## Contributing
 
