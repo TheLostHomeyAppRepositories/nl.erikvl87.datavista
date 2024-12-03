@@ -10,7 +10,7 @@ For advanced users, the widget can accept a boolean value set by a **DataVista a
 
 ### Adding the widget to your dashboard <a href="#adding-the-widget-to-your-dashboard" id="adding-the-widget-to-your-dashboard"></a>
 
-To add the progress bar widget to your dashboard, follow these simple steps:
+To add the toggle switch widget to your dashboard, follow these simple steps:
 
 1. Open your Homey app and go to the **Dashboards** section.
 2. Enter **Edit Mode** and select the **"Add Widget"** button.
@@ -37,7 +37,9 @@ The widget has the following configurable settings:
 | **FA icon code if false**  | Specifies the FontAwesome Unicode code for the icon to display when the widget's value is `false`. It must be a free, solid icon from FontAwesome version 6. You can browse available icons [here](https://fontawesome.com/v6/search?o=r\&m=free\&s=solid). |
 | **Transparent Background** | Choose whether the widget’s background is a solid color tile or transparent, blending seamlessly with the dashboard.                                                                                                                                        |
 | **Show Icon**              | Enable to show the capability or device icon (if available), with priority given to the capability icon.                                                                                                                                                    |
-| **Overwrite Name**         | If set, this name will be displayed below the progress bar instead of the device and capability name.                                                                                                                                                       |
+| **Overwrite Name**         | If set, this name will be displayed next to the toggle switch instead of the device and capability name.                                                                                                                                                    |
+
+
 
 {% hint style="warning" %}
 To use a **DataVista boolean value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
@@ -50,6 +52,10 @@ To use a **DataVista boolean value**, you must first create a flow that sets thi
 ### Why is the switch animating between on and off?
 
 If the switch is animating between on and off, it indicates that the datasource could not be found (or is no longer available). This typically happens when the selected datasource is removed. To resolve this issue, try reconfiguring the datasource setting and ensure the correct value is selected.
+
+### Why is my toggle icon showing as a square box?
+
+This usually happens when an incorrect unicode value is used. Ensure that the configured unicode value matches a valid free [FontAwesome v6 icon](https://fontawesome.com/v6/search?o=r\&m=free\&s=solid) (solid style).
 
 
 
