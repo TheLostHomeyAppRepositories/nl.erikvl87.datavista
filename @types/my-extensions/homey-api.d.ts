@@ -51,6 +51,21 @@ declare module 'homey-api' {
 		on(event: "device.create" | "device.update" | "device.delete", callback: (device: ExtendedDevice) => void): void;
 	}
 
+	class ExtendedManagerLogic extends HomeyAPIV3Local.ManagerLogic {
+		getVariables(): Promise<{
+			[key: string]: ExtendedVariable;
+		}>;
+
+		getVariable(opts: {
+			id: string;
+		}): Promise<ExtendedVariable>;
+	}
+
+	class ExtendedVariable extends HomeyAPIV3Local.ManagerLogic.Variable {
+		value: boolean | number | string;
+		uri: string;
+	}
+
 	export class ExtendedHomeyAPIV3Local extends HomeyAPIV3Local { 
 
 		// manager: HomeyAPIV3Local.Manager;
@@ -100,7 +115,8 @@ declare module 'homey-api' {
 		// zigbee: HomeyAPIV3Local.ManagerZigbee;
 		// zones: HomeyAPIV3Local.ManagerZones;
 		// zwave: HomeyAPIV3Local.ManagerZwave
-		zones: ExtendedManagerZones; // Overwrite the zones property with the ExtendedManagerZones class
+		zones: ExtendedManagerZones;
 		devices: ExtendedManagerDevices;
+		logic: ExtendedManagerLogic;
 	}
 }

@@ -1,7 +1,7 @@
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import { BaseSettings } from '../../datavistasettings/baseSettings.mjs';
-import { DATA_TYPE_IDS, DATAVISTA_APP_NAME } from '../../constants.mjs';
+import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../../constants.mjs';
 import { BooleanData } from '../../datavistasettings/booleanSettings.mjs';
 import { Widget } from 'homey';
 
@@ -38,7 +38,7 @@ export default class toggleSwitchWidget {
 				name: string;
 				description: string;
 				id: string;
-				type: 'capability' | 'advanced';
+				type: 'capability' | 'advanced' | 'variable';
 				deviceId?: string;
 				deviceName: string;
 			}[] = [];
@@ -71,6 +71,19 @@ export default class toggleSwitchWidget {
 					}
 				}
 			}
+			
+			const variables = await this.homeyApi.logic.getVariables();
+			for (const [_key, variable] of Object.entries(variables)) {
+				if (variable.type === 'boolean') {
+					results.push({
+						name: variable.name,
+						description: `${HOMEY_LOGIC} (${variable.value ? 'true' : 'false'})`,
+						id: variable.id,
+						type: 'variable',
+						deviceName: HOMEY_LOGIC,
+					});
+				}
+			}
 
 			const filteredResults = results
 				.filter(result => {
@@ -85,6 +98,12 @@ export default class toggleSwitchWidget {
 							return -1;
 						}
 						if (a.deviceName !== DATAVISTA_APP_NAME && b.deviceName === DATAVISTA_APP_NAME) {
+							return 1;
+						}
+						if (a.deviceName === HOMEY_LOGIC && b.deviceName !== HOMEY_LOGIC) {
+							return -1;
+						}
+						if (a.deviceName !== HOMEY_LOGIC && b.deviceName === HOMEY_LOGIC) {
 							return 1;
 						}
 					}

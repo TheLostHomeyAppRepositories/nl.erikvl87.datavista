@@ -138,6 +138,10 @@
 			"method": "GET",
 			"path": "/advanced"
 		},
+		"getVariableBoolean": {
+			"method": "GET",
+			"path": "/variable"
+		},
 		"getIcon": {
 			"method": "GET",
 			"path": "/icon"

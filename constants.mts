@@ -9,3 +9,4 @@ export enum WIDGET_TYPE_IDS {
 }
 
 export const DATAVISTA_APP_NAME = 'DataVista';
+export const HOMEY_LOGIC = 'Homey Logic';

@@ -1,7 +1,7 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { toggleSwitchWidgetPayload } from '../api.mjs';
 import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import { BooleanData } from '../../../datavistasettings/booleanSettings.mjs';
+import type { BooleanData } from '../../../datavistasettings/booleanSettings.mjs';
 
 type Settings = {
 	datasource?: {
@@ -9,7 +9,7 @@ type Settings = {
 		deviceName: string;
 		id: string;
 		name: string;
-		type: 'capability' | 'advanced';
+		type: 'capability' | 'advanced' | 'variable';
 	};
 	transparent: boolean;
 	refreshSeconds: number;
@@ -112,6 +112,11 @@ class toggleSwitchWidgetScript {
 				'GET',
 				`/advanced?key=${this.settings.datasource!.id}`,
 			)) as toggleSwitchWidgetPayload | null;
+		} else if (type === 'variable') {
+			payload = (await this.homey.api(
+				'GET',
+				`/variable?variableId=${this.settings.datasource!.id}`,
+			)) as toggleSwitchWidgetPayload | null;
 		} else {
 			await this.startConfigurationAnimation();
 			return;
@@ -173,7 +178,7 @@ class toggleSwitchWidgetScript {
 			return;
 		}
 
-		if (this.settings.datasource.type === 'capability') {
+		if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
 			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
 			this.refreshInterval = setInterval(async () => {
 				await this.syncData();

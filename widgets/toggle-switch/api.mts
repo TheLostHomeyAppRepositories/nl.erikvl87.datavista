@@ -1,4 +1,4 @@
-import { DATAVISTA_APP_NAME } from "../../constants.mjs";
+import { DATAVISTA_APP_NAME, HOMEY_LOGIC } from "../../constants.mjs";
 import { BaseSettings } from "../../datavistasettings/baseSettings.mjs";
 import { BooleanData } from "../../datavistasettings/booleanSettings.mjs";
 import type { ApiRequest } from "../../types.mjs";
@@ -47,6 +47,22 @@ class ToggleSwitchWidgetApi {
 			value: data.settings.value,
 			iconUrl: null,
 			name: `${DATAVISTA_APP_NAME} - ${data.identifier}`
+		};
+
+		return payload;
+	}
+
+	public async getVariableBoolean({ homey, query }: ApiRequest): Promise<toggleSwitchWidgetPayload | null> {
+		const variable = await homey.app.homeyApi.logic.getVariable({ id: query.variableId });
+		if (!variable) {
+			homey.app.log(`[${this.constructor.name}]: Variable with id '${query.variableId}' not found.`);
+			return null;
+		}
+
+		const payload: toggleSwitchWidgetPayload = {
+			value: variable.value as boolean,
+			iconUrl: null,
+			name: `${HOMEY_LOGIC} - ${variable.name}`
 		};
 
 		return payload;
