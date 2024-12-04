@@ -32,8 +32,6 @@ export default class progressBarWidget {
 	}
 
 	private async setup(): Promise<void> {
-		const devices = await this.homeyApi.devices.getDevices();
-
 		this.widget.registerSettingAutocompleteListener('datasource', async (query: string) => {
 			const results: {
 				name: string;
@@ -57,6 +55,7 @@ export default class progressBarWidget {
 				});
 			});
 
+			const devices = await this.homeyApi.devices.getDevices();
 			for (const [_key, device] of Object.entries(devices)) {
 				for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
 					if (capability.type === 'number' && capability.units !== undefined && capability.units === '%') {

@@ -29,8 +29,6 @@ export default class SimpleGaugeWidget {
 	}
 
 	private async setup(): Promise<void> {
-		const devices = await this.homeyApi.devices.getDevices();
-
 		this.widget.registerSettingAutocompleteListener('datasource', async (query: string) => {
 			const results: {
 				name: string;
@@ -39,6 +37,7 @@ export default class SimpleGaugeWidget {
 				deviceId: string;
 				deviceName: string;
 			}[] = [];
+			const devices = await this.homeyApi.devices.getDevices();
 			for (const [_key, device] of Object.entries(devices)) {
 				for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
 					if (capability.type === 'number') {
