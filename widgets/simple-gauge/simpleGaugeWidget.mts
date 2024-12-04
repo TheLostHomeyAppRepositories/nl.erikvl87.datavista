@@ -1,10 +1,11 @@
+import { Widget } from 'homey';
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 
 export default class SimpleGaugeWidget {
 	private static instance: SimpleGaugeWidget | null = null;
 
-	private widget: any;
+	private widget: Widget;
 
 	private constructor(
 		private homey: Homey,

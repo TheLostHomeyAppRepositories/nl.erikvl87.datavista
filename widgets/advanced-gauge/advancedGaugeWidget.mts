@@ -1,12 +1,13 @@
 import Homey from "homey/lib/Homey";
 import { BaseSettings } from "../../datavistasettings/baseSettings.mjs";
 import { AdvancedGaugeWidgetData } from "../../datavistasettings/advancedGaugeWidgetSettings.mjs";
+import { Widget } from "homey";
 
 export default class AdvancedGaugeWidget {
 
 	private static instance: AdvancedGaugeWidget | null = null;
 
-	private widget: any;
+	private widget: Widget;
 
 	private constructor(private homey: Homey, private log: (...args: unknown[]) => void, private error: (...args: unknown[]) => void) {
 		this.widget = this.homey.dashboards.getWidget('advanced-gauge');

@@ -3,11 +3,12 @@ import Homey from 'homey/lib/Homey';
 import { BaseSettings } from '../../datavistasettings/baseSettings.mjs';
 import { PercentageData } from '../../datavistasettings/percentageSettings.mjs';
 import { DATAVISTA_APP_NAME } from '../../constants.mjs';
+import { Widget } from 'homey';
 
 export default class progressBarWidget {
 	private static instance: progressBarWidget | null = null;
 
-	private widget: any;
+	private widget: Widget;
 
 	private constructor(
 		private homey: Homey,

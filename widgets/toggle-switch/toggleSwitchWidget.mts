@@ -3,11 +3,12 @@ import Homey from 'homey/lib/Homey';
 import { BaseSettings } from '../../datavistasettings/baseSettings.mjs';
 import { DATA_TYPE_IDS, DATAVISTA_APP_NAME } from '../../constants.mjs';
 import { BooleanData } from '../../datavistasettings/booleanSettings.mjs';
+import { Widget } from 'homey';
 
 export default class toggleSwitchWidget {
 	private static instance: toggleSwitchWidget | null = null;
 
-	private widget: any;
+	private widget: Widget;
 
 	private constructor(
 		private homey: Homey,
