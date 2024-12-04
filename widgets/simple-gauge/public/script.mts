@@ -1,13 +1,18 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { SimpleGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
+import { WidgetDataPayload } from '../../baseWidgetApi.mjs';
+import { CapabilitiesObject, ExtendedVariable } from 'homey-api';
+import { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
+import { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
 
 type Settings = {
 	transparent: boolean;
 	datasource?: {
-		deviceId: string;
 		id: string;
+		deviceId: string;
 		name: string;
+		type: 'capability' | 'advanced' | 'variable';
 	};
 	segments: number;
 	refreshSeconds: number;
@@ -33,6 +38,9 @@ class SimpleGaugeWidgetScript {
 	constructor(homey: HomeyWidget) {
 		this.homey = homey;
 		this.settings = homey.getSettings() as Settings;
+		if (this.settings.datasource != null && this.settings.datasource.type == null)
+			this.settings.datasource.type = 'capability'; // Fallback to prevent breaking change.
+
 		if (this.settings.isMinNegative && this.settings.min != null) this.settings.min = -this.settings.min;
 		if (this.settings.isMaxNegative && this.settings.max != null) this.settings.max = -this.settings.max;
 		this.data = {
@@ -258,7 +266,7 @@ class SimpleGaugeWidgetScript {
 		}
 	}
 
-	private async startSpinning(): Promise<void> {
+	private async startConfigurationAnimation(): Promise<void> {
 		if (this.spinnerTimeout != null) return;
 
 		await this.log('Starting spinner');
@@ -281,7 +289,7 @@ class SimpleGaugeWidgetScript {
 		this.spinnerTimeout = setTimeout(update, interval);
 	}
 
-	async stopSpinning(): Promise<void> {
+	async stopConfigurationAnimation(): Promise<void> {
 		if (this.spinnerTimeout !== null) clearTimeout(this.spinnerTimeout);
 		this.spinnerTimeout = null;
 		await this.updateGauge();
@@ -300,30 +308,67 @@ class SimpleGaugeWidgetScript {
 	}
 
 	private async syncData(): Promise<void> {
-		const capabilityId = this.settings.datasource?.id;
-		const deviceId = this.settings.datasource?.deviceId;
-		const payload = (await this.homey.api(
-			'GET',
-			`/?deviceId=${deviceId}&capabilityId=${capabilityId}`,
-			{},
-		)) as SimpleGaugeWidgetPayload | null;
+		if (this.settings.datasource == null) {
+			await this.log('No datasource is set');
+			await this.startConfigurationAnimation();
+			return;
+		}
 
-		if (payload !== null) {
-			await this.log('Received payload', payload);
-			await this.stopSpinning();
+		const payload = (await this.homey.api('POST', `/datasource`, {
+			datasource: this.settings.datasource,
+		})) as WidgetDataPayload | null;
 
-			this.data = {
-				min: this.settings.min != null && this.settings.min !== '' ? this.settings.min : payload.min ?? 0,
-				max: this.settings.max != null && this.settings.max !== '' ? this.settings.max : payload.max ?? 100,
-				value: payload.value,
-				units: payload.units,
-				decimals: payload.decimals,
-			};
-
-			await this.updateGauge();
-		} else {
+		if (payload === null) {
 			await this.log('The payload is null');
-			await this.startSpinning();
+			await this.startConfigurationAnimation();
+			return;
+		}
+
+		await this.stopConfigurationAnimation();
+		// this.updateName(payload.name);
+
+		switch (this.settings.datasource.type) {
+			case 'capability': {
+				const capability = payload.data as CapabilitiesObject;
+				this.data = {
+					min: this.settings.min != null && this.settings.min !== '' ? this.settings.min : capability.min ?? 0,
+					max: this.settings.max != null && this.settings.max !== '' ? this.settings.max : capability.max ?? 100,
+					value: capability.value as number,
+					units: capability.units,
+					decimals: capability.decimals,
+				};
+				await this.updateGauge();
+				break;
+			}
+			case 'variable': {
+				const variable = payload.data as ExtendedVariable;
+				this.data = {
+					min: this.settings.min != null && this.settings.min !== '' ? this.settings.min : 0,
+					max: this.settings.max != null && this.settings.max !== '' ? this.settings.max : 100,
+					value: variable.value as number,
+				};
+				await this.updateGauge();
+				break;
+			}
+			case 'advanced': {
+				if ((payload.data as BaseSettings<unknown>).type !== 'percentage') {
+					await this.log('The data type is not percentage');
+					await this.startConfigurationAnimation();
+					return;
+				}
+				const advanced = payload.data as BaseSettings<PercentageData>;
+				this.data = {
+					min: this.settings.min != null && this.settings.min !== '' ? this.settings.min : 0,
+					max: this.settings.max != null && this.settings.max !== '' ? this.settings.max : 100,
+					value: advanced.settings.percentage,
+				};
+				await this.updateGauge();
+				break;
+			}
+			default:
+				await this.log('Unknown datasource type', this.settings.datasource.type);
+				await this.startConfigurationAnimation();
+				break;
 		}
 	}
 
@@ -331,16 +376,18 @@ class SimpleGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		if(!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
+		if (!this.settings.transparent) {
+			const widgetBackgroundColor = getComputedStyle(document.documentElement)
+				.getPropertyValue('--homey-background-color')
+				.trim();
 			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
 		}
 		this.chart = window.echarts.init(document.getElementById('gauge'));
 		const height = this.settings.style === 'style1' ? 200 : 165;
-		this.homey.ready( { height });
+		this.homey.ready({ height });
 		if (this.settings.datasource?.id == null) {
 			await this.log('No datasource selected');
-			await this.startSpinning();
+			await this.startConfigurationAnimation();
 			return;
 		}
 

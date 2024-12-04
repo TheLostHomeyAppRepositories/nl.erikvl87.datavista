@@ -130,17 +130,9 @@
 		}
 	],
 	"api": {
-		"getCapabilityBoolean": {
-			"method": "GET",
-			"path": "/capability"
-		},
-		"getAdvancedBoolean": {
-			"method": "GET",
-			"path": "/advanced"
-		},
-		"getVariableBoolean": {
-			"method": "GET",
-			"path": "/variable"
+		"datasource": {
+			"method": "POST",
+			"path": "/datasource"
 		},
 		"getIcon": {
 			"method": "GET",

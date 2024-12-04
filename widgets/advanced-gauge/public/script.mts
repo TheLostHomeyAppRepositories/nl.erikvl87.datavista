@@ -11,6 +11,7 @@ type Settings = {
 	datasource?: {
 		id: string;
 		name: string;
+		type: 'advanced';
 	};
 	configsource?: {
 		id: string;
@@ -183,6 +184,9 @@ class AdvancedGaugeWidgetScript {
 	constructor(homey: HomeyWidget) {
 		this.homey = homey;
 		this.settings = homey.getSettings() as Settings;
+		if (this.settings.datasource != null && this.settings.datasource.type == null)
+			this.settings.datasource.type = 'advanced'; // Fallback to prevent breaking change.
+
 		this.colorStopsManager = new ColorStopsManager();
 
 		this.data = {
@@ -386,7 +390,7 @@ class AdvancedGaugeWidgetScript {
 	/**
 	 * Starts the spinning animation.
 	 */
-	private async startSpinning(): Promise<void> {
+	private async startConfigurationAnimation(): Promise<void> {
 		if (this.spinnerTimeout != null) return;
 
 		const interval = 1000;
@@ -413,7 +417,7 @@ class AdvancedGaugeWidgetScript {
 	/**
 	 * Stops the spinning animation.
 	 */
-	async stopSpinning(): Promise<void> {
+	async stopConfigurationAnimation(): Promise<void> {
 		if (this.spinnerTimeout !== null) clearTimeout(this.spinnerTimeout);
 		this.spinnerTimeout = null;
 		await this.updateGauge();
@@ -435,6 +439,7 @@ class AdvancedGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
+		await this.log('Homey is ready', this.settings);
 		if(!this.settings.transparent) {
 			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
 			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
@@ -446,39 +451,68 @@ class AdvancedGaugeWidgetScript {
 
 		if (this.settings.datasource?.id == null) {
 			await this.log('No datasource selected');
-			await this.startSpinning();
+			await this.startConfigurationAnimation();
 			return;
 		}
 
 		const datasourceId = this.settings.datasource?.id;
 		const configsourceId = this.settings.configsource?.id;
-		const payload = (await this.homey.api(
-			'GET',
-			`/?datasource=${datasourceId}&configsource=${configsourceId}`,
-			{},
-		)) as AdvancedGaugeWidgetPayload | null;
 
-		if (payload !== null) {
-			if (payload.data !== null) {
-				this.data = payload.data;
+		const payload = (await this.homey.api('POST', `/datasource`, {
+			datasource: this.settings.datasource,
+			configsource: this.settings.configsource?.id,
+		})) as AdvancedGaugeWidgetPayload;
+
+		await this.log('Received payload', payload);
+
+		if (payload.data != null) {
+			if (payload.data.type === 'advanced') {
+				switch (payload.data.data.type) {
+					case 'percentage': {
+						const percentageData = payload.data.data as BaseSettings<PercentageData>;
+						this.data = {
+							min: 0,
+							max: 100,
+							value: percentageData.settings.percentage,
+							label: `${percentageData.settings.percentage}%`,
+						};
+						break;
+					}
+					case 'range': {
+						const rangeData = payload.data.data as BaseSettings<RangeData>;
+						this.data = {
+							min: rangeData.settings.min,
+							max: rangeData.settings.max,
+							value: rangeData.settings.value,
+							label: rangeData.settings.label,
+						};
+						break;
+					}
+					default: {
+						await this.log(`Type '${payload.data.data.type}' is not implemented.`);
+						await this.startConfigurationAnimation();
+					}
+				}
+
 			} else {
-				await this.startSpinning();
+				await this.startConfigurationAnimation();
 			}
-
-			if (payload.config !== null) this.config = payload.config;
-			await this.updateGauge();
 		} else {
-			await this.startSpinning();
+			await this.startConfigurationAnimation();
 		}
+
+		if (payload.config != null) this.config = payload.config;
+		await this.updateGauge();
+		
 
 		if (datasourceId !== null) {
 			this.homey.on(`settings/${datasourceId}`, async (data: BaseSettings<unknown> | null) => {
 				if (data === null) {
-					await this.startSpinning();
+					await this.startConfigurationAnimation();
 					await this.log('The data has been removed');
 					return;
 				} else if (this.spinnerTimeout !== null) {
-					await this.stopSpinning();
+					await this.stopConfigurationAnimation();
 				}
 
 				switch (data.type) {
@@ -504,7 +538,7 @@ class AdvancedGaugeWidgetScript {
 					}
 					default: {
 						await this.log(`Type '${data.type}' is not implemented.`);
-						await this.startSpinning();
+						await this.startConfigurationAnimation();
 						return;
 					}
 				}

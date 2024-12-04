@@ -1,7 +1,8 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { toggleSwitchWidgetPayload } from '../api.mjs';
 import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
 import type { BooleanData } from '../../../datavistasettings/booleanSettings.mjs';
+import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
+import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 
 type Settings = {
 	datasource?: {
@@ -66,11 +67,17 @@ class toggleSwitchWidgetScript {
 		titleEl.textContent = name;
 	}
 
-	async updateIcon(iconUrl: string): Promise<void> {
+	async updateIcon(iconUrl: string | null): Promise<void> {
 		if (this.settings.showIcon === false) return;
 		if (this.iconUrl === iconUrl) return;
-		this.iconUrl = iconUrl;
 
+		const iconEl = document.getElementById('icon')!;
+		if (iconUrl == null) {
+			iconEl.style.display = 'none';
+			return;
+		}
+
+		this.iconUrl = iconUrl;
 		const widgetDiv = document.querySelector('.homey-widget')!;
 		const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
 		const rgbMatch = bgColor.match(/\d+/g)!;
@@ -86,50 +93,63 @@ class toggleSwitchWidgetScript {
 		if (color != null) url += `&color=${encodeURIComponent(color)}`;
 
 		const result = (await this.homey.api('GET', url)) as string;
-		const iconEl = document.getElementById('icon')!;
 		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
 		iconEl.style.display = 'block';
 	}
 
-	private async syncData(): Promise<void> {
-		const type = this.settings.datasource!.type;
-
-		let payload;
-		if (type === 'capability') {
-			const capabilityId = this.settings.datasource?.id;
-			const deviceId = this.settings.datasource?.deviceId;
-			payload = (await this.homey.api(
-				'GET',
-				`/capability?deviceId=${deviceId}&capabilityId=${capabilityId}`,
-				{},
-			)) as toggleSwitchWidgetPayload | null;
-
-			if (payload?.iconUrl != null) {
-				await this.updateIcon(payload.iconUrl);
-			}
-		} else if (type === 'advanced') {
-			payload = (await this.homey.api(
-				'GET',
-				`/advanced?key=${this.settings.datasource!.id}`,
-			)) as toggleSwitchWidgetPayload | null;
-		} else if (type === 'variable') {
-			payload = (await this.homey.api(
-				'GET',
-				`/variable?variableId=${this.settings.datasource!.id}`,
-			)) as toggleSwitchWidgetPayload | null;
-		} else {
+	private async getData(): Promise<void> {
+		if (this.settings.datasource == null) {
+			await this.log('No datasource is set');
 			await this.startConfigurationAnimation();
 			return;
 		}
 
-		if (payload !== null && payload.value != null) {
-			await this.log('Received payload', payload);
-			await this.stopConfigurationAnimation();
-			this.updateName(payload.name);
-			this.updateState(payload.value);
-		} else {
+		const payload = (await this.homey.api('POST', `/datasource`, {
+			datasource: this.settings.datasource,
+		})) as WidgetDataPayload | null;
+
+		if (payload === null) {
 			await this.log('The payload is null');
 			await this.startConfigurationAnimation();
+			return;
+		}
+
+		await this.stopConfigurationAnimation();
+		this.updateName(payload.name);
+
+		switch (this.settings.datasource.type) {
+			case 'capability': {
+				const capability = payload.data as CapabilitiesObject;
+				if (capability.iconObj?.id != null) {
+					await this.updateIcon(`https://icons-cdn.athom.com/${capability.iconObj?.id}.svg?ver=1`);
+				} else if (payload.fallbackIcon != null) {
+					await this.updateIcon(payload.fallbackIcon);
+				} else {
+					await this.updateIcon(null);
+				}
+				
+				this.updateState(capability.value as boolean);
+				break;
+			}
+			case 'variable': {
+				const variable = payload.data as ExtendedVariable;
+				this.updateState(variable.value as boolean);
+				break;
+			}
+			case 'advanced': {
+				if((payload.data as BaseSettings<unknown>).type !== 'boolean') {
+					await this.log('The data type is not boolean');
+					await this.startConfigurationAnimation();
+					return;
+				}
+				const advanced = payload.data as BaseSettings<BooleanData>;
+				this.updateState(advanced.settings.value as boolean);
+				break;
+			}
+			default:
+				await this.log('Unknown datasource type', this.settings.datasource.type);
+				await this.startConfigurationAnimation();
+				break;
 		}
 	}
 
@@ -142,7 +162,7 @@ class toggleSwitchWidgetScript {
 			this.updateState(value);
 			this.configurationAnimationTimeout = setTimeout(update, interval);
 		};
-		this.updateName('Configure me', true);
+		this.updateName('Configure me', false);
 		this.configurationAnimationTimeout = setTimeout(update, interval);
 	}
 
@@ -170,7 +190,7 @@ class toggleSwitchWidgetScript {
 		document.documentElement.style.setProperty('--true-color', this.settings.trueColor);
 		document.documentElement.style.setProperty('--false-color', this.settings.falseColor);
 
-		if (this.settings.datasource != null) await this.syncData();
+		if (this.settings.datasource != null) await this.getData();
 		this.homey.ready();
 
 		if (this.settings.datasource == null) {
@@ -181,7 +201,7 @@ class toggleSwitchWidgetScript {
 		if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
 			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
 			this.refreshInterval = setInterval(async () => {
-				await this.syncData();
+				await this.getData();
 			}, this.settings.refreshSeconds * 1000);
 		} else if (this.settings.datasource.type === 'advanced') {
 			this.homey.on(`settings/${this.settings.datasource.id}`, async (data: BaseSettings<BooleanData> | null) => {

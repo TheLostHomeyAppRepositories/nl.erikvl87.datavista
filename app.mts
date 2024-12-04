@@ -28,7 +28,7 @@ export default class DataVista extends Homey.App {
 		});
 
 		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
-		await AdvancedGaugeWidget.initialize(this.homey, this.log, this.error);
+		await AdvancedGaugeWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
 		await progressBarWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
 		await toggleSwitchWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
 

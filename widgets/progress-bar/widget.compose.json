@@ -122,13 +122,9 @@
 		}
 	],
 	"api": {
-		"getCapabilityPercentage": {
-			"method": "GET",
-			"path": "/capability"
-		},
-		"getAdvancedPercentage": {
-			"method": "GET",
-			"path": "/advanced"
+		"datasource": {
+			"method": "POST",
+			"path": "/datasource"
 		},
 		"getIcon": {
 			"method": "GET",

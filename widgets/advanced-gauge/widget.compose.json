@@ -68,9 +68,9 @@
 		}
 	],
 	"api": {
-		"getSettings": {
-			"method": "GET",
-			"path": "/"
+		"datasource": {
+			"method": "POST",
+			"path": "/datasource"
 		},
 		"log": {
 			"method": "POST",

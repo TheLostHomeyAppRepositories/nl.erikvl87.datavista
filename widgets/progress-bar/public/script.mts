@@ -1,7 +1,8 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { progressBarWidgetPayload } from '../api.mjs';
 import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
 import type { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
+import { WidgetDataPayload } from '../../baseWidgetApi.mjs';
+import { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 
 type Settings = {
 	datasource?: {
@@ -9,7 +10,7 @@ type Settings = {
 		deviceName: string;
 		id: string;
 		name: string;
-		type: 'capability' | 'advanced';
+		type: 'capability' | 'advanced' | 'variable';
 	};
 	transparent: boolean;
 	refreshSeconds: number;
@@ -89,46 +90,75 @@ class ProgressBarWidgetScript {
 	}
 
 	private async syncData(): Promise<void> {
-		const type = this.settings.datasource!.type;
-
-		let payload;
-		if (type === 'capability') {
-			const capabilityId = this.settings.datasource?.id;
-			const deviceId = this.settings.datasource?.deviceId;
-			payload = (await this.homey.api(
-				'GET',
-				`/capability?deviceId=${deviceId}&capabilityId=${capabilityId}`,
-				{},
-			)) as progressBarWidgetPayload | null;
-
-			if (payload?.iconUrl != null) {
-				await this.updateIcon(payload.iconUrl);
-			}
-		} else if (type === 'advanced') {
-			payload = (await this.homey.api(
-				'GET',
-				`/advanced?key=${this.settings.datasource!.id}`,
-			)) as progressBarWidgetPayload | null;
-		} else {
+		if (this.settings.datasource == null) {
+			await this.log('No datasource is set');
 			await this.startConfigurationAnimation();
 			return;
 		}
 
-		if (payload !== null && payload.value !== null) {
-			await this.log('Received payload', payload);
-			await this.stopConfigurationAnimation();
-			this.updateName(payload.name);
-			this.updateProgress(payload.value);
-		} else {
+		const payload = (await this.homey.api('POST', `/datasource`, {
+			datasource: this.settings.datasource,
+		})) as WidgetDataPayload | null;
+
+		if (payload === null) {
 			await this.log('The payload is null');
 			await this.startConfigurationAnimation();
+			return;
+		}
+
+		await this.stopConfigurationAnimation();
+		this.updateName(payload.name);
+
+		switch (this.settings.datasource.type) {
+			case 'capability': {
+				const capability = payload.data as CapabilitiesObject;
+				if (capability.iconObj?.id != null) {
+					await this.updateIcon(`https://icons-cdn.athom.com/${capability.iconObj?.id}.svg?ver=1`);
+				} else if (payload.fallbackIcon != null) {
+					await this.updateIcon(payload.fallbackIcon);
+				} else {
+					await this.updateIcon(null);
+				}
+				
+				let value = capability.value as number;
+				if (capability.min !== undefined && capability.min == 0 && capability.max !== undefined && capability.max == 1) {
+					value = Math.round(((value - capability.min) / (capability.max - capability.min)) * 100);
+				}
+				this.updateProgress(value);
+				break;
+			}
+			case 'variable': {
+				const variable = payload.data as ExtendedVariable;
+				this.updateProgress(variable.value as number);
+				break;
+			}
+			case 'advanced': {
+				if((payload.data as BaseSettings<unknown>).type !== 'percentage') {
+					await this.log('The data type is not percentage');
+					await this.startConfigurationAnimation();
+					return;
+				}
+				const advanced = payload.data as BaseSettings<PercentageData>;
+				this.updateProgress(advanced.settings.percentage);
+				break;
+			}
+			default:
+				await this.log('Unknown datasource type', this.settings.datasource.type);
+				await this.startConfigurationAnimation();
+				break;
 		}
 	}
 
-	async updateIcon(iconUrl: string): Promise<void> {
+	async updateIcon(iconUrl: string | null): Promise<void> {
 		if (this.settings.showIcon === false) return;
 		if (this.iconUrl === iconUrl) return;
 		this.iconUrl = iconUrl;
+		
+		const iconEl = document.getElementById('icon')!;
+		if (iconUrl == null) {
+			iconEl.style.display = 'none';
+			return;
+		}
 
 		const widgetDiv = document.querySelector('.homey-widget')!;
 		const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
@@ -145,7 +175,6 @@ class ProgressBarWidgetScript {
 		if (color != null) url += `&color=${encodeURIComponent(color)}`;
 
 		const result = (await this.homey.api('GET', url)) as string;
-		const iconEl = document.getElementById('icon')!;
 		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
 		iconEl.style.display = 'block';
 	}

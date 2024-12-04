@@ -349,9 +349,9 @@
         }
       ],
       "api": {
-        "getSettings": {
-          "method": "GET",
-          "path": "/"
+        "datasource": {
+          "method": "POST",
+          "path": "/datasource"
         },
         "log": {
           "method": "POST",
@@ -724,13 +724,9 @@
         }
       ],
       "api": {
-        "getCapabilityPercentage": {
-          "method": "GET",
-          "path": "/capability"
-        },
-        "getAdvancedPercentage": {
-          "method": "GET",
-          "path": "/advanced"
+        "datasource": {
+          "method": "POST",
+          "path": "/datasource"
         },
         "getIcon": {
           "method": "GET",
@@ -1320,9 +1316,13 @@
         }
       ],
       "api": {
-        "getSettings": {
+        "datasource": {
+          "method": "POST",
+          "path": "/datasource"
+        },
+        "getIcon": {
           "method": "GET",
-          "path": "/"
+          "path": "/icon"
         },
         "log": {
           "method": "POST",
@@ -1691,17 +1691,9 @@
         }
       ],
       "api": {
-        "getCapabilityBoolean": {
-          "method": "GET",
-          "path": "/capability"
-        },
-        "getAdvancedBoolean": {
-          "method": "GET",
-          "path": "/advanced"
-        },
-        "getVariableBoolean": {
-          "method": "GET",
-          "path": "/variable"
+        "datasource": {
+          "method": "POST",
+          "path": "/datasource"
         },
         "getIcon": {
           "method": "GET",

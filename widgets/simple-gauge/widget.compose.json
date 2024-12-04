@@ -197,9 +197,13 @@
 		}
 	],
 	"api": {
-		"getSettings": {
+		"datasource": {
+			"method": "POST",
+			"path": "/datasource"
+		},
+		"getIcon": {
 			"method": "GET",
-			"path": "/"
+			"path": "/icon"
 		},
 		"log": {
 			"method": "POST",
