@@ -53,7 +53,7 @@ export class BaseWidget {
 						const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
 						results.push({
 							name: data.identifier,
-							description: `${DATAVISTA_APP_NAME} boolean (${data.settings.value ? 'true' : 'false'})`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${data.settings.value ? 'true' : 'false'})`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -65,7 +65,7 @@ export class BaseWidget {
 						const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
 						results.push({
 							name: percentageData.identifier,
-							description: `${DATAVISTA_APP_NAME} percentage (${percentageData.settings.percentage ?? '0'}%)`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${percentageData.settings.percentage ?? '0'}%)`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -77,7 +77,7 @@ export class BaseWidget {
 						const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
 						results.push({
 							name: rangeData.identifier,
-							description: `${DATAVISTA_APP_NAME} range (${rangeData.settings.min}-${rangeData.settings.max})`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${rangeData.settings.max})`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -141,7 +141,7 @@ export class BaseWidget {
 				if (options.includeBooleans && variable.type === 'boolean') {
 					results.push({
 						name: variable.name,
-						description: `${HOMEY_LOGIC} (${variable.value ? 'true' : 'false'})`,
+						description: `${this.homey.__('homey_variable')} (${variable.value ? 'true' : 'false'})`,
 						id: variable.id,
 						type: 'variable',
 						deviceName: HOMEY_LOGIC,
@@ -149,7 +149,7 @@ export class BaseWidget {
 				} else if (options.includeNumbers && variable.type === 'number') {
 					results.push({
 						name: variable.name,
-						description: `${HOMEY_LOGIC} (${variable.value ?? '0'})`,
+						description: `${this.homey.__('homey_variable')} (${variable.value ?? '0'})`,
 						id: variable.id,
 						type: 'variable',
 						deviceName: HOMEY_LOGIC,

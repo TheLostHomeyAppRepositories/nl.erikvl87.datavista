@@ -1,2 +1,6 @@
 {
+	"range": "bereik",
+	"percentage": "percentage",
+	"boolean": "boolean",
+	"homey_variable": "Homey variabele"
 }
