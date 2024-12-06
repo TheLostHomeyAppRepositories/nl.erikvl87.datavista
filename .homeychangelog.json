@@ -22,5 +22,8 @@
   },
   "0.4.0": {
     "en": "Added a toggle switch widget"
+  },
+  "0.4.1": {
+    "en": "The simple gauge and toggle switch now allow variables"
   }
 }
