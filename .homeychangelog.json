@@ -25,5 +25,8 @@
   },
   "0.4.1": {
     "en": "The simple gauge and toggle switch now allow variables"
+  },
+  "0.5.0": {
+    "en": "Added support for ranges in the progress bar widget"
   }
 }
