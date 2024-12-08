@@ -33,11 +33,11 @@ The Advanced Gauge widget provides greater flexibility and customization but req
 <table><thead><tr><th width="184">Setting</th><th width="551">Description</th></tr></thead><tbody><tr><td><strong>Datasource*</strong></td><td>The <em>DataVista datasource</em> field, which can be of type range or percentage, providing the data for the advanced gauge.</td></tr><tr><td><strong>Configuration source*</strong></td><td>The <em>DataVista configuration source</em>, which contains the gauge colors along with their respective offset settings.</td></tr><tr><td><strong>Number of segments</strong></td><td>Sets the number of segments on the gauge, with each segment's border displaying a value.</td></tr><tr><td><strong>Style</strong></td><td>Choose between Style 1 or Style 2. Style 1 features a needle, while Style 2 displays a colored bar indicating the angle of the value.</td></tr><tr><td><strong>Transparent background</strong></td><td>Choose whether the widget’s background is a solid color tile or transparent, blending seamlessly with the dashboard.</td></tr></tbody></table>
 
 {% hint style="warning" %}
-\*The **datasource** requires a flow with a DataVista action card to configure either a percentage or range. This action card must be run at least once before the source can be selected in the widget settings.
+\*The **datasource** requires a flow with a **DataVista action card** to configure either a percentage or range. This action card must be run at least once before the source can be selected in the widget settings.
 
 ![](<../.gitbook/assets/actioncard-set-percentage (2).jpg>)\
 \
-![](<../.gitbook/assets/actioncard-set-range (1).jpg>)
+![](<../.gitbook/assets/action-set-range (2).png>)
 {% endhint %}
 
 {% hint style="warning" %}
