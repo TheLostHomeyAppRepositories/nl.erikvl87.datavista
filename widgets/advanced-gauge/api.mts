@@ -3,7 +3,6 @@ import { AdvancedGaugeWidgetData } from "../../datavistasettings/advancedGaugeWi
 import type { ApiRequest } from "../../types.mjs";
 import { BaseWidgetApi, WidgetDataPayload } from "../baseWidgetApi.mjs";
 
-export type widgetDataDto = { min: number, max: number, value: number, label?: string };
 export type AdvancedGaugeWidgetPayload = { data: WidgetDataPayload | null, config?: AdvancedGaugeWidgetData | null };
 
 class AdvancedGaugeWidgetApi extends BaseWidgetApi {

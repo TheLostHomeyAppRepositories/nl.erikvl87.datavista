@@ -16,16 +16,12 @@
 			}
 
 			.title {
-				margin-top: 5px;
+				margin-top: 2px;
 				width: 100%;
 				text-align: left;
 				overflow: hidden;
 				white-space: nowrap;
 				text-overflow: ellipsis;
-			}
-
-			#progress {
-				display: none;
 			}
 
 			body {
@@ -56,12 +52,32 @@
 			#progressBackground {
 				height: 5px;
 				width: 100%;
+				position: relative;
 			}
 
 			#progressBar {
-				height: 15px;
+				height: 5px;
 				width: 0%;
 				transition: width 0.5s ease-in-out;
+			}
+
+			.displayRange {
+				height: 21px !important;
+			}
+
+			#progressLabel {
+				font-size: 14px;
+				margin-right: 10px;
+				height: 15px;
+				line-height: 1;
+				position: absolute;
+				left: 50%;
+				top: 3px;
+				transform: translateX(-50%);
+				z-index: 1;
+				color: var(--homey-text-color);
+				padding: 0 10px;
+				white-space: nowrap;
 			}
 
 			#icon {
@@ -85,6 +101,7 @@
 				<div class="bar-container" style="background-color: var(--homey-color-mono-200)">
 					<div id="progressBackground" style="background-color: var(--homey-color-mono-200)">
 						<div id="progressBar"></div>
+						<div id="progressLabel" class="homey-text-small-light" style="display: none;">Test</div>
 					</div>
 				</div>
 			</div>

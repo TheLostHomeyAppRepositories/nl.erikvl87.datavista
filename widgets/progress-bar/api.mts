@@ -11,7 +11,7 @@ class progressBarWidgetApi extends BaseWidgetApi {
 	public async datasource({ homey, body }: ApiRequest): Promise<WidgetDataPayload | null> {
 		const data = await this.getDatasource(homey.app, body.datasource);
 		if (data == null) return null;
-		if (!BaseWidgetApi.isDataType(data, { number: true, percentage: true })) return null;
+		if (!BaseWidgetApi.isDataType(data, { number: true, percentage: true, range: true })) return null;
 		return data;
 	}
 }

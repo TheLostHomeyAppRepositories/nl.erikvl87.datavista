@@ -3,8 +3,8 @@
 		"en": "Set range"
 	},
 	"titleFormatted": {
-		"en": "[Range] Set range from [[min]] to [[max]] with value [[value]] (label [[label]]) for [[identifier]]",
-		"nl": "[Bereik] Zet bereik van [[min]] tot [[max]] met waarde [[value]] (label [[label]]) voor [[identifier]]"
+		"en": "[Range] Set range [[identifier]] from [[min]] to [[max]] with value [[value]] (unit [[unit]] is placed [[unitPosition]]). Overwrite value with label [[label]].",
+		"nl": "[Bereik] Zet bereik [[identifier]] van [[min]] tot [[max]] met waarde [[value]] (eenheid [[unit]] is [[unitPosition]] geplaatst). Overschrijf waarde met label [[label]]."
 	},
 	"hint": {
 		"en": "Set a range that can be used in Advanced Gauge widgets.",
@@ -34,12 +34,49 @@
 		},
 		{
 			"type": "text",
+			"name": "unit",
+			"required": false,
+			"title": {
+				"en": "unit",
+				"nl": "eenheid"
+			},
+			"placeholder": {
+				"en": "%, €, °C, MHz, watt, etc."
+			}
+		},
+		{
+			"type": "dropdown",
+			"name": "unitPosition",
+			"title": {
+				"en": "position",
+				"nl": "positie"
+			},
+			"required": false,
+			"values": [
+				{
+					"id": "prefix",
+					"title": {
+						"en": "before",
+						"nl": "ervoor"
+					}
+				},
+				{
+					"id": "suffix",
+					"title": {
+						"en": "after",
+						"nl": "erna"
+					}
+				}
+			]
+		},
+		{
+			"type": "text",
 			"name": "label",
 			"required": false,
 			"placeholder": {
-			  "en": "Label"
+				"en": "Label"
 			}
-		  },
+		},
 		{
 			"type": "text",
 			"name": "identifier",

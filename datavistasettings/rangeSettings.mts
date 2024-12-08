@@ -4,6 +4,8 @@ import { BaseSettingsRecord } from "./baseSettings.mjs";
 export interface RangeData {
 	min: number;
 	max: number;
+	unit: string;
+	unitPosition: 'prefix' | 'suffix';
 	value: number;
 	label: string;
 }

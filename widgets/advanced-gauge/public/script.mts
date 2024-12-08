@@ -1,5 +1,5 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { widgetDataDto, AdvancedGaugeWidgetPayload } from '../api.mjs';
+import type { AdvancedGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
 import type { AdvancedGaugeWidgetData } from '../../../datavistasettings/advancedGaugeWidgetSettings.mjs';
 import type { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
@@ -39,12 +39,21 @@ type ColorStopConfig = {
 	colorOffset5?: number;
 };
 
+type WidgetDataDto = { 
+	min: number,
+	max: number,
+	value: number,
+	unit?: string,
+	unitPosition?: 'prefix' | 'suffix',
+	label?: string
+};
+
 class ColorStopsManager {
 	private lastConfig: ColorStopConfig | null = null;
-	private lastData: widgetDataDto | null = null;
+	private lastData: WidgetDataDto | null = null;
 	private cachedResult: ColorStop[] | null = null;
 
-	public getColorStops(config: ColorStopConfig, data: widgetDataDto): ColorStop[] {
+	public getColorStops(config: ColorStopConfig, data: WidgetDataDto): ColorStop[] {
 		if (this.shouldUseCache(config, data)) {
 			return this.cachedResult!;
 		}
@@ -78,7 +87,7 @@ class ColorStopsManager {
 		return this.cacheAndReturn(config, data, result);
 	}
 
-	private shouldUseCache(config: ColorStopConfig, data: widgetDataDto): boolean {
+	private shouldUseCache(config: ColorStopConfig, data: WidgetDataDto): boolean {
 		if (!this.cachedResult || !this.lastConfig || !this.lastData) return false;
 
 		const configMatch = JSON.stringify(config) === JSON.stringify(this.lastConfig);
@@ -87,7 +96,7 @@ class ColorStopsManager {
 		return configMatch && rangeMatch;
 	}
 
-	private cacheAndReturn(config: ColorStopConfig, data: widgetDataDto, result: ColorStop[]): ColorStop[] {
+	private cacheAndReturn(config: ColorStopConfig, data: WidgetDataDto, result: ColorStop[]): ColorStop[] {
 		this.lastConfig = { ...config };
 		this.lastData = { ...data };
 		this.cachedResult = [...result];
@@ -98,7 +107,7 @@ class ColorStopsManager {
 		stops.sort((a, b) => (a.offset === undefined || b.offset === undefined ? 0 : a.offset - b.offset));
 	}
 
-	private normalizeStops(stops: ColorStop[], data: widgetDataDto): void {
+	private normalizeStops(stops: ColorStop[], data: WidgetDataDto): void {
 		const rangeSize = data.max - data.min;
 		const hasDefinedOffsets = stops.some(stop => stop.offset !== undefined);
 
@@ -171,7 +180,7 @@ class ColorStopsManager {
 class AdvancedGaugeWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
-	private data: widgetDataDto;
+	private data: WidgetDataDto;
 	private config: AdvancedGaugeWidgetData;
 	private colorStopsManager: ColorStopsManager;
 	private spinnerTimeout: NodeJS.Timeout | null | undefined;
@@ -225,7 +234,14 @@ class AdvancedGaugeWidgetScript {
 							center: ['50%', '180px'],
 							detail: {
 								valueAnimation: true,
-								formatter: this.data.label ?? '{value}',
+								formatter: (value: number): string => {
+									if (this.data.label != null && this.data.label != '') return this.data.label;
+									if (this.data.unit == null) return `${value}`;
+							
+									return this.data.unitPosition === 'prefix'
+										? `${this.data.unit} ${value}`
+										: `${value} ${this.data.unit}`;
+								},
 								fontSize: 20,
 								offsetCenter: [0, '20%'],
 								color: homeyTextColor,
@@ -296,7 +312,14 @@ class AdvancedGaugeWidgetScript {
 							center: ['50%', '180px'],
 							detail: {
 								valueAnimation: true,
-								formatter: this.data.label ?? '{value}',
+								formatter: (value: number): string => {
+									if (this.data.label != null && this.data.label != '') return this.data.label;
+									if (this.data.unit == null) return `${value}`;
+							
+									return this.data.unitPosition === 'prefix'
+										? `${this.data.unit} ${value}`
+										: `${value} ${this.data.unit}`;
+								},
 								fontSize: 20,
 								offsetCenter: [0, '-10%'],
 								color: homeyTextColor,
@@ -406,6 +429,8 @@ class AdvancedGaugeWidgetScript {
 				min: 0,
 				max: 100,
 				value: value,
+				unit: '%',
+				unitPosition: 'suffix',
 				label: `Configure me`,
 			};
 			await this.updateGauge();
@@ -474,7 +499,8 @@ class AdvancedGaugeWidgetScript {
 							min: 0,
 							max: 100,
 							value: percentageData.settings.percentage,
-							label: `${percentageData.settings.percentage}%`,
+							unit: '%',
+							unitPosition: 'suffix',
 						};
 						break;
 					}
@@ -484,6 +510,8 @@ class AdvancedGaugeWidgetScript {
 							min: rangeData.settings.min,
 							max: rangeData.settings.max,
 							value: rangeData.settings.value,
+							unit: rangeData.settings.unit,
+							unitPosition: rangeData.settings.unitPosition,
 							label: rangeData.settings.label,
 						};
 						break;
@@ -522,7 +550,8 @@ class AdvancedGaugeWidgetScript {
 							min: 0,
 							max: 100,
 							value: settings.percentage,
-							label: `${settings.percentage}%`,
+							unit: '%',
+							unitPosition: 'suffix'
 						};
 						break;
 					}
@@ -533,6 +562,8 @@ class AdvancedGaugeWidgetScript {
 							max: rangeData.max,
 							value: rangeData.value,
 							label: rangeData.label,
+							unit: rangeData.unit,
+							unitPosition: rangeData.unitPosition
 						};
 						break;
 					}

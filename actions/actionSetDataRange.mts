@@ -35,6 +35,8 @@ export default class ActionSetDataRange extends BaseDataAction {
 				min: args.min,
 				max: args.max,
 				value: args.value,
+				unit: args.unit,
+				unitPosition: args.unitPosition,
 				label: args.label,
 			}));
 		});

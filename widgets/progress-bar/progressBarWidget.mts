@@ -35,6 +35,7 @@ export default class progressBarWidget extends BaseWidget {
 			this.autocompleteQuery({ 
 				query,
 				includePercentages: true,
+				includeRanges: true,
 				fromCapabilities: true,
 				fromSettings: true
 			}));

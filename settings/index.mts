@@ -42,9 +42,11 @@ class SettingsScript {
 		const minInput = element.querySelector('#min-input') as HTMLInputElement;
 		const maxInput = element.querySelector('#max-input') as HTMLInputElement;
 		const valueInput = element.querySelector('#value-input') as HTMLInputElement;
+		const unitInput = element.querySelector('#unit-input') as HTMLInputElement;
 		minInput.value = `${data.settings.min}`;
 		maxInput.value = `${data.settings.max}`;
 		valueInput.value = `${data.settings.value}`;
+		unitInput.value = data.settings.unit ?? '';
 		return element;
 	}
 
