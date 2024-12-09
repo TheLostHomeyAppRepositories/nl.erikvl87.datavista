@@ -157,6 +157,9 @@ class ProgressBarWidgetScript {
 		await this.updateIcon(
 			capability.iconObj?.id ? `https://icons-cdn.athom.com/${capability.iconObj.id}.svg?ver=1` : payload.fallbackIcon,
 		);
+
+		this.updateProgressBarDisplay(capability.units !== 'percentage');
+		
 		await this.updateProgress(
 			capability.min ?? 0,
 			capability.max ?? 100,
@@ -178,12 +181,10 @@ class ProgressBarWidgetScript {
 
 		switch (advanced.type) {
 			case 'percentage':
-				document.getElementById('progressPercentage')!.style.display = 'block';
 				this.updateProgressBarDisplay(false);
 				await this.updateProgress(0, 100, (advanced as BaseSettings<PercentageData>).settings.percentage, 0, '%');
 				break;
 			case 'range': {
-				document.getElementById('progressPercentage')!.style.display = 'none';
 				this.updateProgressBarDisplay(true);
 				const rangeSettings = (advanced as BaseSettings<RangeData>).settings;
 				await this.updateProgress(
@@ -211,10 +212,12 @@ class ProgressBarWidgetScript {
 		const progressLabel = document.getElementById('progressLabel')!;
 
 		if (isRange) {
+			document.getElementById('progressPercentage')!.style.display = 'none';
 			progressBar.classList.add('displayRange');
 			progressBackground.classList.add('displayRange');
 			progressLabel.style.display = 'block';
 		} else {
+			document.getElementById('progressPercentage')!.style.display = 'block';
 			progressBar.classList.remove('displayRange');
 			progressBackground.classList.remove('displayRange');
 			progressLabel.style.display = 'none';

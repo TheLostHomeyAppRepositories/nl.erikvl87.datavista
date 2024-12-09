@@ -32,7 +32,7 @@ export default class progressBarWidget extends BaseWidget {
 
 	private async setup(): Promise<void> {
 		this.widget.registerSettingAutocompleteListener('datasource', async (query: string) => 
-			this.autocompleteQuery({ 
+			this.autocompleteQuery({
 				query,
 				includePercentages: true,
 				includeRanges: true,

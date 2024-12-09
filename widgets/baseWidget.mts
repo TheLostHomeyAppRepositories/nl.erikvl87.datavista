@@ -53,7 +53,9 @@ export class BaseWidget {
 						const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
 						results.push({
 							name: data.identifier,
-							description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${data.settings.value ? 'true' : 'false'})`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${
+								data.settings.value ? 'true' : 'false'
+							})`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -65,7 +67,9 @@ export class BaseWidget {
 						const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
 						results.push({
 							name: percentageData.identifier,
-							description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${percentageData.settings.percentage ?? '0'}%)`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${
+								percentageData.settings.percentage ?? '0'
+							}%)`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -77,7 +81,9 @@ export class BaseWidget {
 						const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
 						results.push({
 							name: rangeData.identifier,
-							description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${rangeData.settings.max})`,
+							description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${
+								rangeData.settings.max
+							})`,
 							id: key,
 							type: 'advanced',
 							deviceName: DATAVISTA_APP_NAME,
@@ -115,12 +121,26 @@ export class BaseWidget {
 							deviceId: device.id,
 							type: 'capability',
 						});
+					} else if (
+						options.includeRanges &&
+						capability.type === 'number' &&
+						capability.min !== undefined &&
+						capability.max !== undefined
+					) {
+						results.push({
+							name: capability.title,
+							description: `${device.name} (${capability.value ?? '0'}${
+								capability.units ? ` ${capability.units}` : ''
+							})`,
+							deviceName: device.name,
+							id: capability.id,
+							deviceId: device.id,
+							type: 'capability',
+						});
 					} else if (options.includeNumbers && capability.type === 'number') {
 						let description = device.name;
 						if (capability.units != null || capability.value != null) {
-							description += ` (${capability.value ?? '0'}${
-								capability.units ? ` ${capability.units}` : ''
-							})`;
+							description += ` (${capability.value ?? '0'}${capability.units ? ` ${capability.units}` : ''})`;
 						}
 						results.push({
 							name: capability.title,

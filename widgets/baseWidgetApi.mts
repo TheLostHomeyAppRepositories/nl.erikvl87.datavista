@@ -75,6 +75,7 @@ export class BaseWidgetApi {
 				if (options.boolean && capability.type === 'boolean') return true;
 				if (options.percentage && capability.type === 'number' && capability.units === '%') return true;
 				if (options.number && capability.type === 'number') return true;
+				if (options.range && capability.type === 'number' && capability.min !== undefined && capability.max !== undefined) return true;
 				return false;
 			}
 			case 'variable': {
