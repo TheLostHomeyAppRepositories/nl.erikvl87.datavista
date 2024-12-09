@@ -1374,7 +1374,7 @@
         "nl": "Schakelaar"
       },
       "transparent": true,
-      "height": 40,
+      "height": 25,
       "settings": [
         {
           "id": "datasource",

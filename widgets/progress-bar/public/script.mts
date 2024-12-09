@@ -330,7 +330,7 @@ class ProgressBarWidgetScript {
 
 		if (this.settings.datasource) await this.syncData();
 
-		this.homey.ready({ height: this.settings.showName ? 65 : 40 });
+		this.homey.ready({ height: this.settings.showName ? 45 : 20 });
 
 		if (!this.settings.datasource) {
 			await this.startConfigurationAnimation();
