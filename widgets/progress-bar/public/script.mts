@@ -13,7 +13,6 @@ type Settings = {
 		name: string;
 		type: 'capability' | 'advanced' | 'variable';
 	};
-	transparent: boolean;
 	refreshSeconds: number;
 	color1: string;
 	color2: string;
@@ -319,13 +318,6 @@ class ProgressBarWidgetScript {
 	}
 
 	public async onHomeyReady(): Promise<void> {
-		if (!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement)
-				.getPropertyValue('--homey-background-color')
-				.trim();
-			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-		}
-
 		this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
 
 		if (this.settings.datasource) await this.syncData();

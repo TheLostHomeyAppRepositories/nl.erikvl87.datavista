@@ -118,15 +118,6 @@
 				"nl": "Toon icoon (indien beschikbaar)"
 			},
 			"value": true
-		},
-		{
-			"id": "transparent",
-			"type": "checkbox",
-			"title": {
-				"en": "Transparent background",
-				"nl": "Transparante achtergrond"
-			},
-			"value": false
 		}
 	],
 	"api": {

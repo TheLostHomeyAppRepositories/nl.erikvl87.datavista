@@ -12,7 +12,6 @@ type Settings = {
 		name: string;
 		type: 'capability' | 'advanced' | 'variable';
 	};
-	transparent: boolean;
 	refreshSeconds: number;
 	showIcon: boolean;
 	overwriteName: string;
@@ -175,13 +174,6 @@ class toggleSwitchWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		if (!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement)
-				.getPropertyValue('--homey-background-color')
-				.trim();
-			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-		}
-
 		this.switchEl = document.getElementById('switch')! as HTMLInputElement;
 		const label = document.querySelector('label[for="switch"]') as HTMLLabelElement;
 		label.style.setProperty('--icon-true-value', `'\\${this.settings.faTrueValue}'`);
