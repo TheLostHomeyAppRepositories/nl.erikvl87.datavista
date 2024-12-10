@@ -31,5 +31,8 @@
   },
   "0.6.0": {
     "en": "Reduced height and removed transparency from the toggle switch and progress bar widgets"
+  },
+  "0.6.1": {
+    "en": "Fixed an issue with the value precision during animation in the Progress bar widget"
   }
 }
