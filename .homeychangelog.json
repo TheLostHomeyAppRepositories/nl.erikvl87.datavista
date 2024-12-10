@@ -28,5 +28,8 @@
   },
   "0.5.0": {
     "en": "Added support for ranges in the progress bar widget"
+  },
+  "0.6.0": {
+    "en": "Reduced height and removed transparency from the toggle switch and progress bar widgets"
   }
 }
