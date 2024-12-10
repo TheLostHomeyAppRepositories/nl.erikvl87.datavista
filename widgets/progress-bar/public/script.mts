@@ -177,7 +177,7 @@ class ProgressBarWidgetScript {
 			capability.iconObj?.id ? `https://icons-cdn.athom.com/${capability.iconObj.id}.svg?ver=1` : payload.fallbackIcon,
 		);
 
-		this.updateProgressBarDisplay(capability.units !== 'percentage');
+		this.updateProgressBarDisplay(capability.units !== '%');
 
 		await this.updateProgress(
 			capability.min ?? 0,
