@@ -92,11 +92,9 @@ class ProgressBarWidgetScript {
 			const currentValue = previousValue + (value - previousValue) * progress;
 
 			const displayValue =
-				value % 1 == 0
+				ProgressBarWidgetScript.getPrecision(currentValue) <= maximumPrecision
 					? currentValue.toString()
-					: ProgressBarWidgetScript.getPrecision(currentValue) <= maximumPrecision
-						? currentValue.toString()
-						: currentValue.toFixed(actualPrecision);
+					: currentValue.toFixed(actualPrecision);
 
 			if (overwriteLabel === undefined || overwriteLabel === null || overwriteLabel === '') {
 				progressLabel.textContent =
