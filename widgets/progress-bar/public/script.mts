@@ -43,11 +43,22 @@ class ProgressBarWidgetScript {
 		await this.homey.api('POST', '/log', { message, optionalParams });
 	}
 
+	private static getPrecision(a: number): number {
+		if (!isFinite(a)) return 0; // Handle non-finite numbers (e.g., Infinity, NaN)
+		let e = 1,
+			p = 0; // Initialize multiplier `e` and precision counter `p`
+		while (Math.round(a * e) / e !== a) {
+			e *= 10; // Multiply `e` by 10 to shift the decimal point
+			p++; // Increment precision counter
+		}
+		return p; // Return the calculated precision
+	}
+
 	private async updateProgress(
 		min: number,
 		max: number,
 		value: number,
-		decimals: number,
+		maximumPrecision: number,
 		unit?: string,
 		unitLocation: 'prefix' | 'suffix' = 'suffix',
 		overwriteLabel?: string,
@@ -69,6 +80,9 @@ class ProgressBarWidgetScript {
 		const percentage = ((value - min) / (max - min)) * 100;
 		this.percentage = percentage;
 
+		const precision = ProgressBarWidgetScript.getPrecision(value);
+		const actualPrecision = precision <= maximumPrecision ? precision : maximumPrecision;
+
 		const animate = async (currentTime: number): Promise<void> => {
 			const elapsedTime = currentTime - startTime;
 			const progress = Math.min(elapsedTime / duration, 1);
@@ -76,7 +90,13 @@ class ProgressBarWidgetScript {
 			progressPercentage.textContent = `${currentPercentage}%`;
 
 			const currentValue = previousValue + (value - previousValue) * progress;
-			const displayValue = value % 1 == 0 ? currentValue.toFixed(0) : currentValue.toFixed(decimals);
+
+			const displayValue =
+				value % 1 == 0
+					? currentValue.toString()
+					: ProgressBarWidgetScript.getPrecision(currentValue) <= maximumPrecision
+						? currentValue.toString()
+						: currentValue.toFixed(actualPrecision);
 
 			if (overwriteLabel === undefined || overwriteLabel === null || overwriteLabel === '') {
 				progressLabel.textContent =
@@ -158,7 +178,7 @@ class ProgressBarWidgetScript {
 		);
 
 		this.updateProgressBarDisplay(capability.units !== 'percentage');
-		
+
 		await this.updateProgress(
 			capability.min ?? 0,
 			capability.max ?? 100,
@@ -193,7 +213,7 @@ class ProgressBarWidgetScript {
 					2,
 					rangeSettings.unit,
 					rangeSettings.unitPosition,
-					rangeSettings.label
+					rangeSettings.label,
 				);
 				break;
 			}
