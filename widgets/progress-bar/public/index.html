@@ -43,22 +43,23 @@
 				width: 35px;
 			}
 
-			.bar-container {
-				border-radius: 15px;
-				overflow: hidden;
-				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-			}
-
 			#progressBackground {
 				height: 5px;
 				width: 100%;
 				position: relative;
+				border-radius: 15px;
+				overflow: hidden;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				background-color: var(--homey-color-mono-200);
 			}
 
 			#progressBar {
 				height: 5px;
 				width: 0%;
 				transition: width 0.5s ease-in-out;
+				position: absolute;
+				right: 0;
+				background-color: var(--homey-color-mono-200);
 			}
 
 			.displayRange {
@@ -101,11 +102,9 @@
 				<div id="progressPercentage" class="homey-text-small">0%</div>
 			</div>
 			<div class="progress-container">
-				<div class="bar-container" style="background-color: var(--homey-color-mono-200)">
-					<div id="progressBackground" style="background-color: var(--homey-color-mono-200)">
-						<div id="progressBar"></div>
-						<div id="progressLabel" class="homey-text-small" style="display: none;">Test</div>
-					</div>
+				<div id="progressBackground">
+					<div id="progressBar"></div>
+					<div id="progressLabel" class="homey-text-small" style="display: none;"></div>
 				</div>
 			</div>
 		</div>

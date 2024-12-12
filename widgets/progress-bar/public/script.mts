@@ -68,6 +68,7 @@ class ProgressBarWidgetScript {
 		await this.stopConfigurationAnimation();
 
 		const progressBar = document.getElementById('progressBar')!;
+		const progressBackground = document.getElementById('progressBackground')!;
 		const progressPercentage = document.getElementById('progressPercentage')!;
 		const progressLabel = document.getElementById('progressLabel')!;
 
@@ -109,9 +110,11 @@ class ProgressBarWidgetScript {
 
 			const progressBarRect = progressBar.getBoundingClientRect();
 			const progressLabelRect = progressLabel.getBoundingClientRect();
-			const isLabelOverBar = progressLabelRect.left + progressLabelRect.width / 2 < progressBarRect.right;
+			const isLabelOverBar = progressLabelRect.right - progressLabelRect.width / 2 < progressBarRect.left;
 
 			if (isLabelOverBar) {
+				// Get the intermidiate color at 50% because that's where the label will be.
+				const intermediateColor = ProgressBarWidgetScript.interpolateColor(startColor, endColor, 0.5);
 				progressLabel.style.color = ProgressBarWidgetScript.getContrastYIQ(intermediateColor);
 			} else {
 				progressLabel.style.color = getComputedStyle(document.documentElement)
@@ -126,9 +129,9 @@ class ProgressBarWidgetScript {
 
 		requestAnimationFrame(animate);
 
-		progressBar.style.width = `${percentage}%`;
-		const intermediateColor = ProgressBarWidgetScript.interpolateColor(startColor, endColor, percentage / 100);
-		progressBar.style.backgroundColor = intermediateColor;
+		progressBar.style.width = `${100 - percentage}%`;
+		progressBar.style.right = '0';
+		progressBackground.style.background = `linear-gradient(to right, ${this.settings.color1}, ${this.settings.color2})`;
 	}
 
 	private async syncData(): Promise<void> {
