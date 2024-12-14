@@ -6,7 +6,7 @@ For advanced users, the widget can accept a percentage value set by a **DataVist
 
 The configuration allows you to customize two colors: one for **0%** and one for **100%**, with the bar dynamically changing its color based on the percentage value, giving you a clear and intuitive visual of your data.
 
-<figure><img src="../.gitbook/assets/progress-bar-light.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/progress-bar-light.gif" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -22,7 +22,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding it, you can customize the widget to display the progress of specific devices or metrics based on your needs.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1).png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1).png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
 
 ## Configuring the widget
 
@@ -33,10 +33,16 @@ The widget has the following configurable settings:
 {% hint style="warning" %}
 To use a **DataVista percentage value** or **DataVista range value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
 
-<img src="../.gitbook/assets/actioncard-set-percentage (2).jpg" alt="" data-size="original">\
+<img src="../../.gitbook/assets/actioncard-set-percentage (2).jpg" alt="" data-size="original">\
 \
-![](<../.gitbook/assets/action-set-range (3).png>)
+![](<../../.gitbook/assets/action-set-range (3).png>)
 {% endhint %}
+
+## Tutorials
+
+{% content-ref url="tutorial-displaying-temperature-on-a-progress-bar.md" %}
+[tutorial-displaying-temperature-on-a-progress-bar.md](tutorial-displaying-temperature-on-a-progress-bar.md)
+{% endcontent-ref %}
 
 ## FAQ
 
