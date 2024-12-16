@@ -16,6 +16,7 @@ type Settings = {
 	refreshSeconds: number;
 	color1: string;
 	color2: string;
+	color3: string;
 	showIcon: boolean;
 	showName: boolean;
 	overwriteName: string;
@@ -68,12 +69,8 @@ class ProgressBarWidgetScript {
 		await this.stopConfigurationAnimation();
 
 		const progressBar = document.getElementById('progressBar')!;
-		const progressBackground = document.getElementById('progressBackground')!;
 		const progressPercentage = document.getElementById('progressPercentage')!;
 		const progressLabel = document.getElementById('progressLabel')!;
-
-		const startColor = ProgressBarWidgetScript.hexToRgb(this.settings.color1);
-		const endColor = ProgressBarWidgetScript.hexToRgb(this.settings.color2);
 
 		const duration = 500;
 		const startTime = performance.now();
@@ -113,8 +110,8 @@ class ProgressBarWidgetScript {
 			const isLabelOverBar = progressLabelRect.right - progressLabelRect.width / 2 < progressBarRect.left;
 
 			if (isLabelOverBar) {
-				// Get the intermidiate color at 50% because that's where the label will be.
-				const intermediateColor = ProgressBarWidgetScript.interpolateColor(startColor, endColor, 0.5);
+				const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(color => color && color.trim() !== '').map(color => ProgressBarWidgetScript.hexToRgb(color));
+				const intermediateColor = ProgressBarWidgetScript.interpolateColor(colors, 0.5);
 				progressLabel.style.color = ProgressBarWidgetScript.getContrastYIQ(intermediateColor);
 			} else {
 				progressLabel.style.color = getComputedStyle(document.documentElement)
@@ -131,7 +128,6 @@ class ProgressBarWidgetScript {
 
 		progressBar.style.width = `${100 - percentage}%`;
 		progressBar.style.right = '0';
-		progressBackground.style.background = `linear-gradient(to right, ${this.settings.color1}, ${this.settings.color2})`;
 	}
 
 	private async syncData(): Promise<void> {
@@ -320,13 +316,22 @@ class ProgressBarWidgetScript {
 		return [r, g, b];
 	}
 
-	private static interpolateColor(color1: number[], color2: number[], factor: number): string {
-		const [r1, g1, b1] = color1;
-		const [r2, g2, b2] = color2;
+	private static interpolateColor(colors: number[][], factor: number): string {
+		if (colors.length === 1) {
+			const [r, g, b] = colors[0];
+			return `rgb(${r},${g},${b})`;
+		}
+		const interpolate = (start: number, end: number, factor: number): number => Math.round(start + factor * (end - start));
+		const steps = colors.length - 1;
+		const step = Math.floor(factor * steps);
+		const localFactor = (factor * steps) - step;
 
-		const r = Math.round(r1 + factor * (r2 - r1));
-		const g = Math.round(g1 + factor * (g2 - g1));
-		const b = Math.round(b1 + factor * (b2 - b1));
+		const [r1, g1, b1] = colors[step];
+		const [r2, g2, b2] = colors[step + 1];
+
+		const r = interpolate(r1, r2, localFactor);
+		const g = interpolate(g1, g2, localFactor);
+		const b = interpolate(b1, b2, localFactor);
 
 		return `rgb(${r},${g},${b})`;
 	}
@@ -340,6 +345,11 @@ class ProgressBarWidgetScript {
 
 	public async onHomeyReady(): Promise<void> {
 		this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
+		const progressBackground = document.getElementById('progressBackground')!;
+		const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(color => color && color.trim() !== '');
+		progressBackground.style.background = colors.length === 1 
+			? colors[0] 
+			: progressBackground.style.background = `linear-gradient(to right, ${colors.join(', ')})`;
 
 		if (this.settings.datasource) await this.syncData();
 
