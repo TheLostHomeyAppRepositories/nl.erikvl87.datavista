@@ -55,11 +55,13 @@ export default class AdvancedGaugeWidget extends BaseWidget {
 				};
 			});
 
-			const filteredResults = results
-				.filter(result => {
-					return result.name.toLowerCase().includes(query.toLowerCase());
-				})
-				.sort((a, b) => a.name.localeCompare(b.name));
+			const filteredResults = query
+				? results
+					.filter(result => {
+						return result.name.toLowerCase().includes(query.toLowerCase());
+					})
+					.sort((a, b) => a.name.localeCompare(b.name))
+				: results;
 			return filteredResults;
 		});
 	}

@@ -26,7 +26,7 @@ export class BaseWidget {
 	}
 
 	async autocompleteQuery(options: {
-		query: string;
+		query?: string | null;
 		includeBooleans?: boolean;
 		includePercentages?: boolean;
 		includeRanges?: boolean;
@@ -178,29 +178,31 @@ export class BaseWidget {
 			}
 		}
 
-		const filteredResults = results
-			.filter(result => {
-				const queryParts = options.query.toLowerCase().split(' ');
+		const filteredResults = options.query
+			? results.filter(result => {
+				const queryParts = options.query!.toLowerCase().split(' ');
 				return queryParts.every(
 					part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
 				);
 			})
-			.sort((a, b) => {
-				if (a.deviceName === DATAVISTA_APP_NAME && b.deviceName !== DATAVISTA_APP_NAME) {
-					return -1;
-				}
-				if (a.deviceName !== DATAVISTA_APP_NAME && b.deviceName === DATAVISTA_APP_NAME) {
-					return 1;
-				}
-				if (a.deviceName === HOMEY_LOGIC && b.deviceName !== HOMEY_LOGIC) {
-					return -1;
-				}
-				if (a.deviceName !== HOMEY_LOGIC && b.deviceName === HOMEY_LOGIC) {
-					return 1;
-				}
+			: results;
 
-				return a.name.localeCompare(b.name);
-			});
+		filteredResults.sort((a, b) => {
+			if (a.deviceName === DATAVISTA_APP_NAME && b.deviceName !== DATAVISTA_APP_NAME) {
+				return -1;
+			}
+			if (a.deviceName !== DATAVISTA_APP_NAME && b.deviceName === DATAVISTA_APP_NAME) {
+				return 1;
+			}
+			if (a.deviceName === HOMEY_LOGIC && b.deviceName !== HOMEY_LOGIC) {
+				return -1;
+			}
+			if (a.deviceName !== HOMEY_LOGIC && b.deviceName === HOMEY_LOGIC) {
+				return 1;
+			}
+
+			return a.name.localeCompare(b.name);
+		});
 
 		return filteredResults.map(({ name, description, id, deviceId, type }) => ({
 			name,
