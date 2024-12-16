@@ -43,5 +43,8 @@
   },
   "0.7.1": {
     "en": "Add logging for datasource selection"
+  },
+  "0.7.2": {
+    "en": "Add logging for datasource selection"
   }
 }
