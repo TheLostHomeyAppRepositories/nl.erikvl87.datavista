@@ -45,123 +45,133 @@ export class BaseWidget {
 		}[] = [];
 
 		if (options.fromSettings) {
-			const settingsKeys = this.homey.settings.getKeys();
-			settingsKeys.forEach(key => {
-				try {
-					switch (key.split('-')[0]) {
-						case DATA_TYPE_IDS.BOOLEAN: {
-							if (!options.includeBooleans) break;
-							const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
-							results.push({
-								name: data.identifier,
-								description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${
-									data.settings.value ? 'true' : 'false'
-								})`,
-								id: key,
-								type: 'advanced',
-								deviceName: DATAVISTA_APP_NAME,
-							});
-							break;
+			try {
+				const settingsKeys = this.homey.settings.getKeys();
+				settingsKeys.forEach(key => {
+					try {
+						switch (key.split('-')[0]) {
+							case DATA_TYPE_IDS.BOOLEAN: {
+								if (!options.includeBooleans) break;
+								const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
+								results.push({
+									name: data.identifier,
+									description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${
+										data.settings.value ? 'true' : 'false'
+									})`,
+									id: key,
+									type: 'advanced',
+									deviceName: DATAVISTA_APP_NAME,
+								});
+								break;
+							}
+							case DATA_TYPE_IDS.PERCENTAGE: {
+								if (!options.includePercentages) break;
+								const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
+								results.push({
+									name: percentageData.identifier,
+									description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${
+										percentageData.settings.percentage ?? '0'
+									}%)`,
+									id: key,
+									type: 'advanced',
+									deviceName: DATAVISTA_APP_NAME,
+								});
+								break;
+							}
+							case DATA_TYPE_IDS.RANGE: {
+								if (!options.includeRanges) break;
+								const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
+								results.push({
+									name: rangeData.identifier,
+									description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${
+										rangeData.settings.max
+									})`,
+									id: key,
+									type: 'advanced',
+									deviceName: DATAVISTA_APP_NAME,
+								});
+								break;
+							}
 						}
-						case DATA_TYPE_IDS.PERCENTAGE: {
-							if (!options.includePercentages) break;
-							const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
-							results.push({
-								name: percentageData.identifier,
-								description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${
-									percentageData.settings.percentage ?? '0'
-								}%)`,
-								id: key,
-								type: 'advanced',
-								deviceName: DATAVISTA_APP_NAME,
-							});
-							break;
-						}
-						case DATA_TYPE_IDS.RANGE: {
-							if (!options.includeRanges) break;
-							const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
-							results.push({
-								name: rangeData.identifier,
-								description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${
-									rangeData.settings.max
-								})`,
-								id: key,
-								type: 'advanced',
-								deviceName: DATAVISTA_APP_NAME,
-							});
-							break;
-						}
+					} catch (e) {
+						this.log('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)), key);
+						this.error('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)), key);
 					}
-				} catch (e) {
-					this.log('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-					this.error('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-				}
-			});
+				});
+			} catch (e) {
+				this.log('error at getting setting keys', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+				this.error('error at getting setting keys', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+			}
 		}
 
 		if (options.fromCapabilities) {
-			const devices = await this.homeyApi.devices.getDevices();
-			for (const [_key, device] of Object.entries(devices)) {
-				for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
-					try {
-						if (options.includeBooleans && capability.type === 'boolean') {
-							results.push({
-								name: capability.title,
-								description: `${device.name} (${capability.value ? 'true' : 'false'})`,
-								deviceName: device.name,
-								id: capability.id,
-								deviceId: device.id,
-								type: 'capability',
-							});
-						} else if (
-							options.includePercentages &&
-							capability.type === 'number' &&
-							capability.units !== undefined &&
-							capability.units === '%'
-						) {
-							results.push({
-								name: capability.title,
-								description: `${device.name} (${capability.value ?? '0'}%)`,
-								deviceName: device.name,
-								id: capability.id,
-								deviceId: device.id,
-								type: 'capability',
-							});
-						} else if (
-							options.includeRanges &&
-							capability.type === 'number' &&
-							capability.min !== undefined &&
-							capability.max !== undefined
-						) {
-							results.push({
-								name: capability.title,
-								description: `${device.name} (${capability.value ?? '0'}${
-									capability.units ? ` ${capability.units}` : ''
-								})`,
-								deviceName: device.name,
-								id: capability.id,
-								deviceId: device.id,
-								type: 'capability',
-							});
-						} else if (options.includeNumbers && capability.type === 'number') {
-							let description = device.name;
-							if (capability.units != null || capability.value != null) {
-								description += ` (${capability.value ?? '0'}${capability.units ? ` ${capability.units}` : ''})`;
+			try {
+				const devices = await this.homeyApi.devices.getDevices();
+				for (const [_key, device] of Object.entries(devices)) {
+					for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
+						try {
+							if (options.includeBooleans && capability.type === 'boolean') {
+								results.push({
+									name: capability.title,
+									description: `${device.name} (${capability.value ? 'true' : 'false'})`,
+									deviceName: device.name,
+									id: capability.id,
+									deviceId: device.id,
+									type: 'capability',
+								});
+							} else if (
+								options.includePercentages &&
+								capability.type === 'number' &&
+								capability.units !== undefined &&
+								capability.units === '%'
+							) {
+								results.push({
+									name: capability.title,
+									description: `${device.name} (${capability.value ?? '0'}%)`,
+									deviceName: device.name,
+									id: capability.id,
+									deviceId: device.id,
+									type: 'capability',
+								});
+							} else if (
+								options.includeRanges &&
+								capability.type === 'number' &&
+								capability.min !== undefined &&
+								capability.max !== undefined
+							) {
+								results.push({
+									name: capability.title,
+									description: `${device.name} (${capability.value ?? '0'}${
+										capability.units ? ` ${capability.units}` : ''
+									})`,
+									deviceName: device.name,
+									id: capability.id,
+									deviceId: device.id,
+									type: 'capability',
+								});
+							} else if (options.includeNumbers && capability.type === 'number') {
+								let description = device.name;
+								if (capability.units != null || capability.value != null) {
+									description += ` (${capability.value ?? '0'}${capability.units ? ` ${capability.units}` : ''})`;
+								}
+								results.push({
+									name: capability.title,
+									description: description,
+									deviceName: device.name,
+									id: capability.id,
+									deviceId: device.id,
+									type: 'capability',
+								});
 							}
-							results.push({
-								name: capability.title,
-								description: description,
-								deviceName: device.name,
-								id: capability.id,
-								deviceId: device.id,
-								type: 'capability',
-							});
+						} catch (e) {
+							this.log('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)), capability);
+							this.error('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)), capability);
 						}
-					} catch (e) {
-						this.log('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-						this.error('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)));
 					}
 				}
+			} catch (e) {
+				this.log('error at getting devices', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+				this.error('error at getting devices', JSON.stringify(e, Object.getOwnPropertyNames(e)));
 			}
 		}
 
@@ -187,8 +197,8 @@ export class BaseWidget {
 						});
 					}
 				} catch (e) {
-					this.log('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-					this.error('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+					this.log('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)), variable);
+					this.error('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)), variable);
 				}
 			}
 		}
@@ -201,8 +211,8 @@ export class BaseWidget {
 						part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
 					);
 				} catch (e) {
-					this.log('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-					this.error('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+					this.log('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)), result, queryParts);
+					this.error('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)), result, queryParts);
 					return false;
 				}
 			})
@@ -225,8 +235,8 @@ export class BaseWidget {
 
 				return a.name.localeCompare(b.name);
 			} catch (e) {
-				this.log('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-				this.error('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+				this.log('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)), a, b);
+				this.error('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)), a, b);
 				return 0;
 			}
 		});
