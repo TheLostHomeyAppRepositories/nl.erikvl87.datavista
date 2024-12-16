@@ -146,6 +146,14 @@ export default class DataVista extends Homey.App {
 				}
 			}
 
+			const styles = svgDoc.getElementsByTagName('style');
+			for (let i = 0; i < styles.length; i++) {
+				const style = styles[i];
+				if (style.textContent) {
+					style.textContent = style.textContent.replace(/fill:[^;]+;/g, `fill:${color};`);
+				}
+			}
+
 			iconSvgSource = new XMLSerializer().serializeToString(svgDoc);
 
 			return iconSvgSource;
