@@ -18,8 +18,6 @@ class AppApi {
 
 	public updateGauge({ homey, params, body }: ApiRequest): boolean {
 		const key = params.id;
-
-		homey.app.log('incoming update gauge', key, body);
 		let data: AdvancedGaugeWidgetData;
 		try {
 			data = {
@@ -35,7 +33,6 @@ class AppApi {
 				colorOffset5: this.convertToNumber(body.colorOffset5),
 			};
 		} catch (error) {
-			homey.app.log("Can't update gauge because one or more values are invalid.", error);
 			return false;
 		}
 
@@ -43,7 +40,6 @@ class AppApi {
 		for (const colorKey of colorKeys) {
 			const colorValue = data[colorKey] as string;
 			if (colorValue && !/^#[0-9A-F]{6}$/i.test(colorValue)) {
-				homey.app.log(`Can't update gauge because color '${colorKey}' is not a valid hex color.`);
 				return false;
 			}
 		}
@@ -55,7 +51,6 @@ class AppApi {
 	public addGauge({ homey, params, body }: ApiRequest): boolean {
 		const identifier = body.identifier;
 		if (homey.settings.get(identifier)) {
-			homey.app.log(`Can't add gauge because gauge with id '${identifier}' already exists.`);
 			return false;
 		}
 

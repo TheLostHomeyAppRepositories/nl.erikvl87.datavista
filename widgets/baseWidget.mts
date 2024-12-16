@@ -6,35 +6,31 @@ import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs
 import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
 import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
+import DataVistaLogger from '../dataVistaLogger.mjs';
+
+type autocompleteQueryOptions = {
+	query?: string | null;
+	includeBooleans?: boolean;
+	includePercentages?: boolean;
+	includeRanges?: boolean;
+	includeNumbers?: boolean;
+	fromCapabilities?: boolean;
+	fromSettings?: boolean;
+	fromVariables?: boolean;
+};
 
 export class BaseWidget {
 	protected homey: Homey;
 	protected homeyApi: ExtendedHomeyAPIV3Local;
-	protected log: (...args: unknown[]) => void;
-	protected error: (...args: unknown[]) => void;
+	protected logger: DataVistaLogger;
 
-	constructor(
-		homey: Homey,
-		homeyApi: ExtendedHomeyAPIV3Local,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
-	) {
+	constructor(homey: Homey, homeyApi: ExtendedHomeyAPIV3Local, logger: DataVistaLogger) {
 		this.homey = homey;
 		this.homeyApi = homeyApi;
-		this.log = log;
-		this.error = error;
+		this.logger = logger;
 	}
 
-	async autocompleteQuery(options: {
-		query?: string | null;
-		includeBooleans?: boolean;
-		includePercentages?: boolean;
-		includeRanges?: boolean;
-		includeNumbers?: boolean;
-		fromCapabilities?: boolean;
-		fromSettings?: boolean;
-		fromVariables?: boolean;
-	}): Promise<Widget.SettingAutocompleteResults> {
+	async autocompleteQuery(options: autocompleteQueryOptions): Promise<Widget.SettingAutocompleteResults> {
 		const results: {
 			name: string;
 			description: string;
@@ -44,68 +40,58 @@ export class BaseWidget {
 			deviceName: string;
 		}[] = [];
 
-		if (options.fromSettings) {
-			try {
+		try {
+			if (options.fromSettings) {
 				const settingsKeys = this.homey.settings.getKeys();
 				settingsKeys.forEach(key => {
-					try {
-						switch (key.split('-')[0]) {
-							case DATA_TYPE_IDS.BOOLEAN: {
-								if (!options.includeBooleans) break;
-								const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
-								results.push({
-									name: data.identifier,
-									description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${
-										data.settings.value ? 'true' : 'false'
-									})`,
-									id: key,
-									type: 'advanced',
-									deviceName: DATAVISTA_APP_NAME,
-								});
-								break;
-							}
-							case DATA_TYPE_IDS.PERCENTAGE: {
-								if (!options.includePercentages) break;
-								const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
-								results.push({
-									name: percentageData.identifier,
-									description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${
-										percentageData.settings.percentage ?? '0'
-									}%)`,
-									id: key,
-									type: 'advanced',
-									deviceName: DATAVISTA_APP_NAME,
-								});
-								break;
-							}
-							case DATA_TYPE_IDS.RANGE: {
-								if (!options.includeRanges) break;
-								const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
-								results.push({
-									name: rangeData.identifier,
-									description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${
-										rangeData.settings.max
-									})`,
-									id: key,
-									type: 'advanced',
-									deviceName: DATAVISTA_APP_NAME,
-								});
-								break;
-							}
+					switch (key.split('-')[0]) {
+						case DATA_TYPE_IDS.BOOLEAN: {
+							if (!options.includeBooleans) break;
+							const data: BaseSettings<BooleanData> = this.homey.settings.get(key);
+							results.push({
+								name: data.identifier,
+								description: `${DATAVISTA_APP_NAME} ${this.homey.__('boolean')} (${
+									data.settings.value ? 'true' : 'false'
+								})`,
+								id: key,
+								type: 'advanced',
+								deviceName: DATAVISTA_APP_NAME,
+							});
+							break;
 						}
-					} catch (e) {
-						this.log('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)), key);
-						this.error('error at getting settings', JSON.stringify(e, Object.getOwnPropertyNames(e)), key);
+						case DATA_TYPE_IDS.PERCENTAGE: {
+							if (!options.includePercentages) break;
+							const percentageData: BaseSettings<PercentageData> = this.homey.settings.get(key);
+							results.push({
+								name: percentageData.identifier,
+								description: `${DATAVISTA_APP_NAME} ${this.homey.__('percentage')} (${
+									percentageData.settings.percentage ?? '0'
+								}%)`,
+								id: key,
+								type: 'advanced',
+								deviceName: DATAVISTA_APP_NAME,
+							});
+							break;
+						}
+						case DATA_TYPE_IDS.RANGE: {
+							if (!options.includeRanges) break;
+							const rangeData: BaseSettings<RangeData> = this.homey.settings.get(key);
+							results.push({
+								name: rangeData.identifier,
+								description: `${DATAVISTA_APP_NAME} ${this.homey.__('range')} (${rangeData.settings.min}-${
+									rangeData.settings.max
+								})`,
+								id: key,
+								type: 'advanced',
+								deviceName: DATAVISTA_APP_NAME,
+							});
+							break;
+						}
 					}
 				});
-			} catch (e) {
-				this.log('error at getting setting keys', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-				this.error('error at getting setting keys', JSON.stringify(e, Object.getOwnPropertyNames(e)));
 			}
-		}
 
-		if (options.fromCapabilities) {
-			try {
+			if (options.fromCapabilities) {
 				const devices = await this.homeyApi.devices.getDevices();
 				for (const [_key, device] of Object.entries(devices)) {
 					for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
@@ -164,21 +150,15 @@ export class BaseWidget {
 								});
 							}
 						} catch (e) {
-							this.log('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)), capability);
-							this.error('error at getting capabilities', JSON.stringify(e, Object.getOwnPropertyNames(e)), capability);
+							void this.logger.logException(e);
 						}
 					}
 				}
-			} catch (e) {
-				this.log('error at getting devices', JSON.stringify(e, Object.getOwnPropertyNames(e)));
-				this.error('error at getting devices', JSON.stringify(e, Object.getOwnPropertyNames(e)));
 			}
-		}
 
-		if (options.fromVariables) {
-			const variables = await this.homeyApi.logic.getVariables();
-			for (const [_key, variable] of Object.entries(variables)) {
-				try {
+			if (options.fromVariables) {
+				const variables = await this.homeyApi.logic.getVariables();
+				for (const [_key, variable] of Object.entries(variables)) {
 					if (options.includeBooleans && variable.type === 'boolean') {
 						results.push({
 							name: variable.name,
@@ -196,30 +176,19 @@ export class BaseWidget {
 							deviceName: HOMEY_LOGIC,
 						});
 					}
-				} catch (e) {
-					this.log('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)), variable);
-					this.error('error at getting variables', JSON.stringify(e, Object.getOwnPropertyNames(e)), variable);
 				}
 			}
-		}
 
-		const filteredResults = options.query
-			? results.filter(result => {
-				const queryParts = options.query!.toLowerCase().split(' ');
-				try {
-					return queryParts.every(
-						part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
-					);
-				} catch (e) {
-					this.log('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)), result, queryParts);
-					this.error('error at filtering', JSON.stringify(e, Object.getOwnPropertyNames(e)), result, queryParts);
-					return false;
-				}
-			})
-			: results;
+			const filteredResults = options.query
+				? results.filter(result => {
+						const queryParts = options.query!.toLowerCase().split(' ');
+						return queryParts.every(
+							part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
+						);
+				  })
+				: results;
 
-		filteredResults.sort((a, b) => {
-			try {
+			filteredResults.sort((a, b) => {
 				if (a.deviceName === DATAVISTA_APP_NAME && b.deviceName !== DATAVISTA_APP_NAME) {
 					return -1;
 				}
@@ -234,19 +203,18 @@ export class BaseWidget {
 				}
 
 				return a.name.localeCompare(b.name);
-			} catch (e) {
-				this.log('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)), a, b);
-				this.error('error at sorting', JSON.stringify(e, Object.getOwnPropertyNames(e)), a, b);
-				return 0;
-			}
-		});
+			});
 
-		return filteredResults.map(({ name, description, id, deviceId, type }) => ({
-			name,
-			description,
-			id,
-			deviceId,
-			type,
-		}));
+			return filteredResults.map(({ name, description, id, deviceId, type }) => ({
+				name,
+				description,
+				id,
+				deviceId,
+				type,
+			}));
+		} catch (e) {
+			void this.logger.logException(e);
+			throw e;
+		}
 	}
 }

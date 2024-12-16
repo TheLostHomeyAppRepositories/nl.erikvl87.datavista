@@ -1,6 +1,5 @@
 import Homey from 'homey';
 import { HomeyAPI, ExtendedHomeyAPIV3Local } from 'homey-api';
-import { Log } from 'homey-log';
 import ActionSetDataPercentage from './actions/actionSetDataPercentage.mjs';
 import ActionSetRange from './actions/actionSetDataRange.mjs';
 import AdvancedGaugeWidget from './widgets/advanced-gauge/advancedGaugeWidget.mjs';
@@ -14,28 +13,29 @@ import progressBarWidget from './widgets/progress-bar/progressBarWidget.mjs';
 import toggleSwitchWidget from './widgets/toggle-switch/toggleSwitchWidget.mjs';
 import actionSetDataBoolean from './actions/actionSetDataBoolean.mjs';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+import DataVistaLogger from './dataVistaLogger.mjs';
 
 export default class DataVista extends Homey.App {
 	homeyApi!: ExtendedHomeyAPIV3Local;
-	homeyLog?: Log;
+	logger!: DataVistaLogger;
 
 	public override async onInit(): Promise<void> {
-		this.homeyLog = new Log({ homey: this.homey });
-		this.log(`${this.constructor.name} has been initialized`);
+		this.logger = await DataVistaLogger.initialize(this.homey, this.log, this.error);
+		await this.logger.logMessage(`${this.constructor.name} has been initialized`);
 
 		this.homeyApi = await HomeyAPI.createAppAPI({
 			homey: this.homey,
 		});
 
-		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
-		await AdvancedGaugeWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
-		await progressBarWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
-		await toggleSwitchWidget.initialize(this.homey, this.homeyApi, this.log, this.error);
+		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await AdvancedGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await progressBarWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await toggleSwitchWidget.initialize(this.homey, this.homeyApi, this.logger);
 
-		await ActionSetDataPercentage.initialize(this.homey, this.log, this.error);
-		await ActionSetRange.initialize(this.homey, this.log, this.error);
-		await ActionSetGaugeConfiguration.initialize(this.homey, this.log, this.error);
-		await actionSetDataBoolean.initialize(this.homey, this.log, this.error);
+		await ActionSetDataPercentage.initialize(this.homey, this.logger);
+		await ActionSetRange.initialize(this.homey, this.logger);
+		await ActionSetGaugeConfiguration.initialize(this.homey, this.logger);
+		await actionSetDataBoolean.initialize(this.homey, this.logger);
 	}
 
 	/**
@@ -56,11 +56,11 @@ export default class DataVista extends Homey.App {
 	public removeData(key: string): boolean {
 		const data = this.homey.settings.get(key);
 		if (data == null) {
-			this.homey.log(`Can't remove data with key '${key}' because it doesn't exist.`);
+			void this.logger.logMessage(`Can't remove data with key '${key}' because it doesn't exist.`);
 			return false;
 		}
 
-		this.homey.app.log(`[${this.constructor.name}] Deleting data with key '${key}'.`, data);
+		void this.logger.logMessage(`[${this.constructor.name}] Deleting data with key '${key}'.`, data);
 		this.homey.app.homey.settings.unset(key);
 		this.homey.api.realtime(`settings/${key}`, null);
 		return true;
@@ -75,12 +75,12 @@ export default class DataVista extends Homey.App {
 	public updateGauge(key: string, data: AdvancedGaugeWidgetData): boolean {
 		const existingData = this.homey.settings.get(key);
 		if (existingData == null) {
-			this.homey.log(`Can't update data with key '${key}' because it doesn't exist.`);
+			void this.logger.logMessage(`Can't update data with key '${key}' because it doesn't exist.`);
 			return false;
 		}
 
 		const rangeSettings = new AdvancedGaugeWidgetSettings(existingData.identifier, data);
-		rangeSettings.setSettings(this.homey);
+		rangeSettings.setSettings(this.homey, this.logger);
 		return true;
 	}
 
@@ -92,7 +92,7 @@ export default class DataVista extends Homey.App {
 	 */
 	public addGauge(key: string, data: AdvancedGaugeWidgetData): void {
 		const rangeSettings = new AdvancedGaugeWidgetSettings(key, data);
-		rangeSettings.setSettings(this.homey);
+		rangeSettings.setSettings(this.homey, this.logger);
 	}
 
 	/**

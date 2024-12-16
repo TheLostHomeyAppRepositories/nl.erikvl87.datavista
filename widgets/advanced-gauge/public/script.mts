@@ -453,18 +453,15 @@ class AdvancedGaugeWidgetScript {
 	 * @param args The arguments to log.
 	 * @returns A promise that resolves when the message is logged.
 	 */
-	private async log(...args: any[]): Promise<void> {
-		const message = args[0];
-		const optionalParams = args.slice(1);
+	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
 		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, optionalParams });
+		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
 	}
 
 	/**
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		await this.log('Homey is ready', this.settings);
 		if(!this.settings.transparent) {
 			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
 			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
@@ -475,7 +472,7 @@ class AdvancedGaugeWidgetScript {
 		this.homey.ready({ height });
 
 		if (this.settings.datasource?.id == null) {
-			await this.log('No datasource selected');
+			await this.log('No datasource selected', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -487,8 +484,6 @@ class AdvancedGaugeWidgetScript {
 			datasource: this.settings.datasource,
 			configsource: this.settings.configsource?.id,
 		})) as AdvancedGaugeWidgetPayload;
-
-		await this.log('Received payload', payload);
 
 		if (payload.data != null) {
 			if (payload.data.type === 'advanced') {
@@ -517,7 +512,7 @@ class AdvancedGaugeWidgetScript {
 						break;
 					}
 					default: {
-						await this.log(`Type '${payload.data.data.type}' is not implemented.`);
+						await this.log(`Type '${payload.data.data.type}' is not implemented.`, true);
 						await this.startConfigurationAnimation();
 					}
 				}
@@ -537,7 +532,6 @@ class AdvancedGaugeWidgetScript {
 			this.homey.on(`settings/${datasourceId}`, async (data: BaseSettings<unknown> | null) => {
 				if (data === null) {
 					await this.startConfigurationAnimation();
-					await this.log('The data has been removed');
 					return;
 				} else if (this.spinnerTimeout !== null) {
 					await this.stopConfigurationAnimation();
@@ -568,7 +562,7 @@ class AdvancedGaugeWidgetScript {
 						break;
 					}
 					default: {
-						await this.log(`Type '${data.type}' is not implemented.`);
+						await this.log(`Type '${data.type}' is not implemented.`, true);
 						await this.startConfigurationAnimation();
 						return;
 					}

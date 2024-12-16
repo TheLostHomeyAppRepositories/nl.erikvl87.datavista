@@ -107,7 +107,7 @@ export class BaseWidgetApi {
 	): Promise<{ device: ExtendedDevice; capability: CapabilitiesObject } | null> {
 		const device = await app.homeyApi.devices.getDevice({ id: deviceId });
 		if (!device) {
-			app.log(`[${this.constructor.name}]: Device with id '${deviceId}' not found.`);
+			void app.logger.logMessage(`[${this.constructor.name}]: Device with id '${deviceId}' not found.`);
 			return null;
 		}
 
@@ -133,7 +133,7 @@ export class BaseWidgetApi {
 	private async getVariable(app: DataVista, id: string): Promise<ExtendedVariable | null> {
 		const variable = await app.homeyApi.logic.getVariable({ id: id });
 		if (!variable) {
-			app.log(`[${this.constructor.name}]: Variable with id '${id}' not found.`);
+			void app.logger.logMessage(`[${this.constructor.name}]: Variable with id '${id}' not found.`);
 			return null;
 		}
 
@@ -144,7 +144,7 @@ export class BaseWidgetApi {
 	 * Log a message.
 	 */
 	public async log({ homey, body }: ApiRequest): Promise<void> {
-		homey.app.log(`[${this.constructor.name}]: ${body.message}`, ...body.optionalParams);
+		void homey.app.logger.logMessage(`[${this.constructor.name}]: ${body.message}`, body.logToSentry, ...body.optionalParams);
 	}
 
 	/**

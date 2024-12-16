@@ -44,11 +44,9 @@ class toggleSwitchWidgetScript {
 	 * @param args The arguments to log.
 	 * @returns A promise that resolves when the message is logged.
 	 */
-	private async log(...args: any[]): Promise<void> {
-		const message = args[0];
-		const optionalParams = args.slice(1);
+	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
 		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, optionalParams });
+		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
 	}
 
 	private updateState(value: boolean): void {
@@ -98,7 +96,7 @@ class toggleSwitchWidgetScript {
 
 	private async getData(): Promise<void> {
 		if (this.settings.datasource == null) {
-			await this.log('No datasource is set');
+			await this.log('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -108,7 +106,7 @@ class toggleSwitchWidgetScript {
 		})) as WidgetDataPayload | null;
 
 		if (payload === null) {
-			await this.log('The payload is null');
+			await this.log('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -137,7 +135,7 @@ class toggleSwitchWidgetScript {
 			}
 			case 'advanced': {
 				if((payload.data as BaseSettings<unknown>).type !== 'boolean') {
-					await this.log('The data type is not boolean');
+					await this.log('The data type is not boolean', false);
 					await this.startConfigurationAnimation();
 					return;
 				}
@@ -146,7 +144,7 @@ class toggleSwitchWidgetScript {
 				break;
 			}
 			default:
-				await this.log('Unknown datasource type', this.settings.datasource.type);
+				await this.log('Unknown datasource type', true, this.settings.datasource.type);
 				await this.startConfigurationAnimation();
 				break;
 		}

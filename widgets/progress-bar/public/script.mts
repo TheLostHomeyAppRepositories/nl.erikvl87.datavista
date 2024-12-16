@@ -37,11 +37,14 @@ class ProgressBarWidgetScript {
 		this.settings = homey.getSettings() as Settings;
 	}
 
-	private async log(...args: any[]): Promise<void> {
-		const message = args[0];
-		const optionalParams = args.slice(1);
+	/*
+	 * Logs a message to the Homey API.
+	 * @param args The arguments to log.
+	 * @returns A promise that resolves when the message is logged.
+	 */
+	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
 		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, optionalParams });
+		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
 	}
 
 	private static getPrecision(a: number): number {
@@ -132,14 +135,14 @@ class ProgressBarWidgetScript {
 
 	private async syncData(): Promise<void> {
 		if (!this.settings.datasource) {
-			await this.log('No datasource is set');
+			await this.log('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
 
 		const payload = await this.fetchDataSourcePayload();
 		if (!payload) {
-			await this.log('The payload is null');
+			await this.log('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -155,7 +158,7 @@ class ProgressBarWidgetScript {
 				await this.handleAdvancedPayload(payload);
 				break;
 			default:
-				await this.log('Unknown datasource type', this.settings.datasource!.type);
+				await this.log('Unknown datasource type', true, this.settings.datasource!.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -216,7 +219,7 @@ class ProgressBarWidgetScript {
 			}
 			default:
 				document.getElementById('progressPercentage')!.style.display = 'block';
-				await this.log('Unknown advanced type', advanced.type);
+				await this.log('Unknown advanced type', true, advanced.type);
 				await this.startConfigurationAnimation();
 				break;
 		}

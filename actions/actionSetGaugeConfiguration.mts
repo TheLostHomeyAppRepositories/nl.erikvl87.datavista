@@ -2,6 +2,7 @@ import Homey from "homey/lib/Homey";
 import { FlowCardAction } from "homey";
 import { BaseDataAction } from "./baseActionData.mjs";
 import { AdvancedGaugeWidgetSettings } from "../datavistasettings/advancedGaugeWidgetSettings.mjs";
+import DataVistaLogger from "../dataVistaLogger.mjs";
 
 export default class ActionSetGaugeConfiguration extends BaseDataAction {
 
@@ -9,14 +10,14 @@ export default class ActionSetGaugeConfiguration extends BaseDataAction {
 
 	private actionCard: FlowCardAction;
 
-	private constructor(homey: Homey, log: (...args: unknown[]) => void, error: (...args: unknown[]) => void) {
-		super(homey, log, error);
+	private constructor(homey: Homey, logger: DataVistaLogger) {
+		super(homey, logger);
 		this.actionCard = this.homey.flow.getActionCard('set-gauge-configuration');
 	}
 
-	public static async initialize(homey: Homey, log: (...args: unknown[]) => void, error: (...args: unknown[]) => void): Promise<ActionSetGaugeConfiguration> {
+	public static async initialize(homey: Homey, logger: DataVistaLogger): Promise<ActionSetGaugeConfiguration> {
 		if (this.instance === null) {
-			this.instance = new this(homey, log, error);
+			this.instance = new this(homey, logger);
 			await this.instance.setup();
 		}
 		return this.instance;

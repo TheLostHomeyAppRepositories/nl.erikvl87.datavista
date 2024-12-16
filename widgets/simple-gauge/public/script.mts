@@ -269,7 +269,6 @@ class SimpleGaugeWidgetScript {
 	private async startConfigurationAnimation(): Promise<void> {
 		if (this.spinnerTimeout != null) return;
 
-		await this.log('Starting spinner');
 		const interval = 1000;
 		let value = 0;
 		const step = 25;
@@ -300,16 +299,14 @@ class SimpleGaugeWidgetScript {
 	 * @param args The arguments to log.
 	 * @returns A promise that resolves when the message is logged.
 	 */
-	private async log(...args: any[]): Promise<void> {
-		const message = args[0];
-		const optionalParams = args.slice(1);
+	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
 		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, optionalParams });
+		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
 	}
 
 	private async syncData(): Promise<void> {
 		if (this.settings.datasource == null) {
-			await this.log('No datasource is set');
+			await this.log('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -319,7 +316,7 @@ class SimpleGaugeWidgetScript {
 		})) as WidgetDataPayload | null;
 
 		if (payload === null) {
-			await this.log('The payload is null');
+			await this.log('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -352,7 +349,7 @@ class SimpleGaugeWidgetScript {
 			}
 			case 'advanced': {
 				if ((payload.data as BaseSettings<unknown>).type !== 'percentage') {
-					await this.log('The data type is not percentage');
+					await this.log('The data type is not percentage', false);
 					await this.startConfigurationAnimation();
 					return;
 				}
@@ -366,7 +363,7 @@ class SimpleGaugeWidgetScript {
 				break;
 			}
 			default:
-				await this.log('Unknown datasource type', this.settings.datasource.type);
+				await this.log('Unknown datasource type', this.settings.datasource.type, true);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -386,7 +383,7 @@ class SimpleGaugeWidgetScript {
 		const height = this.settings.style === 'style1' ? 200 : 165;
 		this.homey.ready({ height });
 		if (this.settings.datasource?.id == null) {
-			await this.log('No datasource selected');
+			await this.log('No datasource selected', false);
 			await this.startConfigurationAnimation();
 			return;
 		}

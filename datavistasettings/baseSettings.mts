@@ -1,5 +1,6 @@
 import { Homey } from "homey/lib/Device";
 import * as crypto from 'crypto';
+import DataVistaLogger from "../dataVistaLogger.mjs";
 
 export interface BaseSettings<T> {
 	identifier: string;
@@ -29,7 +30,7 @@ export abstract class BaseSettingsRecord<T> {
 		}
 	}
 
-	public setSettings(homey: Homey) : void {
+	public setSettings(homey: Homey, logger: DataVistaLogger) : void {
 		const hash = crypto
 			.createHash('md5')
 			.update(this.identifier)
@@ -37,7 +38,7 @@ export abstract class BaseSettingsRecord<T> {
 
 		const key = `${this.type}-${hash}`;
 		const settings = this.getSettings();
-		homey.log(`Updating ${this.type} '${key}' with data`, settings);
+		void logger.logMessage(`Updating ${this.type} '${key}' with data`, false, settings);
 		homey.settings.set(key, this.getSettings());
 		homey.api.realtime(`settings/${key}`, settings);
 	}

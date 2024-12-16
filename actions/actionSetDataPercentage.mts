@@ -2,6 +2,7 @@ import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
 import { BaseDataAction } from './baseActionData.mjs';
 import { PercentageSettings } from '../datavistasettings/percentageSettings.mjs';
+import DataVistaLogger from '../dataVistaLogger.mjs';
 
 export default class ActionSetDataPercentage extends BaseDataAction {
 	private static instance: ActionSetDataPercentage | null = null;
@@ -9,20 +10,18 @@ export default class ActionSetDataPercentage extends BaseDataAction {
 
 	private constructor(
 		homey: Homey,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	) {
-		super(homey, log, error);
+		super(homey, logger);
 		this.actionCard = this.homey.flow.getActionCard('set-percentage');
 	}
 
 	public static async initialize(
 		homey: Homey,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	): Promise<void> {
 		if (this.instance === null) {
-			this.instance = new this(homey, log, error);
+			this.instance = new this(homey, logger);
 			await this.instance.setup();
 		}
 	}

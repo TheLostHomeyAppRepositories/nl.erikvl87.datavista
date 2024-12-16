@@ -1,22 +1,20 @@
 import { Homey } from 'homey/lib/Device';
 import { BaseSettingsRecord } from '../datavistasettings/baseSettings.mjs';
+import DataVistaLogger from '../dataVistaLogger.mjs';
 
 export class BaseDataAction {
 	protected homey: Homey;
-	protected log: (...args: unknown[]) => void;
-	protected error: (...args: unknown[]) => void;
+	protected logger: DataVistaLogger;
 
 	constructor(
 		homey: Homey,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	) {
 		this.homey = homey;
-		this.log = log;
-		this.error = error;
+		this.logger = logger;
 	}
 
 	protected writeData<T extends BaseSettingsRecord<unknown>>(data: T): void {
-		data.setSettings(this.homey);
+		data.setSettings(this.homey, this.logger);
 	}
 }

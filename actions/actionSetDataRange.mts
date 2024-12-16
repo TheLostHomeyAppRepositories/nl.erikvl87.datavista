@@ -2,6 +2,7 @@ import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
 import { BaseDataAction } from './baseActionData.mjs';
 import { RangeSettings } from '../datavistasettings/rangeSettings.mjs';
+import DataVistaLogger from '../dataVistaLogger.mjs';
 
 export default class ActionSetDataRange extends BaseDataAction {
 	private static instance: ActionSetDataRange | null = null;
@@ -10,20 +11,18 @@ export default class ActionSetDataRange extends BaseDataAction {
 
 	private constructor(
 		homey: Homey,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	) {
-		super(homey, log, error);
+		super(homey, logger);
 		this.actionCard = this.homey.flow.getActionCard('set-range');
 	}
 
 	public static async initialize(
 		homey: Homey,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	): Promise<ActionSetDataRange> {
 		if (this.instance === null) {
-			this.instance = new this(homey, log, error);
+			this.instance = new this(homey, logger);
 			await this.instance.setup();
 		}
 		return this.instance;

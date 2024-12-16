@@ -4,6 +4,7 @@ import { AdvancedGaugeWidgetData } from '../../datavistasettings/advancedGaugeWi
 import { Widget } from 'homey';
 import { BaseWidget } from '../baseWidget.mjs';
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
+import DataVistaLogger from '../../dataVistaLogger.mjs';
 
 export default class AdvancedGaugeWidget extends BaseWidget {
 	private static instance: AdvancedGaugeWidget | null = null;
@@ -12,21 +13,19 @@ export default class AdvancedGaugeWidget extends BaseWidget {
 	private constructor(
 		homey: Homey,
 		homeyApi: ExtendedHomeyAPIV3Local,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	) {
-		super(homey, homeyApi, log, error);
+		super(homey, homeyApi, logger);
 		this.widget = this.homey.dashboards.getWidget('advanced-gauge');
 	}
 
 	public static async initialize(
 		homey: Homey,
 		homeyApi: ExtendedHomeyAPIV3Local,
-		log: (...args: unknown[]) => void,
-		error: (...args: unknown[]) => void,
+		logger: DataVistaLogger
 	): Promise<AdvancedGaugeWidget> {
 		if (this.instance === null) {
-			this.instance = new this(homey, homeyApi, log, error);
+			this.instance = new this(homey, homeyApi, logger);
 			await this.instance.setup();
 		}
 		return this.instance;
@@ -38,8 +37,7 @@ export default class AdvancedGaugeWidget extends BaseWidget {
 				query,
 				includePercentages: true,
 				includeRanges: true,
-				fromSettings: true,
-				fromVariables: false,
+				fromSettings: true
 			}),
 		);
 
