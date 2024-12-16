@@ -37,5 +37,8 @@
   },
   "0.6.2": {
     "en": "Fixed the gradient of the progress bar widget"
+  },
+  "0.7.0": {
+    "en": "Added the option for a 3rd color for the progress bar and fixed some issues"
   }
 }
