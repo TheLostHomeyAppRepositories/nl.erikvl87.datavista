@@ -40,5 +40,8 @@
   },
   "0.7.0": {
     "en": "Added the option for a 3rd color for the progress bar and fixed some issues"
+  },
+  "0.7.1": {
+    "en": "Add logging for datasource selection"
   }
 }
