@@ -27,47 +27,43 @@ type Settings = {
 };
 
 class SimpleGaugeWidgetScript {
-	private homey!: HomeyWidget;
-	private settings!: Settings;
-	private data!: SimpleGaugeWidgetPayload;
+	private homey: HomeyWidget;
+	private settings: Settings;
+	private data: SimpleGaugeWidgetPayload;
 	private spinnerTimeout: NodeJS.Timeout | null | undefined;
 	private refreshInterval: NodeJS.Timeout | null = null;
-	private colors!: { offset: number; color: string }[];
+	private colors: { offset: number; color: string }[];
 	private chart!: echarts.ECharts;
 
 	constructor(homey: HomeyWidget) {
-		try {
-			this.homey = homey;
-			this.settings = homey.getSettings() as Settings;
-			if (this.settings.datasource != null && this.settings.datasource.type == null)
-				this.settings.datasource.type = 'capability'; // Fallback to prevent breaking change.
+		this.homey = homey;
+		this.settings = homey.getSettings() as Settings;
+		if (this.settings.datasource != null && this.settings.datasource.type == null)
+			this.settings.datasource.type = 'capability'; // Fallback to prevent breaking change.
 
-			if (this.settings.isMinNegative && this.settings.min != null) this.settings.min = -this.settings.min;
-			if (this.settings.isMaxNegative && this.settings.max != null) this.settings.max = -this.settings.max;
-			this.data = {
-				min: 0,
-				max: 100,
-				value: 0,
-				units: '',
-			};
+		if (this.settings.isMinNegative && this.settings.min != null) this.settings.min = -this.settings.min;
+		if (this.settings.isMaxNegative && this.settings.max != null) this.settings.max = -this.settings.max;
+		this.data = {
+			min: 0,
+			max: 100,
+			value: 0,
+			units: '',
+		};
 
-			if (this.settings.color1 == null && this.settings.color2 == null && this.settings.color3 == null) {
-				this.colors = [
-					{ offset: 0, color: '#008000' },
-					{ offset: 0.5, color: '#FFFF00' },
-					{ offset: 1, color: '#FF0000' },
-				];
-			} else {
-				this.colors = [];
-				if (this.settings.color1 != null && this.settings.color1 != '')
-					this.colors.push({ offset: 0, color: this.settings.color1 });
-				if (this.settings.color2 != null && this.settings.color2 != '')
-					this.colors.push({ offset: 0.5, color: this.settings.color2 });
-				if (this.settings.color3 != null && this.settings.color3 != '')
-					this.colors.push({ offset: 1, color: this.settings.color3 });
-			}
-		} catch (error: any) {
-			void this.log('Error in constructor', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+		if (this.settings.color1 == null && this.settings.color2 == null && this.settings.color3 == null) {
+			this.colors = [
+				{ offset: 0, color: '#008000' },
+				{ offset: 0.5, color: '#FFFF00' },
+				{ offset: 1, color: '#FF0000' },
+			];
+		} else {
+			this.colors = [];
+			if (this.settings.color1 != null && this.settings.color1 != '')
+				this.colors.push({ offset: 0, color: this.settings.color1 });
+			if (this.settings.color2 != null && this.settings.color2 != '')
+				this.colors.push({ offset: 0.5, color: this.settings.color2 });
+			if (this.settings.color3 != null && this.settings.color3 != '')
+				this.colors.push({ offset: 1, color: this.settings.color3 });
 		}
 	}
 
@@ -380,33 +376,27 @@ class SimpleGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		await this.log('Starting widget', this, this.settings);
-
-		try {
-			if (!this.settings.transparent) {
-				const widgetBackgroundColor = getComputedStyle(document.documentElement)
-					.getPropertyValue('--homey-background-color')
-					.trim();
-				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-			}
-			this.chart = window.echarts.init(document.getElementById('gauge'));
-			const height = this.settings.style === 'style1' ? 200 : 165;
-			this.homey.ready({ height });
-			if (this.settings.datasource?.id == null) {
-				await this.log('No datasource selected');
-				await this.startConfigurationAnimation();
-				return;
-			}
-
-			await this.syncData();
-
-			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-			this.refreshInterval = setInterval(async () => {
-				await this.syncData();
-			}, this.settings.refreshSeconds * 1000);
-		} catch (error: any) {
-			await this.log('Error in onHomeyReady', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+		if (!this.settings.transparent) {
+			const widgetBackgroundColor = getComputedStyle(document.documentElement)
+				.getPropertyValue('--homey-background-color')
+				.trim();
+			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
 		}
+		this.chart = window.echarts.init(document.getElementById('gauge'));
+		const height = this.settings.style === 'style1' ? 200 : 165;
+		this.homey.ready({ height });
+		if (this.settings.datasource?.id == null) {
+			await this.log('No datasource selected');
+			await this.startConfigurationAnimation();
+			return;
+		}
+
+		await this.syncData();
+
+		this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+		this.refreshInterval = setInterval(async () => {
+			await this.syncData();
+		}, this.settings.refreshSeconds * 1000);
 	}
 }
 
