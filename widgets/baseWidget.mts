@@ -93,66 +93,72 @@ export class BaseWidget {
 
 			if (options.fromCapabilities) {
 				const devices = await this.homeyApi.devices.getDevices();
-				for (const [_key, device] of Object.entries(devices)) {
-					for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
-						try {
-							if (options.includeBooleans && capability.type === 'boolean') {
-								results.push({
-									name: capability.title,
-									description: `${device.name} (${capability.value ? 'true' : 'false'})`,
-									deviceName: device.name,
-									id: capability.id,
-									deviceId: device.id,
-									type: 'capability',
-								});
-							} else if (
-								options.includePercentages &&
-								capability.type === 'number' &&
-								capability.units !== undefined &&
-								capability.units === '%'
-							) {
-								results.push({
-									name: capability.title,
-									description: `${device.name} (${capability.value ?? '0'}%)`,
-									deviceName: device.name,
-									id: capability.id,
-									deviceId: device.id,
-									type: 'capability',
-								});
-							} else if (
-								options.includeRanges &&
-								capability.type === 'number' &&
-								capability.min !== undefined &&
-								capability.max !== undefined
-							) {
-								results.push({
-									name: capability.title,
-									description: `${device.name} (${capability.value ?? '0'}${
-										capability.units ? ` ${capability.units}` : ''
-									})`,
-									deviceName: device.name,
-									id: capability.id,
-									deviceId: device.id,
-									type: 'capability',
-								});
-							} else if (options.includeNumbers && capability.type === 'number') {
-								let description = device.name;
-								if (capability.units != null || capability.value != null) {
-									description += ` (${capability.value ?? '0'}${capability.units ? ` ${capability.units}` : ''})`;
+				if (devices != null) {
+					for (const [_key, device] of Object.entries(devices)) {
+						if (device.capabilitiesObj != null) {
+							for (const [_key, capability] of Object.entries(device.capabilitiesObj)) {
+								try {
+									if (options.includeBooleans && capability.type === 'boolean') {
+										results.push({
+											name: capability.title ?? '[No name]',
+											description: `${device.name} (${capability.value ? 'true' : 'false'})`,
+											deviceName: device.name,
+											id: capability.id,
+											deviceId: device.id,
+											type: 'capability',
+										});
+									} else if (
+										options.includePercentages &&
+										capability.type === 'number' &&
+										capability.units !== undefined &&
+										capability.units === '%'
+									) {
+										results.push({
+											name: capability.title ?? '[No name]',
+											description: `${device.name} (${capability.value ?? '0'}%)`,
+											deviceName: device.name,
+											id: capability.id,
+											deviceId: device.id,
+											type: 'capability',
+										});
+									} else if (
+										options.includeRanges &&
+										capability.type === 'number' &&
+										capability.min !== undefined &&
+										capability.max !== undefined
+									) {
+										results.push({
+											name: capability.title ?? '[No name]',
+											description: `${device.name} (${capability.value ?? '0'}${
+												capability.units ? ` ${capability.units}` : ''
+											})`,
+											deviceName: device.name,
+											id: capability.id,
+											deviceId: device.id,
+											type: 'capability',
+										});
+									} else if (options.includeNumbers && capability.type === 'number') {
+										let description = device.name;
+										if (capability.units != null || capability.value != null) {
+											description += ` (${capability.value ?? '0'}${capability.units ? ` ${capability.units}` : ''})`;
+										}
+										results.push({
+											name: capability.title ?? '[No name]',
+											description: description,
+											deviceName: device.name,
+											id: capability.id,
+											deviceId: device.id,
+											type: 'capability',
+										});
+									}
+								} catch (e) {
+									void this.logger.logException(e);
 								}
-								results.push({
-									name: capability.title,
-									description: description,
-									deviceName: device.name,
-									id: capability.id,
-									deviceId: device.id,
-									type: 'capability',
-								});
 							}
-						} catch (e) {
-							void this.logger.logException(e);
 						}
 					}
+				} else {
+					void this.logger.logMessage('No devices found for autocomplete', true);
 				}
 			}
 

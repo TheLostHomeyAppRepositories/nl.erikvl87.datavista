@@ -13,7 +13,7 @@ declare module 'homey-api' {
 	class CapabilitiesObject {
 		id: string;
 		type: string;
-		title: string;
+		title?: string | null;
 		getable: boolean;
 		setable: boolean;
 		min?: number;
