@@ -46,5 +46,8 @@
   },
   "0.7.2": {
     "en": "Add logging for datasource selection"
+  },
+  "0.7.3": {
+    "en": "Improved the logging infrastructure"
   }
 }
