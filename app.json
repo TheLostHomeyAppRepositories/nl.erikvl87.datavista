@@ -78,8 +78,8 @@
           "nl": "[Boolean] Zet [[value]] voor [[identifier]]"
         },
         "hint": {
-          "en": "Set a boolean that can be used in Toggle Switch widgets.",
-          "nl": "Zet een boolean die gebruikt kan worden in Schakelaar widgets."
+          "en": "Set a boolean that can be used in DataVista widgets.",
+          "nl": "Zet een boolean die gebruikt kan worden in DataVista widgets."
         },
         "args": [
           {
@@ -200,8 +200,8 @@
           "nl": "[Percentage] Zet [[percentage]]% voor [[identifier]]"
         },
         "hint": {
-          "en": "Set a percentage that can be used in Advanced Gauge widgets.",
-          "nl": "Zet een percentage dat gebruikt kan worden in Geavanceerde Meter widgets."
+          "en": "Set a percentage that can be used in DataVista widgets.",
+          "nl": "Zet een percentage dat gebruikt kan worden in DataVista widgets."
         },
         "args": [
           {
@@ -233,8 +233,8 @@
           "nl": "[Bereik] Zet bereik [[identifier]] van [[min]] tot [[max]] met waarde [[value]] (eenheid [[unit]] is [[unitPosition]] geplaatst). Overschrijf waarde met label [[label]]."
         },
         "hint": {
-          "en": "Set a range that can be used in Advanced Gauge widgets.",
-          "nl": "Zet een bereik dat gebruikt kan worden in Geavanceerde Meter widgets."
+          "en": "Set a range that can be used in DataVista widgets.",
+          "nl": "Zet een bereik dat gebruikt kan worden in DataVista widgets."
         },
         "args": [
           {
@@ -312,6 +312,38 @@
           }
         ],
         "id": "set-range"
+      },
+      {
+        "title": {
+          "en": "Set string",
+          "nl": "Zet tekst"
+        },
+        "titleFormatted": {
+          "en": "[String] Set [[value]] for [[identifier]]",
+          "nl": "[Tekst] Zet [[value]] voor [[identifier]]"
+        },
+        "hint": {
+          "en": "Set a string that can be used in DataVista widgets.",
+          "nl": "Zet een tekst die gebruikt kan worden in DataVista widgets."
+        },
+        "args": [
+          {
+            "type": "text",
+            "name": "value",
+            "title": {
+              "en": "value"
+            },
+            "required": false
+          },
+          {
+            "type": "text",
+            "name": "identifier",
+            "placeholder": {
+              "en": "identifier"
+            }
+          }
+        ],
+        "id": "set-string"
       }
     ]
   },
@@ -396,6 +428,82 @@
         }
       },
       "id": "advanced-gauge"
+    },
+    "label": {
+      "name": {
+        "en": "Label"
+      },
+      "transparent": true,
+      "settings": [
+        {
+          "id": "datasource",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource",
+            "nl": "Databron"
+          }
+        },
+        {
+          "id": "refreshSeconds",
+          "type": "number",
+          "title": {
+            "en": "Refresh interval (seconds)",
+            "nl": "Verversingsinterval (seconden)"
+          },
+          "min": 2,
+          "value": 5
+        },
+        {
+          "id": "showIcon",
+          "type": "checkbox",
+          "title": {
+            "en": "Show icon (if available)",
+            "nl": "Toon icoon (indien beschikbaar)"
+          },
+          "value": true
+        },
+        {
+          "id": "showName",
+          "type": "checkbox",
+          "title": {
+            "en": "Show name",
+            "nl": "Toon naam"
+          },
+          "value": true
+        },
+        {
+          "id": "overwriteName",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name",
+            "nl": "Naam overschrijven"
+          }
+        },
+        {
+          "id": "transparent",
+          "type": "checkbox",
+          "title": {
+            "en": "Transparent background",
+            "nl": "Transparante achtergrond"
+          },
+          "value": false
+        }
+      ],
+      "api": {
+        "datasource": {
+          "method": "POST",
+          "path": "/datasource"
+        },
+        "getIcon": {
+          "method": "GET",
+          "path": "/icon"
+        },
+        "log": {
+          "method": "POST",
+          "path": "/log"
+        }
+      },
+      "id": "label"
     },
     "progress-bar": {
       "name": {

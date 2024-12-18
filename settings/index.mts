@@ -4,6 +4,7 @@ import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../datavistasettings/advancedGaugeWidgetSettings.mjs';
 import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
+import { StringData } from '../datavistasettings/stringSettings.mjs';
 
 class SettingsScript {
 	private homey: HomeySettings;
@@ -54,6 +55,13 @@ class SettingsScript {
 		const element = this.createElement('boolean-template', data, key);
 		const booleanInput = element.querySelector('#boolean-input') as HTMLInputElement;
 		booleanInput.checked = data.settings.value;
+		return element;
+	}
+
+	private createStringElement(data: BaseSettings<StringData>, key: string): HTMLElement {
+		const element = this.createElement('string-template', data, key);
+		const stringInput = element.querySelector('#string-input') as HTMLInputElement;
+		stringInput.value = data.settings.value;
 		return element;
 	}
 
@@ -279,12 +287,14 @@ class SettingsScript {
 		const percentageContent = document.querySelector('#percentage-container .content') as HTMLElement;
 		const rangeContent = document.querySelector('#range-container .content') as HTMLElement;
 		const booleanContent = document.querySelector('#boolean-container .content') as HTMLElement;
+		const stringContent = document.querySelector('#string-container .content') as HTMLElement;
 		const gaugeContent = document.querySelector('#gauge-container .content') as HTMLElement;
 
-		percentageContent.innerHTML = ''; // Clear existing percentages
-		rangeContent.innerHTML = ''; // Clear existing ranges
-		booleanContent.innerHTML = ''; // Clear existing ranges
-		gaugeContent.innerHTML = ''; // Clear existing gauges
+		percentageContent.innerHTML = '';
+		rangeContent.innerHTML = '';
+		booleanContent.innerHTML = '';
+		stringContent.innerHTML = '';
+		gaugeContent.innerHTML = '';
 
 		const dataKeys = Object.keys(settings).filter(key => dataTypeIds.some(id => key.startsWith(`${id}-`)));
 		const groupedData: Record<string, { key: string; item: BaseSettings<unknown> }[]> = {};
@@ -321,6 +331,12 @@ class SettingsScript {
 								element = this.createBooleanElement(settings as BaseSettings<BooleanData>, key);
 								this.AddListenerToRemoveButton(element, key);
 								booleanContent.appendChild(element);
+								break;
+							}
+							case 'string': {
+								element = this.createStringElement(settings as BaseSettings<StringData>, key);
+								this.AddListenerToRemoveButton(element, key);
+								stringContent.appendChild(element);
 								break;
 							}
 							case 'gauge': {
