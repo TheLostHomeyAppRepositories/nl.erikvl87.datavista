@@ -22,13 +22,13 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding it, you can customize the widget to display the progress of specific devices or metrics based on your needs.
 
-<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1).png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1) (1).png" alt="" width="375"></picture><figcaption><p>Progress bar widget preview</p></figcaption></figure>
 
 ## Configuring the widget
 
 The widget has the following configurable settings:
 
-<table><thead><tr><th width="146">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*, DataVista range value*, device capability</em> or <em>Homey variable</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Show Name</strong></td><td>If enabled, displays the device and capability name below the progress bar.</td></tr><tr><td><strong>Overwrite Name</strong></td><td>If set, this name will be displayed below the progress bar instead of the device and capability name.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 50%.</td></tr><tr><td><strong>Color 3</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
+<table><thead><tr><th width="143">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*, DataVista range value*, device capability</em> or <em>Homey variable</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Show Name</strong></td><td>If checked the name of the datasource will be displayed in the widget.</td></tr><tr><td><strong>Overwrite Name</strong></td><td>If set, this name will be displayed instead of the datasource name.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 50%.</td></tr><tr><td><strong>Color 3</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
 
 {% hint style="danger" %}
 #### Known Issue: "Show Name" Setting
@@ -54,8 +54,8 @@ You are allowed to configure just one, two or all three colors. The colors will 
 
 ## Tutorials
 
-{% content-ref url="tutorial-displaying-temperature-on-a-progress-bar.md" %}
-[tutorial-displaying-temperature-on-a-progress-bar.md](tutorial-displaying-temperature-on-a-progress-bar.md)
+{% content-ref url="tutorial-visualizing-temperature-with-a-progress-bar.md" %}
+[tutorial-visualizing-temperature-with-a-progress-bar.md](tutorial-visualizing-temperature-with-a-progress-bar.md)
 {% endcontent-ref %}
 
 ## FAQ

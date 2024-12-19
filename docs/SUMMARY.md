@@ -6,9 +6,11 @@
 
 ## Widgets
 
+* [Gauge](widgets/gauge/README.md)
+  * [Tutorial: Visualizing hourly energy prices with a Gauge](widgets/gauge/tutorial-visualizing-hourly-energy-prices-with-a-gauge.md)
+* [Label](widgets/label.md)
 * [Progress bar](widgets/progress-bar/README.md)
-  * [Tutorial: Displaying temperature on a progress bar](widgets/progress-bar/tutorial-displaying-temperature-on-a-progress-bar.md)
-* [Gauge](widgets/gauge.md)
+  * [Tutorial: Visualizing temperature with a Progress bar](widgets/progress-bar/tutorial-visualizing-temperature-with-a-progress-bar.md)
 * [Toggle switch](widgets/toggle-switch.md)
 
 ## Community

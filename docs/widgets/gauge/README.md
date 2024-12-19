@@ -4,7 +4,7 @@ The **Gauge** widget offers a visually dynamic way to display numerical data in 
 
 There are two types of gauges available: the **Simple gauge** and the **Advanced gauge**. The **Simple gauge** can be fully configured through the widget settings, allowing you to easily adjust the value ranges, colors, and other visual elements. On the other hand, the **Advanced gauge** requires the use of **DataVista action cards** to configure both its data source and visual settings, offering more control and customization for advanced users.
 
-<figure><img src="../.gitbook/assets/gauge.png" alt=""><figcaption><p>The gauge widget</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/gauge.png" alt=""><figcaption><p>The gauge widget</p></figcaption></figure>
 
 ## Adding the widget to your dashboard
 
@@ -18,7 +18,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding the widget, you can customize it to display specific metrics or device values, adjusting the gauge’s range and appearance to suit your needs.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1) (1).png" alt="" width="375"></picture><figcaption><p>Gauge widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1) (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1) (1) (1).png" alt="" width="375"></picture><figcaption><p>Gauge widget preview</p></figcaption></figure>
 
 ## Configuring the _Simple_ gauge
 
@@ -35,16 +35,22 @@ The Advanced Gauge widget provides greater flexibility and customization but req
 {% hint style="warning" %}
 \*The **datasource** requires a flow with a **DataVista action card** to configure either a percentage or range. This action card must be run at least once before the source can be selected in the widget settings.
 
-![](<../.gitbook/assets/actioncard-set-percentage (2).jpg>)\
+![](<../../.gitbook/assets/actioncard-set-percentage (2).jpg>)\
 \
-![](<../.gitbook/assets/action-set-range (2).png>)
+![](<../../.gitbook/assets/action-set-range (2).png>)
 {% endhint %}
 
 {% hint style="warning" %}
 \*The **configuration source** requires a flow with a DataVista action card to configure the gauge. This action card must be run at least once before the source can be selected in the widget settings.
 
-![](<../.gitbook/assets/actioncard-set-gaugeconfig (1).jpg>)
+![](<../../.gitbook/assets/actioncard-set-gaugeconfig (1).jpg>)
 {% endhint %}
+
+## Tutorials
+
+{% content-ref url="tutorial-visualizing-hourly-energy-prices-with-a-gauge.md" %}
+[tutorial-visualizing-hourly-energy-prices-with-a-gauge.md](tutorial-visualizing-hourly-energy-prices-with-a-gauge.md)
+{% endcontent-ref %}
 
 ## FAQ
 

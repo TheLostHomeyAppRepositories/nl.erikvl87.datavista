@@ -1,6 +1,8 @@
-# Tutorial: Displaying temperature on a progress bar
+# Tutorial: Visualizing temperature with a Progress bar
 
 The [Progress bar](./) widget can be configured to display a temperature. This does require some additional configuration using flows.&#x20;
+
+<figure><img src="../../.gitbook/assets/DataVista - progress bar temperature (1).jpg" alt=""><figcaption></figcaption></figure>
 
 A progress bar displays values within a specified range, such as 50% within a range of 0 to 100. By default, the progress bar does not have a predefined range, so you'll need to set one up to represent the temperature.
 
