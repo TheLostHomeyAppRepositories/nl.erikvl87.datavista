@@ -93,7 +93,7 @@ export class BaseWidgetApi {
 				if (options.number && advanced.type === 'number') return true;
 				if (options.percentage && advanced.type === 'percentage') return true;
 				if (options.range && advanced.type === 'range') return true;
-				if (options.string && advanced.type === 'string') return true;
+				if (options.string && advanced.type === 'text') return true;
 				return false;
 			}
 			default:

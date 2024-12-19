@@ -1,14 +1,14 @@
 {
 	"title": {
-		"en": "Set string",
+		"en": "Set text",
 		"nl": "Zet tekst"
 	},
 	"titleFormatted": {
-		"en": "[String] Set [[value]] for [[identifier]]",
+		"en": "[Text] Set [[value]] for [[identifier]]",
 		"nl": "[Tekst] Zet [[value]] voor [[identifier]]"
 	},
 	"hint": {
-		"en": "Set a string that can be used in DataVista widgets.",
+		"en": "Set a text that can be used in DataVista widgets.",
 		"nl": "Zet een tekst die gebruikt kan worden in DataVista widgets."
 	},
 

@@ -4,7 +4,7 @@ import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../datavistasettings/advancedGaugeWidgetSettings.mjs';
 import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
-import { StringData } from '../datavistasettings/stringSettings.mjs';
+import { TextData } from '../datavistasettings/textSettings.mjs';
 
 class SettingsScript {
 	private homey: HomeySettings;
@@ -58,10 +58,10 @@ class SettingsScript {
 		return element;
 	}
 
-	private createStringElement(data: BaseSettings<StringData>, key: string): HTMLElement {
-		const element = this.createElement('string-template', data, key);
-		const stringInput = element.querySelector('#string-input') as HTMLInputElement;
-		stringInput.value = data.settings.value;
+	private createTextElement(data: BaseSettings<TextData>, key: string): HTMLElement {
+		const element = this.createElement('text-template', data, key);
+		const textInput = element.querySelector('#text-input') as HTMLInputElement;
+		textInput.value = data.settings.value;
 		return element;
 	}
 
@@ -287,13 +287,13 @@ class SettingsScript {
 		const percentageContent = document.querySelector('#percentage-container .content') as HTMLElement;
 		const rangeContent = document.querySelector('#range-container .content') as HTMLElement;
 		const booleanContent = document.querySelector('#boolean-container .content') as HTMLElement;
-		const stringContent = document.querySelector('#string-container .content') as HTMLElement;
+		const textContent = document.querySelector('#text-container .content') as HTMLElement;
 		const gaugeContent = document.querySelector('#gauge-container .content') as HTMLElement;
 
 		percentageContent.innerHTML = '';
 		rangeContent.innerHTML = '';
 		booleanContent.innerHTML = '';
-		stringContent.innerHTML = '';
+		textContent.innerHTML = '';
 		gaugeContent.innerHTML = '';
 
 		const dataKeys = Object.keys(settings).filter(key => dataTypeIds.some(id => key.startsWith(`${id}-`)));
@@ -333,10 +333,10 @@ class SettingsScript {
 								booleanContent.appendChild(element);
 								break;
 							}
-							case 'string': {
-								element = this.createStringElement(settings as BaseSettings<StringData>, key);
+							case 'text': {
+								element = this.createTextElement(settings as BaseSettings<TextData>, key);
 								this.AddListenerToRemoveButton(element, key);
-								stringContent.appendChild(element);
+								textContent.appendChild(element);
 								break;
 							}
 							case 'gauge': {

@@ -2,7 +2,7 @@ export enum DATA_TYPE_IDS {
 	PERCENTAGE = "percentage",
 	RANGE = "range",
 	BOOLEAN = "boolean",
-	STRING = "string",
+	TEXT = "text",
 }
 
 export enum WIDGET_TYPE_IDS {

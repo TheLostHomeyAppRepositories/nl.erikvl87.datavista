@@ -2,7 +2,7 @@ import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
 import { BaseDataAction } from './baseActionData.mjs';
 import DataVistaLogger from '../dataVistaLogger.mjs';
-import { StringSettings } from '../datavistasettings/stringSettings.mjs';
+import { StringSettings } from '../datavistasettings/textSettings.mjs';
 
 export default class ActionSetDataString extends BaseDataAction {
 	private static instance: ActionSetDataString | null = null;
@@ -14,7 +14,7 @@ export default class ActionSetDataString extends BaseDataAction {
 		logger: DataVistaLogger
 	) {
 		super(homey, logger);
-		this.actionCard = this.homey.flow.getActionCard('set-string');
+		this.actionCard = this.homey.flow.getActionCard('set-text');
 	}
 
 	public static async initialize(

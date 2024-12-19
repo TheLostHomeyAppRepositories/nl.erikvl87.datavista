@@ -7,11 +7,11 @@ import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
 import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import DataVistaLogger from '../dataVistaLogger.mjs';
-import { StringData } from '../datavistasettings/stringSettings.mjs';
+import { TextData } from '../datavistasettings/textSettings.mjs';
 
 type autocompleteQueryOptions = {
 	query?: string | null;
-	includeStrings?: boolean;
+	includeText?: boolean;
 	includeBooleans?: boolean;
 	includePercentages?: boolean;
 	includeRanges?: boolean;
@@ -89,10 +89,10 @@ export class BaseWidget {
 							});
 							break;
 						}
-						case DATA_TYPE_IDS.STRING: {
-							if (!options.includeStrings) break;
-							const rangeData: BaseSettings<StringData> = this.homey.settings.get(key);
-							let description = `${DATAVISTA_APP_NAME} ${this.homey.__('string')}`;
+						case DATA_TYPE_IDS.TEXT: {
+							if (!options.includeText) break;
+							const rangeData: BaseSettings<TextData> = this.homey.settings.get(key);
+							let description = `${DATAVISTA_APP_NAME} ${this.homey.__('text')}`;
 							if (rangeData.settings.value != null && rangeData.settings.value != '')
 								description += ` (${rangeData.settings.value})`;
 
@@ -168,7 +168,7 @@ export class BaseWidget {
 											deviceId: device.id,
 											type: 'capability',
 										});
-									} else if (options.includeStrings && capability.type === 'string') {
+									} else if (options.includeText && capability.type === 'string') {
 										let description = device.name;
 										if (capability.value != null && capability.value != '') description += ` (${capability.value})`;
 										results.push({
@@ -210,7 +210,7 @@ export class BaseWidget {
 							type: 'variable',
 							deviceName: HOMEY_LOGIC,
 						});
-					} else if (options.includeStrings && variable.type === 'string') {
+					} else if (options.includeText && variable.type === 'string') {
 						let description = `${this.homey.__('homey_variable')}`;
 						if (variable.value != null && variable.value != '') description += ` (${variable.value})`;
 						results.push({
@@ -226,11 +226,11 @@ export class BaseWidget {
 
 			const filteredResults = options.query
 				? results.filter(result => {
-						const queryParts = options.query!.toLowerCase().split(' ');
-						return queryParts.every(
-							part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
-						);
-				  })
+					const queryParts = options.query!.toLowerCase().split(' ');
+					return queryParts.every(
+						part => result.name.toLowerCase().includes(part) || result.deviceName.toLowerCase().includes(part),
+					);
+				})
 				: results;
 
 			filteredResults.sort((a, b) => {

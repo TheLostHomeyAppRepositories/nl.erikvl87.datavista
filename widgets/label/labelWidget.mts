@@ -33,7 +33,7 @@ export default class labelWidget extends BaseWidget {
 		this.widget.registerSettingAutocompleteListener('datasource', async (query: string) => 
 			this.autocompleteQuery({
 				query,
-				includeStrings: true,
+				includeText: true,
 				fromCapabilities: true,
 				fromSettings: true,
 				fromVariables: true

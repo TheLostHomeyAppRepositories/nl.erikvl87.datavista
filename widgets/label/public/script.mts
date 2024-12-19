@@ -2,7 +2,7 @@ import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import { StringData } from '../../../datavistasettings/stringSettings.mjs';
+import { TextData } from '../../../datavistasettings/textSettings.mjs';
 
 type Settings = {
 	transparent: boolean;
@@ -145,12 +145,12 @@ class LabelWidgetScript {
 	}
 
 	private async handleAdvancedPayload(payload: WidgetDataPayload): Promise<void> {
-		const advanced = payload.data as BaseSettings<StringData>;
+		const advanced = payload.data as BaseSettings<TextData>;
 		this.updateName(payload.name);
 
 		switch (advanced.type) {
-			case 'string': {
-				const stringSettings = (advanced as BaseSettings<StringData>).settings;
+			case 'text': {
+				const stringSettings = (advanced as BaseSettings<TextData>).settings;
 				await this.updateLabel(stringSettings.value);
 				break;
 			}
