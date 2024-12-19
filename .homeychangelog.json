@@ -52,5 +52,8 @@
   },
   "0.8.0": {
     "en": "Added a label widget"
+  },
+  "0.8.1": {
+    "en": "Updated terminology: 'String' is now referred to as 'Text' for better clarity"
   }
 }
