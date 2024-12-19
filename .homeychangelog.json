@@ -49,5 +49,8 @@
   },
   "0.7.3": {
     "en": "Improved the logging infrastructure"
+  },
+  "0.8.0": {
+    "en": "Added a label widget"
   }
 }
