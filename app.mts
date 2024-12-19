@@ -64,7 +64,7 @@ export default class DataVista extends Homey.App {
 			return false;
 		}
 
-		void this.logger.logMessage(`[${this.constructor.name}] Deleting data with key '${key}'.`, data);
+		void this.logger.logMessage(`[${this.constructor.name}] Deleting data with key '${key}'.`, false, data);
 		this.homey.app.homey.settings.unset(key);
 		this.homey.api.realtime(`settings/${key}`, null);
 		return true;
