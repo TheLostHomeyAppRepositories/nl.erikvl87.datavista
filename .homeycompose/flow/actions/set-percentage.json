@@ -7,8 +7,8 @@
 		"nl": "[Percentage] Zet [[percentage]]% voor [[identifier]]"
 	},
 	"hint": {
-		"en": "Set a percentage that can be used in Advanced Gauge widgets.",
-		"nl": "Zet een percentage dat gebruikt kan worden in Geavanceerde Meter widgets."
+		"en": "Set a percentage that can be used in DataVista widgets.",
+		"nl": "Zet een percentage dat gebruikt kan worden in DataVista widgets."
 	},
 	
 	"args": [

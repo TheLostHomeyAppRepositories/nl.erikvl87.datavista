@@ -7,8 +7,8 @@
 		"nl": "[Bereik] Zet bereik [[identifier]] van [[min]] tot [[max]] met waarde [[value]] (eenheid [[unit]] is [[unitPosition]] geplaatst). Overschrijf waarde met label [[label]]."
 	},
 	"hint": {
-		"en": "Set a range that can be used in Advanced Gauge widgets.",
-		"nl": "Zet een bereik dat gebruikt kan worden in Geavanceerde Meter widgets."
+		"en": "Set a range that can be used in DataVista widgets.",
+		"nl": "Zet een bereik dat gebruikt kan worden in DataVista widgets."
 	},
 	"args": [
 		{

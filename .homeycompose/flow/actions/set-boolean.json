@@ -8,8 +8,8 @@
 		"nl": "[Boolean] Zet [[value]] voor [[identifier]]"
 	},
 	"hint": {
-		"en": "Set a boolean that can be used in Toggle Switch widgets.",
-		"nl": "Zet een boolean die gebruikt kan worden in Schakelaar widgets."
+		"en": "Set a boolean that can be used in DataVista widgets.",
+		"nl": "Zet een boolean die gebruikt kan worden in DataVista widgets."
 	},
 
 	"args": [

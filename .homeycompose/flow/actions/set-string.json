@@ -9,7 +9,7 @@
 	},
 	"hint": {
 		"en": "Set a string that can be used in DataVista widgets.",
-    "nl": "Zet een tekst die gebruikt kan worden in DataVista widgets."
+		"nl": "Zet een tekst die gebruikt kan worden in DataVista widgets."
 	},
 
 	"args": [
