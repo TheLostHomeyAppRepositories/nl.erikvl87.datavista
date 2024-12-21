@@ -136,7 +136,7 @@ class LabelWidgetScript {
 			capability.iconObj?.id ? `https://icons-cdn.athom.com/${capability.iconObj.id}.svg?ver=1` : payload.fallbackIcon,
 		);
 
-		await this.updateLabel(capability.value as string);
+		await this.updateLabel(String(capability.value ?? ''));
 	}
 
 	private async handleVariablePayload(payload: WidgetDataPayload): Promise<void> {

@@ -18,7 +18,7 @@ declare module 'homey-api' {
 		setable: boolean;
 		min?: number;
 		max?: number;
-		value: unknown;
+		value?: unknown;
 		decimals?: number;
 		units?: string;
 		iconObj?: { id: string, url: string; };
