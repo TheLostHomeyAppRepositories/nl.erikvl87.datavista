@@ -27,7 +27,7 @@ class LabelWidgetScript {
 	private refreshInterval: NodeJS.Timeout | null = null;
 	private configurationAnimationTimeout: NodeJS.Timeout | null | undefined;
 	private iconUrl: string | null = null;
-	private value: string = '';
+	private text: string = '';
 	timelineAnimation: any;
 
 	constructor(homey: HomeyWidget) {
@@ -35,26 +35,25 @@ class LabelWidgetScript {
 		this.settings = homey.getSettings() as Settings;
 	}
 
-	/*
-	 * Logs a message to the Homey API.
-	 * @param args The arguments to log.
-	 * @returns A promise that resolves when the message is logged.
-	 */
-	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
-		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
+	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
+		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
+	}
+
+	private async logError(message: string, error: Error): Promise<void> {
+		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
+		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
 	private async syncData(): Promise<void> {
 		if (!this.settings.datasource) {
-			await this.log('No datasource is set', false);
+			await this.logMessage('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
 
 		const payload = await this.fetchDataSourcePayload();
 		if (!payload) {
-			await this.log('The payload is null', false);
+			await this.logMessage('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -70,7 +69,7 @@ class LabelWidgetScript {
 				await this.handleAdvancedPayload(payload);
 				break;
 			default:
-				await this.log('Unknown datasource type', this.settings.datasource!.type);
+				await this.logMessage('Unknown datasource type', this.settings.datasource!.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -80,16 +79,6 @@ class LabelWidgetScript {
 		return (await this.homey.api('POST', `/datasource`, {
 			datasource: this.settings.datasource,
 		})) as WidgetDataPayload | null;
-	}
-
-	private async handleCapabilityPayload(payload: WidgetDataPayload): Promise<void> {
-		const capability = payload.data as CapabilitiesObject;
-		this.updateName(payload.name);
-		await this.updateIcon(
-			capability.iconObj?.id ? `https://icons-cdn.athom.com/${capability.iconObj.id}.svg?ver=1` : payload.fallbackIcon,
-		);
-
-		await this.updateLabel(capability.value as string);
 	}
 
 	private updateName(name: string, overwritable: boolean = true): void {
@@ -140,6 +129,16 @@ class LabelWidgetScript {
 			: null;
 	}
 
+	private async handleCapabilityPayload(payload: WidgetDataPayload): Promise<void> {
+		const capability = payload.data as CapabilitiesObject;
+		this.updateName(payload.name);
+		await this.updateIcon(
+			capability.iconObj?.id ? `https://icons-cdn.athom.com/${capability.iconObj.id}.svg?ver=1` : payload.fallbackIcon,
+		);
+
+		await this.updateLabel(capability.value as string);
+	}
+
 	private async handleVariablePayload(payload: WidgetDataPayload): Promise<void> {
 		const variable = payload.data as ExtendedVariable;
 		this.updateName(payload.name);
@@ -158,16 +157,16 @@ class LabelWidgetScript {
 			}
 			default:
 				document.getElementById('progressPercentage')!.style.display = 'block';
-				await this.log('Unknown advanced type', true, advanced.type);
+				await this.logMessage('Unknown advanced type', true, advanced.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
 	}
 
-	private async updateLabel(string: string): Promise<void> {
-		const previousValue = this.value;
-		this.value = string;
-		if (previousValue === string) return;
+	private async updateLabel(text: string): Promise<void> {
+		// If the text is the same, don't do anything
+		if (this.text === text) return;
+		this.text = text;
 		await this.stopConfigurationAnimation();
 
 		// Clean up
@@ -179,12 +178,13 @@ class LabelWidgetScript {
 			this.timelineAnimation.reset();
 			this.timelineAnimation = null;
 		}
+
 		const clones = document.querySelectorAll('.cloned');
 		clones.forEach(clone => clone.remove());
 		lettersEl.classList.remove('marquee');
 
 		// Split the string into individual characters, including emoticons and spaces
-		const characters = Array.from(string);
+		const characters = Array.from(text);
 		lettersEl.innerHTML = characters
 			.map(char => `<span class='letter'>${char === ' ' ? '&nbsp;' : char}</span>`)
 			.join('');
@@ -197,14 +197,13 @@ class LabelWidgetScript {
 			lettersEl.parentNode!.appendChild(clone);
 		}
 
-		
 		let timeoutForMarquee = 1000;
 		if (this.settings.textFadeInEffect) {
 			const lineOffset = lettersEl.getBoundingClientRect().width + 5;
 			const matchCount = characters.length;
 			const lineDuration = 17 * (matchCount + 1) + 600;
 			timeoutForMarquee += lineDuration;
-			
+
 			this.timelineAnimation = window.anime
 				.timeline({ loop: false })
 				.add({
@@ -245,15 +244,20 @@ class LabelWidgetScript {
 		}
 	}
 
-	private async startConfigurationAnimation(): Promise<void> {
+	private async startConfigurationAnimation(errored: boolean = false): Promise<void> {
 		if (this.configurationAnimationTimeout) return;
 
-		const messages = [
-			{ message: 'I can display text', interval: 3000 },
-			{ message: 'I can show emoticons 🥳', interval: 4000 },
-			{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
-			{ message: 'Are you still here? Go configure me!', interval: 7000 },
-		];
+		const messages = !errored
+			? [
+				{ message: 'I can display text', interval: 3000 },
+				{ message: 'I can show emoticons 🥳', interval: 4000 },
+				{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
+				{ message: 'Are you still here? Go configure me!', interval: 7000 },
+			]
+			: [
+				{ message: 'An error occured', interval: 3000 },
+				{ message: 'Please check the settings or contact the developer', interval: 6000 },
+			];
 		let i = 0;
 
 		const update = async (): Promise<void> => {
@@ -274,31 +278,41 @@ class LabelWidgetScript {
 	}
 
 	public async onHomeyReady(): Promise<void> {
-		if (!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement)
-				.getPropertyValue('--homey-background-color')
-				.trim();
-			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+		try {
+			if (!this.settings.transparent) {
+				const widgetBackgroundColor = getComputedStyle(document.documentElement)
+					.getPropertyValue('--homey-background-color')
+					.trim();
+				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+
 				if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
-		}
-		if (this.settings.datasource) await this.syncData();
+			}
 
-		this.homey.ready({ height: this.settings.showName ? 74 : 52 });
+			if (this.settings.datasource) await this.syncData();
+			this.homey.ready({ height: this.settings.showName ? 74 : 52 });
 
-		if (!this.settings.datasource) {
-			await this.startConfigurationAnimation();
-			return;
-		}
+			if (!this.settings.datasource) {
+				await this.startConfigurationAnimation();
+				return;
+			}
 
-		if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
-			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-			this.refreshInterval = setInterval(async () => {
-				await this.syncData();
-			}, this.settings.refreshSeconds * 1000);
-		} else if (this.settings.datasource.type === 'advanced') {
-			this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
-				await this.syncData();
-			});
+			if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
+				this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+				this.refreshInterval = setInterval(async () => {
+					await this.syncData();
+				}, this.settings.refreshSeconds * 1000);
+			} else if (this.settings.datasource.type === 'advanced') {
+				this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
+					await this.syncData();
+				});
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An errror occured while initializing the widget', error);
+			} else {
+				await this.logMessage('An errror occured while initializing the widget', true, error);
+			}
+			await this.startConfigurationAnimation(true);
 		}
 	}
 }

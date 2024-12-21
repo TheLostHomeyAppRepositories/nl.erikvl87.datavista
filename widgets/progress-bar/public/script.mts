@@ -37,14 +37,13 @@ class ProgressBarWidgetScript {
 		this.settings = homey.getSettings() as Settings;
 	}
 
-	/*
-	 * Logs a message to the Homey API.
-	 * @param args The arguments to log.
-	 * @returns A promise that resolves when the message is logged.
-	 */
-	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
-		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
+	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
+		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
+	}
+
+	private async logError(message: string, error: Error): Promise<void> {
+		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
+		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
 	private static getPrecision(a: number): number {
@@ -113,7 +112,9 @@ class ProgressBarWidgetScript {
 			const isLabelOverBar = progressLabelRect.right - progressLabelRect.width / 2 < progressBarRect.left;
 
 			if (isLabelOverBar) {
-				const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(color => color && color.trim() !== '').map(color => ProgressBarWidgetScript.hexToRgb(color));
+				const colors = [this.settings.color1, this.settings.color2, this.settings.color3]
+					.filter(color => color && color.trim() !== '')
+					.map(color => ProgressBarWidgetScript.hexToRgb(color));
 				const intermediateColor = ProgressBarWidgetScript.interpolateColor(colors, 0.5);
 				progressLabel.style.color = ProgressBarWidgetScript.getContrastYIQ(intermediateColor);
 			} else {
@@ -135,14 +136,14 @@ class ProgressBarWidgetScript {
 
 	private async syncData(): Promise<void> {
 		if (!this.settings.datasource) {
-			await this.log('No datasource is set', false);
+			await this.logMessage('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
 
 		const payload = await this.fetchDataSourcePayload();
 		if (!payload) {
-			await this.log('The payload is null', false);
+			await this.logMessage('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -158,7 +159,7 @@ class ProgressBarWidgetScript {
 				await this.handleAdvancedPayload(payload);
 				break;
 			default:
-				await this.log('Unknown datasource type', true, this.settings.datasource!.type);
+				await this.logMessage('Unknown datasource type', true, this.settings.datasource!.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -219,7 +220,7 @@ class ProgressBarWidgetScript {
 			}
 			default:
 				document.getElementById('progressPercentage')!.style.display = 'block';
-				await this.log('Unknown advanced type', true, advanced.type);
+				await this.logMessage('Unknown advanced type', true, advanced.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -324,10 +325,11 @@ class ProgressBarWidgetScript {
 			const [r, g, b] = colors[0];
 			return `rgb(${r},${g},${b})`;
 		}
-		const interpolate = (start: number, end: number, factor: number): number => Math.round(start + factor * (end - start));
+		const interpolate = (start: number, end: number, factor: number): number =>
+			Math.round(start + factor * (end - start));
 		const steps = colors.length - 1;
 		const step = Math.floor(factor * steps);
-		const localFactor = (factor * steps) - step;
+		const localFactor = factor * steps - step;
 
 		const [r1, g1, b1] = colors[step];
 		const [r2, g2, b2] = colors[step + 1];
@@ -347,31 +349,43 @@ class ProgressBarWidgetScript {
 	}
 
 	public async onHomeyReady(): Promise<void> {
-		this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
-		const progressBackground = document.getElementById('progressBackground')!;
-		const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(color => color && color.trim() !== '');
-		progressBackground.style.background = colors.length === 1 
-			? colors[0] 
-			: progressBackground.style.background = `linear-gradient(to right, ${colors.join(', ')})`;
+		try {
+			this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
+			const progressBackground = document.getElementById('progressBackground')!;
+			const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(
+				color => color && color.trim() !== '',
+			);
+			progressBackground.style.background =
+				colors.length === 1
+					? colors[0]
+					: (progressBackground.style.background = `linear-gradient(to right, ${colors.join(', ')})`);
 
-		if (this.settings.datasource) await this.syncData();
+			if (this.settings.datasource) await this.syncData();
 
-		this.homey.ready({ height: this.settings.showName ? 45 : 20 });
+			this.homey.ready({ height: this.settings.showName ? 45 : 20 });
 
-		if (!this.settings.datasource) {
+			if (!this.settings.datasource) {
+				await this.startConfigurationAnimation();
+				return;
+			}
+
+			if (this.settings.datasource.type === 'capability') {
+				this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+				this.refreshInterval = setInterval(async () => {
+					await this.syncData();
+				}, this.settings.refreshSeconds * 1000);
+			} else if (this.settings.datasource.type === 'advanced') {
+				this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
+					await this.syncData();
+				});
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An errror occured while initializing the widget', error);
+			} else {
+				await this.logMessage('An errror occured while initializing the widget', true, error);
+			}
 			await this.startConfigurationAnimation();
-			return;
-		}
-
-		if (this.settings.datasource.type === 'capability') {
-			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-			this.refreshInterval = setInterval(async () => {
-				await this.syncData();
-			}, this.settings.refreshSeconds * 1000);
-		} else if (this.settings.datasource.type === 'advanced') {
-			this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
-				await this.syncData();
-			});
 		}
 	}
 }

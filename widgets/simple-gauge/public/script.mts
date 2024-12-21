@@ -294,19 +294,18 @@ class SimpleGaugeWidgetScript {
 		await this.updateGauge();
 	}
 
-	/*
-	 * Logs a message to the Homey API.
-	 * @param args The arguments to log.
-	 * @returns A promise that resolves when the message is logged.
-	 */
-	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
-		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
+	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
+		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
+	}
+
+	private async logError(message: string, error: Error): Promise<void> {
+		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
+		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
 	private async syncData(): Promise<void> {
 		if (this.settings.datasource == null) {
-			await this.log('No datasource is set', false);
+			await this.logMessage('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -316,7 +315,7 @@ class SimpleGaugeWidgetScript {
 		})) as WidgetDataPayload | null;
 
 		if (payload === null) {
-			await this.log('The payload is null', false);
+			await this.logMessage('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -349,7 +348,7 @@ class SimpleGaugeWidgetScript {
 			}
 			case 'advanced': {
 				if ((payload.data as BaseSettings<unknown>).type !== 'percentage') {
-					await this.log('The data type is not percentage', false);
+					await this.logMessage('The data type is not percentage', false);
 					await this.startConfigurationAnimation();
 					return;
 				}
@@ -363,7 +362,7 @@ class SimpleGaugeWidgetScript {
 				break;
 			}
 			default:
-				await this.log('Unknown datasource type', this.settings.datasource.type, true);
+				await this.logMessage('Unknown datasource type', this.settings.datasource.type, true);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -373,27 +372,36 @@ class SimpleGaugeWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		if (!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement)
-				.getPropertyValue('--homey-background-color')
-				.trim();
-			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-		}
-		this.chart = window.echarts.init(document.getElementById('gauge'));
-		const height = this.settings.style === 'style1' ? 200 : 165;
-		this.homey.ready({ height });
-		if (this.settings.datasource?.id == null) {
-			await this.log('No datasource selected', false);
-			await this.startConfigurationAnimation();
-			return;
-		}
+		try {
+			if (!this.settings.transparent) {
+				const widgetBackgroundColor = getComputedStyle(document.documentElement)
+					.getPropertyValue('--homey-background-color')
+					.trim();
+				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+			}
+			this.chart = window.echarts.init(document.getElementById('gauge'));
+			const height = this.settings.style === 'style1' ? 200 : 165;
+			this.homey.ready({ height });
+			if (this.settings.datasource?.id == null) {
+				await this.logMessage('No datasource selected', false);
+				await this.startConfigurationAnimation();
+				return;
+			}
 
-		await this.syncData();
-
-		this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-		this.refreshInterval = setInterval(async () => {
 			await this.syncData();
-		}, this.settings.refreshSeconds * 1000);
+
+			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+			this.refreshInterval = setInterval(async () => {
+				await this.syncData();
+			}, this.settings.refreshSeconds * 1000);
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An errror occured while initializing the widget', error);
+			} else {
+				await this.logMessage('An errror occured while initializing the widget', true, error);
+			}
+			await this.startConfigurationAnimation();
+		}
 	}
 }
 

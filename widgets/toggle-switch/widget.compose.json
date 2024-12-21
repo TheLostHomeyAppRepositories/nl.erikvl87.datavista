@@ -129,9 +129,13 @@
 			"method": "GET",
 			"path": "/icon"
 		},
-		"log": {
+		"logMessage": {
 			"method": "POST",
-			"path": "/log"
+			"path": "/logMessage"
+		},
+		"logError": {
+			"method": "POST",
+			"path": "/logError"
 		}
 	}
 }

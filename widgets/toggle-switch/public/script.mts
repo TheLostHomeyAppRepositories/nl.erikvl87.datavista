@@ -39,14 +39,13 @@ class toggleSwitchWidgetScript {
 		this.settings = homey.getSettings() as Settings;
 	}
 
-	/*
-	 * Logs a message to the Homey API.
-	 * @param args The arguments to log.
-	 * @returns A promise that resolves when the message is logged.
-	 */
-	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
-		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
+	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
+		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
+	}
+
+	private async logError(message: string, error: Error): Promise<void> {
+		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
+		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
 	private updateState(value: boolean): void {
@@ -96,7 +95,7 @@ class toggleSwitchWidgetScript {
 
 	private async getData(): Promise<void> {
 		if (this.settings.datasource == null) {
-			await this.log('No datasource is set', false);
+			await this.logMessage('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -106,7 +105,7 @@ class toggleSwitchWidgetScript {
 		})) as WidgetDataPayload | null;
 
 		if (payload === null) {
-			await this.log('The payload is null', false);
+			await this.logMessage('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
 		}
@@ -124,7 +123,7 @@ class toggleSwitchWidgetScript {
 				} else {
 					await this.updateIcon(null);
 				}
-				
+
 				this.updateState(capability.value as boolean);
 				break;
 			}
@@ -134,8 +133,8 @@ class toggleSwitchWidgetScript {
 				break;
 			}
 			case 'advanced': {
-				if((payload.data as BaseSettings<unknown>).type !== 'boolean') {
-					await this.log('The data type is not boolean', false);
+				if ((payload.data as BaseSettings<unknown>).type !== 'boolean') {
+					await this.logMessage('The data type is not boolean', false);
 					await this.startConfigurationAnimation();
 					return;
 				}
@@ -144,7 +143,7 @@ class toggleSwitchWidgetScript {
 				break;
 			}
 			default:
-				await this.log('Unknown datasource type', true, this.settings.datasource.type);
+				await this.logMessage('Unknown datasource type', true, this.settings.datasource.type);
 				await this.startConfigurationAnimation();
 				break;
 		}
@@ -172,37 +171,46 @@ class toggleSwitchWidgetScript {
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		this.switchEl = document.getElementById('switch')! as HTMLInputElement;
-		const label = document.querySelector('label[for="switch"]') as HTMLLabelElement;
-		label.style.setProperty('--icon-true-value', `'\\${this.settings.faTrueValue}'`);
-		label.style.setProperty('--icon-false-value', `'\\${this.settings.faFalseValue}'`);
+		try {
+			this.switchEl = document.getElementById('switch')! as HTMLInputElement;
+			const label = document.querySelector('label[for="switch"]') as HTMLLabelElement;
+			label.style.setProperty('--icon-true-value', `'\\${this.settings.faTrueValue}'`);
+			label.style.setProperty('--icon-false-value', `'\\${this.settings.faFalseValue}'`);
 
-		document.documentElement.style.setProperty('--true-color', this.settings.trueColor);
-		document.documentElement.style.setProperty('--false-color', this.settings.falseColor);
+			document.documentElement.style.setProperty('--true-color', this.settings.trueColor);
+			document.documentElement.style.setProperty('--false-color', this.settings.falseColor);
 
-		if (this.settings.datasource != null) await this.getData();
-		this.homey.ready();
+			if (this.settings.datasource != null) await this.getData();
+			this.homey.ready();
 
-		if (this.settings.datasource == null) {
+			if (this.settings.datasource == null) {
+				await this.startConfigurationAnimation();
+				return;
+			}
+
+			if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
+				this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+				this.refreshInterval = setInterval(async () => {
+					await this.getData();
+				}, this.settings.refreshSeconds * 1000);
+			} else if (this.settings.datasource.type === 'advanced') {
+				this.homey.on(`settings/${this.settings.datasource.id}`, async (data: BaseSettings<BooleanData> | null) => {
+					if (data === null) {
+						await this.startConfigurationAnimation();
+						return;
+					}
+
+					await this.stopConfigurationAnimation();
+					this.updateState(data.settings.value);
+				});
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An errror occured while initializing the widget', error);
+			} else {
+				await this.logMessage('An errror occured while initializing the widget', true, error);
+			}
 			await this.startConfigurationAnimation();
-			return;
-		}
-
-		if (this.settings.datasource.type === 'capability' || this.settings.datasource.type === 'variable') {
-			this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-			this.refreshInterval = setInterval(async () => {
-				await this.getData();
-			}, this.settings.refreshSeconds * 1000);
-		} else if (this.settings.datasource.type === 'advanced') {
-			this.homey.on(`settings/${this.settings.datasource.id}`, async (data: BaseSettings<BooleanData> | null) => {
-				if (data === null) {
-					await this.startConfigurationAnimation();
-					return;
-				}
-
-				await this.stopConfigurationAnimation();
-				this.updateState(data.settings.value);
-			});
 		}
 	}
 }

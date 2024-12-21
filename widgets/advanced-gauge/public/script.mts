@@ -18,7 +18,7 @@ type Settings = {
 		name: string;
 	};
 	segments: number;
-	style: "style1" | "style2";
+	style: 'style1' | 'style2';
 };
 
 type ColorStop = {
@@ -39,13 +39,13 @@ type ColorStopConfig = {
 	colorOffset5?: number;
 };
 
-type WidgetDataDto = { 
-	min: number,
-	max: number,
-	value: number,
-	unit?: string,
-	unitPosition?: 'prefix' | 'suffix',
-	label?: string
+type WidgetDataDto = {
+	min: number;
+	max: number;
+	value: number;
+	unit?: string;
+	unitPosition?: 'prefix' | 'suffix';
+	label?: string;
 };
 
 class ColorStopsManager {
@@ -237,7 +237,7 @@ class AdvancedGaugeWidgetScript {
 								formatter: (value: number): string => {
 									if (this.data.label != null && this.data.label != '') return this.data.label;
 									if (this.data.unit == null) return `${value}`;
-							
+
 									return this.data.unitPosition === 'prefix'
 										? `${this.data.unit} ${value}`
 										: `${value} ${this.data.unit}`;
@@ -315,7 +315,7 @@ class AdvancedGaugeWidgetScript {
 								formatter: (value: number): string => {
 									if (this.data.label != null && this.data.label != '') return this.data.label;
 									if (this.data.unit == null) return `${value}`;
-							
+
 									return this.data.unitPosition === 'prefix'
 										? `${this.data.unit} ${value}`
 										: `${value} ${this.data.unit}`;
@@ -448,137 +448,145 @@ class AdvancedGaugeWidgetScript {
 		await this.updateGauge();
 	}
 
-	/*
-	 * Logs a message to the Homey API.
-	 * @param args The arguments to log.
-	 * @returns A promise that resolves when the message is logged.
-	 */
-	private async log(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
-		console.log(message, optionalParams);
-		await this.homey.api('POST', '/log', { message, logToSentry, optionalParams });
+	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
+		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
+	}
+
+	private async logError(message: string, error: Error): Promise<void> {
+		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
+		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
 	/**
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
-		if(!this.settings.transparent) {
-			const widgetBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--homey-background-color').trim();
-			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-		}
-	
-		this.chart = window.echarts.init(document.getElementById('gauge'));
-		const height = this.settings.style === 'style1' ? 200 : 165;
-		this.homey.ready({ height });
+		try {
+			if (!this.settings.transparent) {
+				const widgetBackgroundColor = getComputedStyle(document.documentElement)
+					.getPropertyValue('--homey-background-color')
+					.trim();
+				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+			}
 
-		if (this.settings.datasource?.id == null) {
-			await this.log('No datasource selected', false);
-			await this.startConfigurationAnimation();
-			return;
-		}
+			this.chart = window.echarts.init(document.getElementById('gauge'));
+			const height = this.settings.style === 'style1' ? 200 : 165;
+			this.homey.ready({ height });
 
-		const datasourceId = this.settings.datasource?.id;
-		const configsourceId = this.settings.configsource?.id;
+			if (this.settings.datasource?.id == null) {
+				await this.logMessage('No datasource selected', false);
+				await this.startConfigurationAnimation();
+				return;
+			}
 
-		const payload = (await this.homey.api('POST', `/datasource`, {
-			datasource: this.settings.datasource,
-			configsource: this.settings.configsource?.id,
-		})) as AdvancedGaugeWidgetPayload;
+			const datasourceId = this.settings.datasource?.id;
+			const configsourceId = this.settings.configsource?.id;
 
-		if (payload.data != null) {
-			if (payload.data.type === 'advanced') {
-				switch (payload.data.data.type) {
-					case 'percentage': {
-						const percentageData = payload.data.data as BaseSettings<PercentageData>;
-						this.data = {
-							min: 0,
-							max: 100,
-							value: percentageData.settings.percentage,
-							unit: '%',
-							unitPosition: 'suffix',
-						};
-						break;
+			const payload = (await this.homey.api('POST', `/datasource`, {
+				datasource: this.settings.datasource,
+				configsource: this.settings.configsource?.id,
+			})) as AdvancedGaugeWidgetPayload;
+
+			if (payload.data != null) {
+				if (payload.data.type === 'advanced') {
+					switch (payload.data.data.type) {
+						case 'percentage': {
+							const percentageData = payload.data.data as BaseSettings<PercentageData>;
+							this.data = {
+								min: 0,
+								max: 100,
+								value: percentageData.settings.percentage,
+								unit: '%',
+								unitPosition: 'suffix',
+							};
+							break;
+						}
+						case 'range': {
+							const rangeData = payload.data.data as BaseSettings<RangeData>;
+							this.data = {
+								min: rangeData.settings.min,
+								max: rangeData.settings.max,
+								value: rangeData.settings.value,
+								unit: rangeData.settings.unit,
+								unitPosition: rangeData.settings.unitPosition,
+								label: rangeData.settings.label,
+							};
+							break;
+						}
+						default: {
+							await this.logMessage(`Type '${payload.data.data.type}' is not implemented.`, true);
+							await this.startConfigurationAnimation();
+						}
 					}
-					case 'range': {
-						const rangeData = payload.data.data as BaseSettings<RangeData>;
-						this.data = {
-							min: rangeData.settings.min,
-							max: rangeData.settings.max,
-							value: rangeData.settings.value,
-							unit: rangeData.settings.unit,
-							unitPosition: rangeData.settings.unitPosition,
-							label: rangeData.settings.label,
-						};
-						break;
-					}
-					default: {
-						await this.log(`Type '${payload.data.data.type}' is not implemented.`, true);
-						await this.startConfigurationAnimation();
-					}
+				} else {
+					await this.startConfigurationAnimation();
 				}
-
 			} else {
 				await this.startConfigurationAnimation();
 			}
-		} else {
-			await this.startConfigurationAnimation();
-		}
 
-		if (payload.config != null) this.config = payload.config;
-		await this.updateGauge();
-		
+			if (payload.config != null) this.config = payload.config;
+			await this.updateGauge();
 
-		if (datasourceId !== null) {
-			this.homey.on(`settings/${datasourceId}`, async (data: BaseSettings<unknown> | null) => {
-				if (data === null) {
-					await this.startConfigurationAnimation();
-					return;
-				} else if (this.spinnerTimeout !== null) {
-					await this.stopConfigurationAnimation();
-				}
-
-				switch (data.type) {
-					case 'percentage': {
-						const settings = data.settings as PercentageData;
-						this.data = {
-							min: 0,
-							max: 100,
-							value: settings.percentage,
-							unit: '%',
-							unitPosition: 'suffix'
-						};
-						break;
-					}
-					case 'range': {
-						const rangeData = data.settings as RangeData;
-						this.data = {
-							min: rangeData.min,
-							max: rangeData.max,
-							value: rangeData.value,
-							label: rangeData.label,
-							unit: rangeData.unit,
-							unitPosition: rangeData.unitPosition
-						};
-						break;
-					}
-					default: {
-						await this.log(`Type '${data.type}' is not implemented.`, true);
+			if (datasourceId !== null) {
+				this.homey.on(`settings/${datasourceId}`, async (data: BaseSettings<unknown> | null) => {
+					if (data === null) {
 						await this.startConfigurationAnimation();
 						return;
+					} else if (this.spinnerTimeout !== null) {
+						await this.stopConfigurationAnimation();
 					}
-				}
 
-				await this.updateGauge();
-			});
+					switch (data.type) {
+						case 'percentage': {
+							const settings = data.settings as PercentageData;
+							this.data = {
+								min: 0,
+								max: 100,
+								value: settings.percentage,
+								unit: '%',
+								unitPosition: 'suffix',
+							};
+							break;
+						}
+						case 'range': {
+							const rangeData = data.settings as RangeData;
+							this.data = {
+								min: rangeData.min,
+								max: rangeData.max,
+								value: rangeData.value,
+								label: rangeData.label,
+								unit: rangeData.unit,
+								unitPosition: rangeData.unitPosition,
+							};
+							break;
+						}
+						default: {
+							await this.logMessage(`Type '${data.type}' is not implemented.`, true);
+							await this.startConfigurationAnimation();
+							return;
+						}
+					}
 
-			if (configsourceId !== null) {
-				this.homey.on(`settings/${configsourceId}`, async (config: BaseSettings<AdvancedGaugeWidgetData> | null) => {
-					if (config === null) return;
-
-					this.config = config.settings;
 					await this.updateGauge();
 				});
+
+				if (configsourceId !== null) {
+					this.homey.on(`settings/${configsourceId}`, async (config: BaseSettings<AdvancedGaugeWidgetData> | null) => {
+						if (config === null) return;
+
+						this.config = config.settings;
+						await this.updateGauge();
+					});
+				}
 			}
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An errror occured while initializing the widget', error);
+			} else {
+				await this.logMessage('An errror occured while initializing the widget', true, error);
+			}
+			await this.startConfigurationAnimation();
 		}
 	}
 }

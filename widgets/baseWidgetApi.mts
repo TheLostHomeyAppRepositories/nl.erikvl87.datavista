@@ -7,7 +7,7 @@ import { DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
 export type WidgetDataPayload = {
 	type: 'capability' | 'variable' | 'advanced';
 	name: string;
-	fallbackIcon?: string | null,
+	fallbackIcon?: string | null;
 	data: CapabilitiesObject | BaseSettings<unknown> | ExtendedVariable;
 };
 
@@ -15,16 +15,15 @@ export class BaseWidgetApi {
 	/**
 	 * Get the data source.
 	 */
-	protected async getDatasource(app: DataVista, datasource: any) : Promise<WidgetDataPayload | null> {
+	protected async getDatasource(app: DataVista, datasource: any): Promise<WidgetDataPayload | null> {
 		if (datasource?.type == null) return null;
 
 		switch (datasource.type) {
 			case 'capability': {
-				const { device, capability } = (await this.getCapability(
-					app,
-					datasource.id,
-					datasource.deviceId,
-				)) ?? { device: null, capability: null };
+				const { device, capability } = (await this.getCapability(app, datasource.id, datasource.deviceId)) ?? {
+					device: null,
+					capability: null,
+				};
 
 				if (device == null || capability == null) return null;
 
@@ -63,20 +62,29 @@ export class BaseWidgetApi {
 	/**
 	 * Check if the payload is of a certain data type.
 	 */
-	protected static isDataType(payload: WidgetDataPayload, options: {
-		string?: boolean;
-		boolean?: boolean;
-		percentage?: boolean;
-		number?: boolean;
-		range?: boolean;
-	}): boolean {
+	protected static isDataType(
+		payload: WidgetDataPayload,
+		options: {
+			string?: boolean;
+			boolean?: boolean;
+			percentage?: boolean;
+			number?: boolean;
+			range?: boolean;
+		},
+	): boolean {
 		switch (payload.type) {
 			case 'capability': {
 				const capability = payload.data as CapabilitiesObject;
 				if (options.boolean && capability.type === 'boolean') return true;
 				if (options.percentage && capability.type === 'number' && capability.units === '%') return true;
 				if (options.number && capability.type === 'number') return true;
-				if (options.range && capability.type === 'number' && capability.min !== undefined && capability.max !== undefined) return true;
+				if (
+					options.range &&
+					capability.type === 'number' &&
+					capability.min !== undefined &&
+					capability.max !== undefined
+				)
+					return true;
 				if (options.string && capability.type === 'string') return true;
 				return false;
 			}
@@ -119,8 +127,8 @@ export class BaseWidgetApi {
 
 		return {
 			device,
-			capability
-		}
+			capability,
+		};
 	}
 
 	/**
@@ -147,8 +155,20 @@ export class BaseWidgetApi {
 	/**
 	 * Log a message.
 	 */
-	public async log({ homey, body }: ApiRequest): Promise<void> {
+	public async logMessage({ homey, body }: ApiRequest): Promise<void> {
 		void homey.app.logger.logMessage(`[${this.constructor.name}]: ${body.message}`, body.logToSentry, ...body.optionalParams);
+	}
+
+	/**
+	 * Log an error.
+	 */
+	public async logError({ homey, body }: ApiRequest): Promise<void> {
+		const cause = JSON.parse(body.error as string);
+		const error = new Error(`[${this.constructor.name}]: ${body.message}: ${cause.message}`);
+		error.name = `Error from ${this.constructor.name}`;
+		error.stack = cause.stack;
+		error.cause = cause;
+		void homey.app.logger.logException(error);
 	}
 
 	/**

@@ -422,9 +422,13 @@
           "method": "POST",
           "path": "/datasource"
         },
-        "log": {
+        "logMessage": {
           "method": "POST",
-          "path": "/log"
+          "path": "/logMessage"
+        },
+        "logError": {
+          "method": "POST",
+          "path": "/logError"
         }
       },
       "id": "advanced-gauge"
@@ -516,9 +520,13 @@
           "method": "GET",
           "path": "/icon"
         },
-        "log": {
+        "logMessage": {
           "method": "POST",
-          "path": "/log"
+          "path": "/logMessage"
+        },
+        "logError": {
+          "method": "POST",
+          "path": "/logError"
         }
       },
       "id": "label"
@@ -1051,9 +1059,13 @@
           "method": "GET",
           "path": "/icon"
         },
-        "log": {
+        "logMessage": {
           "method": "POST",
-          "path": "/log"
+          "path": "/logMessage"
+        },
+        "logError": {
+          "method": "POST",
+          "path": "/logError"
         }
       },
       "id": "progress-bar"
@@ -1643,9 +1655,13 @@
           "method": "GET",
           "path": "/icon"
         },
-        "log": {
+        "logMessage": {
           "method": "POST",
-          "path": "/log"
+          "path": "/logMessage"
+        },
+        "logError": {
+          "method": "POST",
+          "path": "/logError"
         }
       },
       "id": "simple-gauge"
@@ -2009,9 +2025,13 @@
           "method": "GET",
           "path": "/icon"
         },
-        "log": {
+        "logMessage": {
           "method": "POST",
-          "path": "/log"
+          "path": "/logMessage"
+        },
+        "logError": {
+          "method": "POST",
+          "path": "/logError"
         }
       },
       "id": "toggle-switch"
