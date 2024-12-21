@@ -22,6 +22,15 @@
 			"value": true
 		},
 		{
+			"id": "textBold",
+			"type": "checkbox",
+			"title": {
+				"en": "Bold text",
+				"nl": "Tekst vetgedrukt"
+			},
+			"value": false
+		},
+		{
 			"id": "refreshSeconds",
 			"type": "number",
 			"title": {

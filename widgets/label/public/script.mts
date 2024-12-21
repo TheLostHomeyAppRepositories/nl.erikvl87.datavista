@@ -7,6 +7,7 @@ import { TextData } from '../../../datavistasettings/textSettings.mjs';
 type Settings = {
 	transparent: boolean;
 	textFadeInEffect: boolean;
+	textBold: boolean;
 	showName: boolean;
 	showIcon: boolean;
 	overwriteName: string;
@@ -278,6 +279,7 @@ class LabelWidgetScript {
 				.getPropertyValue('--homey-background-color')
 				.trim();
 			document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
+				if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
 		}
 		if (this.settings.datasource) await this.syncData();
 
