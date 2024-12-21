@@ -1,6 +1,10 @@
 # Label
 
-The **Label** widget in DataVista provides a simple yet versatile way to display textual information. Labels can be used to provide context, display statuses, or highlight important details. While it is primarily designed for short text, the Label widget also includes a horizontal scrolling feature to accommodate longer text entries, ensuring no information is lost.&#x20;
+The **Label** widget in DataVista provides a simple yet versatile way to display textual information. Labels can be used to provide context, display statuses, or highlight important details. While it is primarily designed for short text, the Label widget also includes a horizontal scrolling feature to accommodate longer text entries, ensuring no information is lost.
+
+<figure><img src="../.gitbook/assets/DataVista - label light.gif" alt=""><figcaption></figcaption></figure>
+
+
 
 The widget can be used to display an existing **text capability**, a **Homey variable**, or be controlled dynamically through advanced flows using a **DataVista action card** to set a string. This flexibility makes it ideal for integrating with various Homey automations and custom setups.
 
