@@ -25,6 +25,29 @@
   "permissions": [
     "homey:manager:api"
   ],
+  "tags": {
+    "en": [
+      "dashboard",
+      "widget",
+      "gauge",
+      "label",
+      "progressbar",
+      "progress bar",
+      "checkbox",
+      "switch",
+      "toggle",
+      "toggle switch"
+    ],
+    "nl": [
+      "dashboard",
+      "widget",
+      "meter",
+      "label",
+      "voortgangsbalk",
+      "checkbox",
+      "schakelaar"
+    ]
+  },
   "brandColor": "#1E3A8A",
   "images": {
     "small": "/assets/images/small.png",
