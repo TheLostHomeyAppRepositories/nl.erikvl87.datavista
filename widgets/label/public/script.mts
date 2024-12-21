@@ -6,6 +6,7 @@ import { TextData } from '../../../datavistasettings/textSettings.mjs';
 
 type Settings = {
 	transparent: boolean;
+	textFadeInEffect: boolean;
 	showName: boolean;
 	showIcon: boolean;
 	overwriteName: string;
@@ -195,44 +196,49 @@ class LabelWidgetScript {
 			lettersEl.parentNode!.appendChild(clone);
 		}
 
-		const lineOffset = lettersEl.getBoundingClientRect().width + 5;
-		const matchCount = characters.length;
-		const lineDuration = 17 * (matchCount + 1) + 600;
-
-		this.timelineAnimation = window.anime
-			.timeline({ loop: false })
-			.add({
-				targets: '.line',
-				scaleY: [0, 1],
-				opacity: [0.5, 1],
-				easing: 'easeOutExpo',
-				duration: 700,
-			})
-			.add({
-				targets: '.line',
-				translateX: [0, lineOffset],
-				easing: 'easeOutExpo',
-				duration: lineDuration,
-				delay: 100,
-			})
-			.add({
-				targets: '.letter',
-				opacity: [0, 1],
-				easing: 'easeOutExpo',
-				duration: 600,
-				offset: `-=${lineDuration}`,
-				delay: (_el: any, i: number) => 17 * (i + 1),
-			})
-			.add({
-				targets: '.line',
-				opacity: 0,
-				duration: 1000,
-				easing: 'easeOutExpo',
-				delay: 500,
-			});
+		
+		let timeoutForMarquee = 1000;
+		if (this.settings.textFadeInEffect) {
+			const lineOffset = lettersEl.getBoundingClientRect().width + 5;
+			const matchCount = characters.length;
+			const lineDuration = 17 * (matchCount + 1) + 600;
+			timeoutForMarquee += lineDuration;
+			
+			this.timelineAnimation = window.anime
+				.timeline({ loop: false })
+				.add({
+					targets: '.line',
+					scaleY: [0, 1],
+					opacity: [0.5, 1],
+					easing: 'easeOutExpo',
+					duration: 700,
+				})
+				.add({
+					targets: '.line',
+					translateX: [0, lineOffset],
+					easing: 'easeOutExpo',
+					duration: lineDuration,
+					delay: 100,
+				})
+				.add({
+					targets: '.letter',
+					opacity: [0, 1],
+					easing: 'easeOutExpo',
+					duration: 600,
+					offset: `-=${lineDuration}`,
+					delay: (_el: any, i: number) => 17 * (i + 1),
+				})
+				.add({
+					targets: '.line',
+					opacity: 0,
+					duration: 1000,
+					easing: 'easeOutExpo',
+					delay: 500,
+				});
+		}
 
 		if (isMarquee) {
-			await new Promise(resolve => setTimeout(resolve, lineDuration + 1000));
+			await new Promise(resolve => setTimeout(resolve, timeoutForMarquee + 1000));
 			const lettersEl = document.querySelectorAll('.letters')! as NodeListOf<HTMLElement>;
 			lettersEl.forEach(el => el.classList.add('marquee'));
 		}

@@ -444,6 +444,15 @@
           }
         },
         {
+          "id": "textFadeInEffect",
+          "type": "checkbox",
+          "title": {
+            "en": "Text fade-in effect",
+            "nl": "Tekst fade-in effect"
+          },
+          "value": true
+        },
+        {
           "id": "refreshSeconds",
           "type": "number",
           "title": {
