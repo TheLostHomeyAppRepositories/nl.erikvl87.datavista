@@ -55,5 +55,8 @@
   },
   "0.8.1": {
     "en": "Updated terminology: 'String' is now referred to as 'Text' for better clarity"
+  },
+  "0.8.2": {
+    "en": "Added the options to disable fade-in effects and setting the text to bold for the Label widget"
   }
 }
