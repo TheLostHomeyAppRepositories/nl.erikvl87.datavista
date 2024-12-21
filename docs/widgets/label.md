@@ -22,14 +22,16 @@ Once the widget is added, you can personalize it to display specific text from d
 
 The widget has the following configurable settings:
 
-| Setting              | Description                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Datasource**       | <p>Select either a <em>DataVista text value*, device capability</em> or <em>Homey variable</em> to use as the </p><p>label value.</p> |
-| **Refresh Interval** | When a _device capability_ or _Homey variable_ is selected, this determines how often the widget updates to reflect new values.       |
-| **Show Icon**        | Enable to show the capability or device icon (if available), with priority given to the capability icon.                              |
-| **Show name**        | If checked the name of the datasource will be displayed in the widget.                                                                |
-| **Color if true**    | Specifies the color to display when the widget's value is `true`.                                                                     |
-| **Overwrite Name**   | If set, this name will be displayed instead of the datasource name.                                                                   |
+| Setting                 | Description                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Datasource**          | <p>Select either a <em>DataVista text value*, device capability</em> or <em>Homey variable</em> to use as the </p><p>label value.</p> |
+| **Text fade-in effect** | Toggles a smooth fade-in transition for the label text when displayed or updated. Consider disabling this for fast changing labels.   |
+| **Bold text**           | Toggles whether the label text is displayed in bold.                                                                                  |
+| **Refresh Interval**    | When a _device capability_ or _Homey variable_ is selected, this determines how often the widget updates to reflect new values.       |
+| **Show Icon**           | Enable to show the capability or device icon (if available), with priority given to the capability icon.                              |
+| **Show name**           | If checked the name of the datasource will be displayed in the widget.                                                                |
+| **Color if true**       | Specifies the color to display when the widget's value is `true`.                                                                     |
+| **Overwrite Name**      | If set, this name will be displayed instead of the datasource name.                                                                   |
 
 {% hint style="warning" %}
 To use a **DataVista text value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.\

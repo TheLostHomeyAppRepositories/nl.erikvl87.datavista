@@ -3,10 +3,12 @@
 ## Prerequisites
 
 1. **Homey Pro**: DataVista is designed specifically for Homey Pro. Ensure you have a Homey Pro device.
-2. **Homey Mobile App**: You need the latest experimental version of the Homey mobile app (v9.0.0 or newer) to access all features. Install the experimental release for your platform:
-   * [iOS via TestFlight](https://testflight.apple.com/join/tA2e9vby)
-   * [Android Experimental Release](https://play.google.com/apps/testing/app.homey)
+2. **Homey Mobile App**: You need v9.0.0 or newer of the Homey mobile app.
 3. **Homey Pro Firmware**: Make sure your Homey Pro is updated to version **12.1.0** or newer.
+
+{% hint style="info" %}
+See [https://homey.app/en-us/news/introducing-homey-dashboards/](https://homey.app/en-us/news/introducing-homey-dashboards/) for more information.
+{% endhint %}
 
 ## **Installation Steps**
 

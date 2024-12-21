@@ -18,7 +18,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding the widget, you can customize it to display specific metrics or device values, adjusting the gauge’s range and appearance to suit your needs.
 
-<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1) (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1) (1) (1).png" alt="" width="375"></picture><figcaption><p>Gauge widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../../.gitbook/assets/preview-dark (1) (1) (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../../.gitbook/assets/preview-light (1) (1) (1) (1).png" alt="" width="375"></picture><figcaption><p>Gauge widget preview</p></figcaption></figure>
 
 ## Configuring the _Simple_ gauge
 
