@@ -77,7 +77,7 @@ class ProgressBarWidgetScript {
 		const duration = 500;
 		const startTime = performance.now();
 		const previousPercentage = this.percentage;
-		const percentage = ((value - min) / (max - min)) * 100;
+		const percentage = ((Math.min(Math.max(value, min), max) - min) / (max - min)) * 100;
 		this.percentage = percentage;
 
 		const precision = ProgressBarWidgetScript.getPrecision(value);
