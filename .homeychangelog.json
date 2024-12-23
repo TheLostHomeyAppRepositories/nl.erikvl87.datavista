@@ -61,5 +61,8 @@
   },
   "0.8.3": {
     "en": "Small improvements"
+  },
+  "0.8.4": {
+    "en": "Fixed the visualization for the progress bar for values out of range"
   }
 }
