@@ -55,6 +55,7 @@ export class BaseWidgetApi {
 				};
 			}
 			default:
+				void app.logger.logMessage(`[${this.constructor.name}]: Unsupported data source type: ${datasource.type}`, true, datasource);
 				return null;
 		}
 	}
@@ -156,7 +157,7 @@ export class BaseWidgetApi {
 	 * Log a message.
 	 */
 	public async logMessage({ homey, body }: ApiRequest): Promise<void> {
-		void homey.app.logger.logMessage(`[${this.constructor.name}]: ${body.message}`, body.logToSentry, ...body.optionalParams);
+		await homey.app.logger.logMessage(`[${this.constructor.name}]: ${body.message}`, body.logToSentry, ...body.optionalParams);
 	}
 
 	/**
@@ -168,7 +169,7 @@ export class BaseWidgetApi {
 		error.name = `Error from ${this.constructor.name}`;
 		error.stack = cause.stack;
 		error.cause = cause;
-		void homey.app.logger.logException(error);
+		await homey.app.logger.logException(error);
 	}
 
 	/**
