@@ -582,9 +582,9 @@ class AdvancedGaugeWidgetScript {
 			}
 		} catch (error) {
 			if (error instanceof Error) {
-				await this.logError('An errror occured while initializing the widget', error);
+				await this.logError('An error occured while initializing the widget', error);
 			} else {
-				await this.logMessage('An errror occured while initializing the widget', true, error);
+				await this.logMessage('An error occured while initializing the widget', true, error);
 			}
 			await this.startConfigurationAnimation();
 		}
