@@ -285,8 +285,11 @@ class LabelWidgetScript {
 			if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
 
 
+			let height = 74;
+			if (!this.settings.showName) height -= 22;
+			if (this.settings.transparent) height -= 32;
 			if (this.settings.datasource) await this.syncData();
-			this.homey.ready({ height: this.settings.showName ? 74 : 52 });
+			this.homey.ready({ height });
 
 			if (!this.settings.datasource) {
 				await this.startConfigurationAnimation();
