@@ -284,9 +284,10 @@ class LabelWidgetScript {
 					.getPropertyValue('--homey-background-color')
 					.trim();
 				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-
-				if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
 			}
+
+			if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
+
 
 			if (this.settings.datasource) await this.syncData();
 			this.homey.ready({ height: this.settings.showName ? 74 : 52 });
