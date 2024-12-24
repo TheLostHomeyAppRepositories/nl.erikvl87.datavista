@@ -64,5 +64,8 @@
   },
   "0.8.4": {
     "en": "Fixed the visualization for the progress bar for values out of range"
+  },
+  "0.8.5": {
+    "en": "Small fixes and improvements for the label and toggle switch widgets"
   }
 }
