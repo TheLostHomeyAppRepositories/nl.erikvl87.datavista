@@ -279,12 +279,8 @@ class LabelWidgetScript {
 
 	public async onHomeyReady(): Promise<void> {
 		try {
-			if (!this.settings.transparent) {
-				const widgetBackgroundColor = getComputedStyle(document.documentElement)
-					.getPropertyValue('--homey-background-color')
-					.trim();
-				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
-			}
+			if (!this.settings.transparent)
+				document.querySelector('.homey-widget')!.classList.add('with-background');
 
 			if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
 
