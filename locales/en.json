@@ -3,5 +3,7 @@
 	"percentage": "percentage",
 	"boolean": "boolean",
 	"text": "text",
-	"homey_variable": "Homey variable"
+	"status": "status",
+	"homey_variable": "Homey variable",
+	"none": "None"
 }

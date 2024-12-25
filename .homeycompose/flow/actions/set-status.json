@@ -1,0 +1,49 @@
+{
+	"title": {
+		"en": "Set status",
+		"nl": "Zet status"
+	},
+	"titleFormatted": {
+		"en": "[Status] Set status [[identifier]] to [[color]] with text [[text]] (attract attention: [[attention]])",
+		"nl": "[Status] Zet status [[identifier]] op [[color]] met tekst [[text]] (trek aandacht: [[attention]])"
+	},
+	"hint": {
+		"en": "Set a status that can be used in DataVista widgets.",
+		"nl": "Zet status die gebruikt kan worden in DataVista widgets."
+	},
+
+	"args": [
+		{
+			"name": "identifier",
+			"type": "text",
+			"placeholder": {
+				"en": "identifier"
+			}
+		},
+		{
+			"name": "color",
+			"type": "color",
+			"title": {
+				"en": "color",
+				"nl": "kleur"
+			}
+		},
+		{
+			"name": "text",
+			"type": "text",
+			"title": {
+				"en": "text",
+				"nl": "tekst"
+			}
+		},
+		{
+			"name": "attention",
+			"type": "checkbox",
+			"title": {
+				"en": "attract attention",
+				"nl": "trek aandacht"
+			},
+			"value": false
+		}
+	]
+}

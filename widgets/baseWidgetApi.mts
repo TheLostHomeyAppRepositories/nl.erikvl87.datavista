@@ -2,7 +2,8 @@ import { CapabilitiesObject, ExtendedDevice, ExtendedVariable } from 'homey-api'
 import DataVista from '../app.mjs';
 import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
 import { ApiRequest } from '../types.mjs';
-import { DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
+import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
+import { DataSource } from './baseWidget.mjs';
 
 export type WidgetDataPayload = {
 	type: 'capability' | 'variable' | 'advanced';
@@ -15,12 +16,12 @@ export class BaseWidgetApi {
 	/**
 	 * Get the data source.
 	 */
-	protected async getDatasource(app: DataVista, datasource: any): Promise<WidgetDataPayload | null> {
+	protected async getDatasource(app: DataVista, datasource: DataSource): Promise<WidgetDataPayload | null> {
 		if (datasource?.type == null) return null;
 
 		switch (datasource.type) {
 			case 'capability': {
-				const { device, capability } = (await this.getCapability(app, datasource.id, datasource.deviceId)) ?? {
+				const { device, capability } = (await this.getCapability(app, datasource.id, datasource.deviceId!)) ?? {
 					device: null,
 					capability: null,
 				};
@@ -66,6 +67,7 @@ export class BaseWidgetApi {
 	protected static isDataType(
 		payload: WidgetDataPayload,
 		options: {
+			status?: boolean;
 			string?: boolean;
 			boolean?: boolean;
 			percentage?: boolean;
@@ -98,11 +100,11 @@ export class BaseWidgetApi {
 			}
 			case 'advanced': {
 				const advanced = payload.data as BaseSettings<unknown>;
-				if (options.boolean && advanced.type === 'boolean') return true;
-				if (options.number && advanced.type === 'number') return true;
-				if (options.percentage && advanced.type === 'percentage') return true;
-				if (options.range && advanced.type === 'range') return true;
-				if (options.string && advanced.type === 'text') return true;
+				if (options.boolean && advanced.type === DATA_TYPE_IDS.BOOLEAN) return true;
+				if (options.percentage && advanced.type === DATA_TYPE_IDS.PERCENTAGE) return true;
+				if (options.range && advanced.type === DATA_TYPE_IDS.RANGE) return true;
+				if (options.string && advanced.type === DATA_TYPE_IDS.TEXT) return true;
+				if (options.status && advanced.type === DATA_TYPE_IDS.STATUS) return true;
 				return false;
 			}
 			default:

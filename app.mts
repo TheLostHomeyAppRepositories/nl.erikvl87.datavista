@@ -16,6 +16,8 @@ import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import DataVistaLogger from './dataVistaLogger.mjs';
 import labelWidget from './widgets/label/labelWidget.mjs';
 import ActionSetDataString from './actions/actionSetDataString.mjs';
+import statusBadgeWidget from './widgets/status-badge/statusBadgeWidget.mjs';
+import actionSetDataColor from './actions/actionSetDataStatus.mjs';
 
 export default class DataVista extends Homey.App {
 	homeyApi!: ExtendedHomeyAPIV3Local;
@@ -34,12 +36,14 @@ export default class DataVista extends Homey.App {
 		await progressBarWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await toggleSwitchWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await labelWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await statusBadgeWidget.initialize(this.homey, this.homeyApi, this.logger);
 
 		await ActionSetDataPercentage.initialize(this.homey, this.logger);
 		await ActionSetRange.initialize(this.homey, this.logger);
 		await ActionSetGaugeConfiguration.initialize(this.homey, this.logger);
 		await ActionSetDataBoolean.initialize(this.homey, this.logger);
 		await ActionSetDataString.initialize(this.homey, this.logger);
+		await actionSetDataColor.initialize(this.homey, this.logger);
 	}
 
 	/**

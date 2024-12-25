@@ -3,6 +3,7 @@ export enum DATA_TYPE_IDS {
 	RANGE = "range",
 	BOOLEAN = "boolean",
 	TEXT = "text",
+	STATUS = "status",
 }
 
 export enum WIDGET_TYPE_IDS {

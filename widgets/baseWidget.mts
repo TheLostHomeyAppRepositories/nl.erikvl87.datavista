@@ -8,14 +8,26 @@ import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
 import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import DataVistaLogger from '../dataVistaLogger.mjs';
 import { TextData } from '../datavistasettings/textSettings.mjs';
+import { StatusData } from '../datavistasettings/statusSettings.mjs';
+
+export type DataSource = {
+	name: string;
+	description?: string;
+	id: string;
+	type?: 'capability' | 'advanced' | 'variable';
+	deviceId?: string;
+	deviceName: string;
+};
 
 type autocompleteQueryOptions = {
 	query?: string | null;
+	optional?: boolean;
 	includeText?: boolean;
 	includeBooleans?: boolean;
 	includePercentages?: boolean;
 	includeRanges?: boolean;
 	includeNumbers?: boolean;
+	includeStatus?: boolean;
 	fromCapabilities?: boolean;
 	fromSettings?: boolean;
 	fromVariables?: boolean;
@@ -33,14 +45,7 @@ export class BaseWidget {
 	}
 
 	async autocompleteQuery(options: autocompleteQueryOptions): Promise<Widget.SettingAutocompleteResults> {
-		const results: {
-			name: string;
-			description: string;
-			id: string;
-			type: 'capability' | 'advanced' | 'variable';
-			deviceId?: string;
-			deviceName: string;
-		}[] = [];
+		const results: DataSource[] = [];
 
 		try {
 			if (options.fromSettings) {
@@ -99,6 +104,18 @@ export class BaseWidget {
 							results.push({
 								name: rangeData.identifier,
 								description: description,
+								id: key,
+								type: 'advanced',
+								deviceName: DATAVISTA_APP_NAME,
+							});
+							break;
+						}
+						case DATA_TYPE_IDS.STATUS: {
+							if (!options.includeStatus) break;
+							const data: BaseSettings<StatusData> = this.homey.settings.get(key);
+							results.push({
+								name: data.identifier,
+								description: `${DATAVISTA_APP_NAME} ${this.homey.__('status')} (${data.settings.color} - ${data.settings.text})`,
 								id: key,
 								type: 'advanced',
 								deviceName: DATAVISTA_APP_NAME,
@@ -250,13 +267,15 @@ export class BaseWidget {
 				return a.name.localeCompare(b.name);
 			});
 
-			return filteredResults.map(({ name, description, id, deviceId, type }) => ({
-				name,
-				description,
-				id,
-				deviceId,
-				type,
-			}));
+			if (!options.query && options.optional) {
+				filteredResults.unshift({
+					name: this.homey.__('none'),
+					id: '',
+					deviceName: DATAVISTA_APP_NAME,
+				});
+			}
+
+			return filteredResults;
 		} catch (e) {
 			void this.logger.logException(e);
 			throw e;
