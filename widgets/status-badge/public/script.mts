@@ -8,7 +8,7 @@ import type { StatusData } from '../../../datavistasettings/statusSettings.mjs';
 
 type Settings = {
 	datasource?: DataSource;
-	style: 'bar' | 'bullet';
+	style: 'bar' | 'bullet' | 'namedBullet';
 	refreshSeconds: number;
 	overwriteName: string;
 	nameWidth: '' | '20%' | '30%' | '40%';
@@ -72,9 +72,11 @@ class statusBadgeWidgetScript {
 	}
 
 	updateName(name: string, overwritable: boolean = true): void {
-		const titleEl = document.querySelector('#bar #title span')! as HTMLElement;
 		name = overwritable && this.settings.overwriteName ? this.settings.overwriteName : name;
-		titleEl.textContent = name;
+		const titleElements = document.querySelectorAll('#title span')! as NodeListOf<HTMLElement>;
+		titleElements.forEach(titleEl => {
+			titleEl.textContent = name;
+		});
 	}
 
 	private static hexToRgb(hex: string): number[] {
@@ -206,8 +208,10 @@ class statusBadgeWidgetScript {
 
 			this.updateName(this.settings.overwriteName ?? 'Status', false);
 			if (this.settings.nameWidth != null && this.settings.nameWidth !== '') {
-				const titleEl = document.querySelector('#title')! as HTMLElement;
-				titleEl.style.width = this.settings.nameWidth;
+				const titleElements = document.querySelectorAll('#title')! as NodeListOf<HTMLElement>;
+				titleElements.forEach(titleEl => {
+					titleEl.style.width = this.settings.nameWidth;
+				});
 			}
 
 
