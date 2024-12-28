@@ -67,5 +67,8 @@
   },
   "0.8.5": {
     "en": "Small fixes and improvements for the label and toggle switch widgets"
+  },
+  "0.9.0": {
+    "en": "Added a Status badge widget"
   }
 }
