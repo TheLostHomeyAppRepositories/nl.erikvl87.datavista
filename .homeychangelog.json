@@ -70,5 +70,8 @@
   },
   "0.9.0": {
     "en": "Added a Status badge widget"
+  },
+  "0.9.1": {
+    "en": "Added fixed widths for the status badge widget"
   }
 }
