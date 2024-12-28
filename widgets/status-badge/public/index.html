@@ -37,6 +37,15 @@
 				height: 100%;
 				border-top-left-radius: 5px;
 				border-bottom-left-radius: 5px;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			#title span {
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
 			}
 
 			.status {
@@ -115,7 +124,7 @@
 
 	<body class="homey-widget">
 		<div id="bar" class="container" style="display: none">
-			<div id="title" class="homey-text-regular">Status</div>
+			<div id="title" class="homey-text-regular"><span>Status</span></div>
 			<div id="status" class="status homey-text-regular">
 				<span class="status-text"></span>
 			</div>

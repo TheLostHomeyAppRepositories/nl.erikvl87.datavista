@@ -76,6 +76,26 @@
 			"value": "Status"
 		},
 		{
+			"id": "nameWidth",
+			"type": "dropdown",
+			"title": {
+				"en": "Width of name",
+				"nl": "Breedte van naam"
+			},
+			"values": [
+				{ "id": "", "title": { "en": "Adjust automatically", "nl": "Automatisch aanpassen" } },
+				{ "id": "20%", "title": { "en": "20%" } },
+				{ "id": "30%", "title": { "en": "30%" } },
+				{ "id": "40%", "title": { "en": "40%" } },
+				{ "id": "50%", "title": { "en": "50%" } },
+				{ "id": "60%", "title": { "en": "60%" } },
+				{ "id": "70%", "title": { "en": "70%" } },
+				{ "id": "80%", "title": { "en": "80%" } },
+				{ "id": "90%", "title": { "en": "90%" } }
+			],
+			"value": ""
+		},
+		{
 			"id": "trueColor",
 			"type": "dropdown",
 			"title": {

@@ -11,6 +11,7 @@ type Settings = {
 	style: 'bar' | 'bullet';
 	refreshSeconds: number;
 	overwriteName: string;
+	nameWidth: '' | '20%' | '30%' | '40%';
 	trueColor: string;
 	falseColor: string;
 	trueText: string;
@@ -71,7 +72,7 @@ class statusBadgeWidgetScript {
 	}
 
 	updateName(name: string, overwritable: boolean = true): void {
-		const titleEl = document.querySelector('#title')! as HTMLElement;
+		const titleEl = document.querySelector('#bar #title span')! as HTMLElement;
 		name = overwritable && this.settings.overwriteName ? this.settings.overwriteName : name;
 		titleEl.textContent = name;
 	}
@@ -204,6 +205,12 @@ class statusBadgeWidgetScript {
 			});
 
 			this.updateName(this.settings.overwriteName ?? 'Status', false);
+			if (this.settings.nameWidth != null && this.settings.nameWidth !== '') {
+				const titleEl = document.querySelector('#title')! as HTMLElement;
+				titleEl.style.width = this.settings.nameWidth;
+			}
+
+
 			if (this.settings.datasource != null) await this.getData();
 			this.homey.ready();
 
