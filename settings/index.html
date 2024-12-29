@@ -187,6 +187,7 @@
 					<a href="#" data-target="#range-container">Ranges</a>
 					<a href="#" data-target="#boolean-container">Booleans</a>
 					<a href="#" data-target="#text-container">Text</a>
+					<a href="#" data-target="#status-container">Status</a>
 				</div>
 			</div>
 			<div class="dropdown">
@@ -215,6 +216,11 @@
 		<div id="text-container" class="tab-content">
 			<div class="container-header">Text</div>
 			<p>View and manage all text data created by flows, which can be utilized in DataVista widgets.</p>
+			<div class="content"></div>
+		</div>
+		<div id="status-container" class="tab-content">
+			<div class="container-header">Text</div>
+			<p>View and manage all status data created by flows, which can be utilized in DataVista widgets.</p>
 			<div class="content"></div>
 		</div>
 		<div id="gauge-container" class="tab-content">
@@ -335,6 +341,37 @@
 						<div class="input-group">
 							<label>Value:</label>
 							<input id="text-input" type="text" readonly />
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Last Updated:</label>
+							<input id="last-updated-label" type="text" readonly />
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="status-template">
+			<div class="data-row">
+				<div class="data-label">
+					<div class="data-field-row">
+						<div class="input-group">
+							<div class="identifier-label"></div>
+							<button class="remove-button homey-button-danger-small">Remove</button>
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Text:</label>
+							<input id="text-input" type="text" readonly />
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Attention:</label>
+							<input id="attention-input" type="checkbox" disabled />
 						</div>
 					</div>
 					<div class="data-field-row">

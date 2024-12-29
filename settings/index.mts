@@ -5,6 +5,7 @@ import { RangeData } from '../datavistasettings/rangeSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../datavistasettings/advancedGaugeWidgetSettings.mjs';
 import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
 import { TextData } from '../datavistasettings/textSettings.mjs';
+import { StatusData } from '../datavistasettings/statusSettings.mjs';
 
 class SettingsScript {
 	private homey: HomeySettings;
@@ -62,6 +63,15 @@ class SettingsScript {
 		const element = this.createElement('text-template', data, key);
 		const textInput = element.querySelector('#text-input') as HTMLInputElement;
 		textInput.value = data.settings.value;
+		return element;
+	}
+
+	private createStatusElement(data: BaseSettings<StatusData>, key: string): HTMLElement {
+		const element = this.createElement('status-template', data, key);
+		const textInput = element.querySelector('#text-input') as HTMLInputElement;
+		const attentionInput = element.querySelector('#attention-input') as HTMLInputElement;
+		textInput.value = data.settings.text;
+		attentionInput.checked = data.settings.attention;
 		return element;
 	}
 
@@ -288,6 +298,7 @@ class SettingsScript {
 		const rangeContent = document.querySelector('#range-container .content') as HTMLElement;
 		const booleanContent = document.querySelector('#boolean-container .content') as HTMLElement;
 		const textContent = document.querySelector('#text-container .content') as HTMLElement;
+		const statusContent = document.querySelector('#status-container .content') as HTMLElement;
 		const gaugeContent = document.querySelector('#gauge-container .content') as HTMLElement;
 
 		percentageContent.innerHTML = '';
@@ -337,6 +348,12 @@ class SettingsScript {
 								element = this.createTextElement(settings as BaseSettings<TextData>, key);
 								this.AddListenerToRemoveButton(element, key);
 								textContent.appendChild(element);
+								break;
+							}
+							case 'status': {
+								element = this.createStatusElement(settings as BaseSettings<StatusData>, key);
+								this.AddListenerToRemoveButton(element, key);
+								statusContent.appendChild(element);
 								break;
 							}
 							case 'gauge': {
