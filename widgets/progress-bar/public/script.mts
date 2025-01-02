@@ -370,7 +370,10 @@ class ProgressBarWidgetScript {
 
 			if (this.settings.datasource) await this.syncData();
 
-			this.homey.ready({ height: this.settings.showName ? 45 : 20 });
+			// # Temporary fix for the height of the widget causing the widget's height to be too small
+			// # This can be reverted once Athom has fixed the issue.
+			// this.homey.ready({ height: this.settings.showName ? 45 : 20 });
+			this.homey.ready({ height: 45 });
 
 			if (!this.settings.datasource) {
 				await this.startConfigurationAnimation();
