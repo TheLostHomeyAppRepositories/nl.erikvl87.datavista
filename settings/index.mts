@@ -1,11 +1,11 @@
 import type HomeySettings from 'homey/lib/HomeySettings';
-import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
-import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
-import { RangeData } from '../datavistasettings/rangeSettings.mjs';
-import { AdvancedGaugeWidgetData } from '../datavistasettings/advancedGaugeWidgetSettings.mjs';
-import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
-import { TextData } from '../datavistasettings/textSettings.mjs';
-import { StatusData } from '../datavistasettings/statusSettings.mjs';
+import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
+import { PercentageData } from '../datavistasettings/PercentageSettings.mjs';
+import { RangeData } from '../datavistasettings/RangeSettings.mjs';
+import { AdvancedGaugeWidgetData } from '../datavistasettings/AdvancedGaugeWidgetSettings.mjs';
+import { BooleanData } from '../datavistasettings/BooleanSettings.mjs';
+import { TextData } from '../datavistasettings/TextSettings.mjs';
+import { StatusData } from '../datavistasettings/StatusSettings.mjs';
 
 class SettingsScript {
 	private homey: HomeySettings;
@@ -229,7 +229,7 @@ class SettingsScript {
 		return numberValue;
 	}
 
-	private AddListenerToRemoveButton(element: HTMLElement, key: string): void {
+	private addListenerToRemoveButton(element: HTMLElement, key: string): void {
 		const button = element.querySelector('.remove-button') as HTMLButtonElement;
 		button.onclick = async (): Promise<void> => {
 			this.homey.confirm(
@@ -328,37 +328,37 @@ class SettingsScript {
 						switch (settings.type) {
 							case 'percentage': {
 								element = this.createPercentageElement(settings as BaseSettings<PercentageData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								percentageContent.appendChild(element);
 								break;
 							}
 							case 'range': {
 								element = this.createRangeElement(settings as BaseSettings<RangeData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								rangeContent.appendChild(element);
 								break;
 							}
 							case 'boolean': {
 								element = this.createBooleanElement(settings as BaseSettings<BooleanData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								booleanContent.appendChild(element);
 								break;
 							}
 							case 'text': {
 								element = this.createTextElement(settings as BaseSettings<TextData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								textContent.appendChild(element);
 								break;
 							}
 							case 'status': {
 								element = this.createStatusElement(settings as BaseSettings<StatusData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								statusContent.appendChild(element);
 								break;
 							}
 							case 'gauge': {
 								element = this.createGaugeElement(settings as BaseSettings<AdvancedGaugeWidgetData>, key);
-								this.AddListenerToRemoveButton(element, key);
+								this.addListenerToRemoveButton(element, key);
 								gaugeContent.appendChild(element);
 								break;
 							}

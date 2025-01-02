@@ -1,6 +1,6 @@
 import { Homey } from 'homey/lib/Device';
-import { BaseSettingsRecord } from '../datavistasettings/baseSettings.mjs';
-import DataVistaLogger from '../dataVistaLogger.mjs';
+import { BaseSettingsRecord } from '../datavistasettings/BaseSettings.mjs';
+import DataVistaLogger from '../DataVistaLogger.mjs';
 
 export class BaseDataAction {
 	protected homey: Homey;

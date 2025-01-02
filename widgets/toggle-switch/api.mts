@@ -1,4 +1,4 @@
-import { ApiRequest } from '../../types.mjs';
+import { ApiRequest } from '../../Types.mjs';
 import { BaseWidgetApi, WidgetDataPayload } from '../baseWidgetApi.mjs';
 
 class ToggleSwitchWidgetApi extends BaseWidgetApi {

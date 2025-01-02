@@ -1,10 +1,10 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { AdvancedGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
-import type { AdvancedGaugeWidgetData } from '../../../datavistasettings/advancedGaugeWidgetSettings.mjs';
-import type { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
-import type { RangeData } from '../../../datavistasettings/rangeSettings.mjs';
-import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
+import type { AdvancedGaugeWidgetData } from '../../../datavistasettings/AdvancedGaugeWidgetSettings.mjs';
+import type { PercentageData } from '../../../datavistasettings/PercentageSettings.mjs';
+import type { RangeData } from '../../../datavistasettings/RangeSettings.mjs';
+import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
 
 type Settings = {
 	transparent: boolean;

@@ -1,5 +1,5 @@
 import { DATA_TYPE_IDS } from "../constants.mjs";
-import { BaseSettingsRecord } from "./baseSettings.mjs";
+import { BaseSettingsRecord } from "./BaseSettings.mjs";
 
 export interface BooleanData {
 	value: boolean;

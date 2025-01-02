@@ -1,15 +1,11 @@
 {
-	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended"
-	],
+	"extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
 	"parserOptions": {
 		"project": "./tsconfig.json",
 		"sourceType": "module"
 	},
-	"plugins": [
-		"@typescript-eslint"
-	],
+	"ignorePatterns": ["widgets/*/public/*.js"],
+	"plugins": ["@typescript-eslint"],
 	"settings": {
 		"import/resolver": {
 			"typescript": {
@@ -20,7 +16,8 @@
 	},
 	"rules": {
 		"no-unused-vars": "off", // Disable the base rule as it can report incorrect errors
-		"@typescript-eslint/no-unused-vars": [ // Error on unused variables
+		"@typescript-eslint/no-unused-vars": [
+			// Error on unused variables
 			"error",
 			{
 				"argsIgnorePattern": "^_",
@@ -31,10 +28,34 @@
 		"@typescript-eslint/explicit-function-return-type": "error", // Enforce explicit return type
 		"@typescript-eslint/no-floating-promises": "error", // Enforce awaiting async functions,
 		"@typescript-eslint/no-explicit-any": "warn", // Warn on explicit any
-		"indent": [
-			"error",
-			"tab",
-			{ "SwitchCase": 1 }
-		]
-	}
+		"indent": ["error", "tab", { "SwitchCase": 1 }],
+		"@typescript-eslint/naming-convention": "error" // Enforce naming conventions
+	},
+	"overrides": [
+		{
+			"files": ["constants.mts"],
+			"rules": {
+				"@typescript-eslint/naming-convention": [
+					"error",
+					{
+						"selector": "enum",
+						"format": ["UPPER_CASE"]
+					},
+					{
+						"selector": "enumMember",
+						"format": ["UPPER_CASE"]
+					},
+					{
+						"selector": "variable",
+						"modifiers": ["const"],
+						"format": ["UPPER_CASE"],
+						"filter": {
+							"regex": "^DATAVISTA_",
+							"match": true
+						}
+					}
+				]
+			}
+		}
+	]
 }

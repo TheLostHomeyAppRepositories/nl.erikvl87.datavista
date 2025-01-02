@@ -1,6 +1,6 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import type { BooleanData } from '../../../datavistasettings/booleanSettings.mjs';
+import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
+import type { BooleanData } from '../../../datavistasettings/BooleanSettings.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 
@@ -21,7 +21,7 @@ type Settings = {
 	falseColor: string;
 };
 
-class toggleSwitchWidgetScript {
+class ToggleSwitchWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
 	switchEl!: HTMLInputElement;
@@ -230,4 +230,4 @@ interface ModuleWindow extends Window {
 declare const window: ModuleWindow;
 
 window.onHomeyReady = async (homey: HomeyWidget): Promise<void> =>
-	await new toggleSwitchWidgetScript(homey).onHomeyReady();
+	await new ToggleSwitchWidgetScript(homey).onHomeyReady();

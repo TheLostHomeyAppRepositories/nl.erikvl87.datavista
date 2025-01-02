@@ -1,6 +1,6 @@
 import { DATA_TYPE_IDS, WIDGET_TYPE_IDS } from './constants.mjs';
-import { AdvancedGaugeWidgetData } from './datavistasettings/advancedGaugeWidgetSettings.mjs';
-import type { ApiRequest } from './types.mjs';
+import { AdvancedGaugeWidgetData } from './datavistasettings/AdvancedGaugeWidgetSettings.mjs';
+import type { ApiRequest } from './Types.mjs';
 
 class AppApi {
 	public dataTypes(_request: ApiRequest): string[] {

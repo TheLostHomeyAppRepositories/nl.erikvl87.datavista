@@ -1,8 +1,8 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
-import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import { TextData } from '../../../datavistasettings/textSettings.mjs';
+import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
+import { TextData } from '../../../datavistasettings/TextSettings.mjs';
 
 type Settings = {
 	transparent: boolean;
@@ -257,15 +257,15 @@ class LabelWidgetScript {
 
 		const messages = !errored
 			? [
-					{ message: 'I can display text', interval: 3000 },
-					{ message: 'I can show emoticons 🥳', interval: 4000 },
-					{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
-					{ message: 'Are you still here? Go configure me!', interval: 7000 },
-			  ]
+				{ message: 'I can display text', interval: 3000 },
+				{ message: 'I can show emoticons 🥳', interval: 4000 },
+				{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
+				{ message: 'Are you still here? Go configure me!', interval: 7000 },
+			]
 			: [
-					{ message: 'An error occured', interval: 3000 },
-					{ message: 'Please check the settings or contact the developer', interval: 6000 },
-			  ];
+				{ message: 'An error occured', interval: 3000 },
+				{ message: 'Please check the settings or contact the developer', interval: 6000 },
+			];
 		let i = 0;
 
 		const update = async (): Promise<void> => {

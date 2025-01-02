@@ -1,23 +1,23 @@
 import Homey from 'homey';
 import { HomeyAPI, ExtendedHomeyAPIV3Local } from 'homey-api';
-import ActionSetDataPercentage from './actions/actionSetDataPercentage.mjs';
-import ActionSetRange from './actions/actionSetDataRange.mjs';
+import ActionSetDataPercentage from './actions/ActionSetDataPercentage.mjs';
+import ActionSetRange from './actions/ActionSetDataRange.mjs';
 import AdvancedGaugeWidget from './widgets/advanced-gauge/advancedGaugeWidget.mjs';
-import ActionSetGaugeConfiguration from './actions/actionSetGaugeConfiguration.mjs';
+import ActionSetGaugeConfiguration from './actions/ActionSetGaugeConfiguration.mjs';
 import SimpleGaugeWidget from './widgets/simple-gauge/simpleGaugeWidget.mjs';
 import {
 	AdvancedGaugeWidgetData,
 	AdvancedGaugeWidgetSettings,
-} from './datavistasettings/advancedGaugeWidgetSettings.mjs';
-import progressBarWidget from './widgets/progress-bar/progressBarWidget.mjs';
-import toggleSwitchWidget from './widgets/toggle-switch/toggleSwitchWidget.mjs';
-import ActionSetDataBoolean from './actions/actionSetDataBoolean.mjs';
+} from './datavistasettings/AdvancedGaugeWidgetSettings.mjs';
+import ProgressBarWidget from './widgets/progress-bar/ProgressBarWidget.mjs';
+import ToggleSwitchWidget from './widgets/toggle-switch/ToggleSwitchWidget.mjs';
+import ActionSetDataBoolean from './actions/ActionSetDataBoolean.mjs';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
-import DataVistaLogger from './dataVistaLogger.mjs';
-import labelWidget from './widgets/label/labelWidget.mjs';
-import ActionSetDataString from './actions/actionSetDataString.mjs';
-import statusBadgeWidget from './widgets/status-badge/statusBadgeWidget.mjs';
-import actionSetDataColor from './actions/actionSetDataStatus.mjs';
+import DataVistaLogger from './DataVistaLogger.mjs';
+import LabelWidget from './widgets/label/LabelWidget.mjs';
+import ActionSetDataString from './actions/ActionSetDataString.mjs';
+import StatusBadgeWidget from './widgets/status-badge/StatusBadgeWidget.mjs';
+import ActionSetDataColor from './actions/ActionSetDataStatus.mjs';
 import { ExtendedError } from './common/ExtendedError.mjs';
 
 let fetch: typeof globalThis.fetch;
@@ -46,17 +46,17 @@ export default class DataVista extends Homey.App {
 
 		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await AdvancedGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);
-		await progressBarWidget.initialize(this.homey, this.homeyApi, this.logger);
-		await toggleSwitchWidget.initialize(this.homey, this.homeyApi, this.logger);
-		await labelWidget.initialize(this.homey, this.homeyApi, this.logger);
-		await statusBadgeWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await ProgressBarWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await ToggleSwitchWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await LabelWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await StatusBadgeWidget.initialize(this.homey, this.homeyApi, this.logger);
 
 		await ActionSetDataPercentage.initialize(this.homey, this.logger);
 		await ActionSetRange.initialize(this.homey, this.logger);
 		await ActionSetGaugeConfiguration.initialize(this.homey, this.logger);
 		await ActionSetDataBoolean.initialize(this.homey, this.logger);
 		await ActionSetDataString.initialize(this.homey, this.logger);
-		await actionSetDataColor.initialize(this.homey, this.logger);
+		await ActionSetDataColor.initialize(this.homey, this.logger);
 	}
 
 	/**

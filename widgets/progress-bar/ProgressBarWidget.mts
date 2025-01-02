@@ -2,10 +2,10 @@ import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import { Widget } from 'homey';
 import { BaseWidget } from '../baseWidget.mjs';
-import DataVistaLogger from '../../dataVistaLogger.mjs';
+import DataVistaLogger from '../../DataVistaLogger.mjs';
 
-export default class progressBarWidget extends BaseWidget {
-	private static instance: progressBarWidget | null = null;
+export default class ProgressBarWidget extends BaseWidget {
+	private static instance: ProgressBarWidget | null = null;
 	private widget: Widget;
 
 	private constructor(
@@ -21,7 +21,7 @@ export default class progressBarWidget extends BaseWidget {
 		homey: Homey,
 		homeyApi: ExtendedHomeyAPIV3Local,
 		logger: DataVistaLogger
-	): Promise<progressBarWidget> {
+	): Promise<ProgressBarWidget> {
 		if (this.instance === null) {
 			this.instance = new this(homey, homeyApi, logger);
 			await this.instance.setup();

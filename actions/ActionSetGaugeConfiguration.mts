@@ -1,8 +1,8 @@
 import Homey from "homey/lib/Homey";
 import { FlowCardAction } from "homey";
 import { BaseDataAction } from "./baseActionData.mjs";
-import { AdvancedGaugeWidgetSettings } from "../datavistasettings/advancedGaugeWidgetSettings.mjs";
-import DataVistaLogger from "../dataVistaLogger.mjs";
+import { AdvancedGaugeWidgetSettings } from "../datavistasettings/AdvancedGaugeWidgetSettings.mjs";
+import DataVistaLogger from "../DataVistaLogger.mjs";
 
 export default class ActionSetGaugeConfiguration extends BaseDataAction {
 

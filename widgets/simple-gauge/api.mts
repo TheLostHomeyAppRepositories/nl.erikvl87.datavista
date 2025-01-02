@@ -1,4 +1,4 @@
-import type { ApiRequest } from "../../types.mjs";
+import type { ApiRequest } from "../../Types.mjs";
 import { BaseWidgetApi, WidgetDataPayload } from "../baseWidgetApi.mjs";
 
 export type SimpleGaugeWidgetPayload = {

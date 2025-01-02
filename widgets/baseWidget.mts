@@ -1,14 +1,14 @@
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import Widget from 'homey/lib/Widget';
-import { BooleanData } from '../datavistasettings/booleanSettings.mjs';
+import { BooleanData } from '../datavistasettings/BooleanSettings.mjs';
 import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
-import { BaseSettings } from '../datavistasettings/baseSettings.mjs';
-import { PercentageData } from '../datavistasettings/percentageSettings.mjs';
-import { RangeData } from '../datavistasettings/rangeSettings.mjs';
-import DataVistaLogger from '../dataVistaLogger.mjs';
-import { TextData } from '../datavistasettings/textSettings.mjs';
-import { StatusData } from '../datavistasettings/statusSettings.mjs';
+import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
+import { PercentageData } from '../datavistasettings/PercentageSettings.mjs';
+import { RangeData } from '../datavistasettings/RangeSettings.mjs';
+import DataVistaLogger from '../DataVistaLogger.mjs';
+import { TextData } from '../datavistasettings/TextSettings.mjs';
+import { StatusData } from '../datavistasettings/StatusSettings.mjs';
 
 export type DataSource = {
 	name: string;
@@ -19,7 +19,7 @@ export type DataSource = {
 	deviceName: string;
 };
 
-type autocompleteQueryOptions = {
+type AutocompleteQueryOptions = {
 	query?: string | null;
 	optional?: boolean;
 	includeText?: boolean;
@@ -44,7 +44,7 @@ export class BaseWidget {
 		this.logger = logger;
 	}
 
-	async autocompleteQuery(options: autocompleteQueryOptions): Promise<Widget.SettingAutocompleteResults> {
+	async autocompleteQuery(options: AutocompleteQueryOptions): Promise<Widget.SettingAutocompleteResults> {
 		const results: DataSource[] = [];
 
 		try {

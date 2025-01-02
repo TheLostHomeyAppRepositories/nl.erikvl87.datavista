@@ -1,10 +1,10 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import type { BooleanData } from '../../../datavistasettings/booleanSettings.mjs';
+import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
+import type { BooleanData } from '../../../datavistasettings/BooleanSettings.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 import type { DataSource } from '../../baseWidget.mjs';
-import type { StatusData } from '../../../datavistasettings/statusSettings.mjs';
+import type { StatusData } from '../../../datavistasettings/StatusSettings.mjs';
 
 type Settings = {
 	datasource?: DataSource;
@@ -18,7 +18,7 @@ type Settings = {
 	falseText: string;
 };
 
-class statusBadgeWidgetScript {
+class StatusBadgeWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
 	switchEl!: HTMLInputElement;
@@ -48,9 +48,9 @@ class statusBadgeWidgetScript {
 	private updateState(color: string, text: string, attention: boolean = false): void {
 		document.documentElement.style.setProperty('--status-color', color);
 		const statusTextEl = document.querySelector('#bar .status-text')! as HTMLElement;
-		const rgb = statusBadgeWidgetScript.hexToRgb(color);
+		const rgb = StatusBadgeWidgetScript.hexToRgb(color);
 		const [r, g, b] = rgb;
-		const contrastColor = statusBadgeWidgetScript.getContrastYIQ(`rgb(${r},${g},${b})`);
+		const contrastColor = StatusBadgeWidgetScript.getContrastYIQ(`rgb(${r},${g},${b})`);
 		statusTextEl.style.color = contrastColor;
 		statusTextEl.style.textShadow =
 			contrastColor === 'white' ? '0px 1px 0px rgba(0, 0, 0, 0.5)' : '0px 1px 0px rgba(255, 255, 255, 0.3)';
@@ -251,4 +251,4 @@ interface ModuleWindow extends Window {
 declare const window: ModuleWindow;
 
 window.onHomeyReady = async (homey: HomeyWidget): Promise<void> =>
-	await new statusBadgeWidgetScript(homey).onHomeyReady();
+	await new StatusBadgeWidgetScript(homey).onHomeyReady();

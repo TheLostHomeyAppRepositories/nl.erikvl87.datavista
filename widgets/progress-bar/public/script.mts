@@ -1,9 +1,9 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
-import type { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import type { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
+import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
+import type { PercentageData } from '../../../datavistasettings/PercentageSettings.mjs';
 import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
-import type { RangeData } from '../../../datavistasettings/rangeSettings.mjs';
+import type { RangeData } from '../../../datavistasettings/RangeSettings.mjs';
 
 type Settings = {
 	datasource?: {
@@ -101,8 +101,8 @@ class ProgressBarWidgetScript {
 					unit == null
 						? `${displayValue}`
 						: unitLocation == 'prefix'
-						? ` ${unit} ${displayValue}`
-						: `${displayValue} ${unit}`;
+							? ` ${unit} ${displayValue}`
+							: `${displayValue} ${unit}`;
 			} else {
 				progressLabel.textContent = overwriteLabel;
 			}

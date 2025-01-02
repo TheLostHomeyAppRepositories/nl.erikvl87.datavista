@@ -1,6 +1,6 @@
 import { Homey } from "homey/lib/Device";
 import * as crypto from 'crypto';
-import DataVistaLogger from "../dataVistaLogger.mjs";
+import DataVistaLogger from "../DataVistaLogger.mjs";
 
 export interface BaseSettings<T> {
 	identifier: string;

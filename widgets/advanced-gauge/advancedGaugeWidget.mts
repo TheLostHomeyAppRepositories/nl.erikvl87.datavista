@@ -1,10 +1,10 @@
 import Homey from 'homey/lib/Homey';
-import { BaseSettings } from '../../datavistasettings/baseSettings.mjs';
-import { AdvancedGaugeWidgetData } from '../../datavistasettings/advancedGaugeWidgetSettings.mjs';
+import { BaseSettings } from '../../datavistasettings/BaseSettings.mjs';
+import { AdvancedGaugeWidgetData } from '../../datavistasettings/AdvancedGaugeWidgetSettings.mjs';
 import { Widget } from 'homey';
 import { BaseWidget } from '../baseWidget.mjs';
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
-import DataVistaLogger from '../../dataVistaLogger.mjs';
+import DataVistaLogger from '../../DataVistaLogger.mjs';
 
 export default class AdvancedGaugeWidget extends BaseWidget {
 	private static instance: AdvancedGaugeWidget | null = null;

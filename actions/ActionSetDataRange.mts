@@ -1,8 +1,8 @@
 import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
 import { BaseDataAction } from './baseActionData.mjs';
-import { RangeSettings } from '../datavistasettings/rangeSettings.mjs';
-import DataVistaLogger from '../dataVistaLogger.mjs';
+import { RangeSettings } from '../datavistasettings/RangeSettings.mjs';
+import DataVistaLogger from '../DataVistaLogger.mjs';
 
 export default class ActionSetDataRange extends BaseDataAction {
 	private static instance: ActionSetDataRange | null = null;

@@ -1,11 +1,11 @@
 import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
 import { BaseDataAction } from './baseActionData.mjs';
-import DataVistaLogger from '../dataVistaLogger.mjs';
-import { StatusSettings } from '../datavistasettings/statusSettings.mjs';
+import DataVistaLogger from '../DataVistaLogger.mjs';
+import { StatusSettings } from '../datavistasettings/StatusSettings.mjs';
 
-export default class actionSetDataColor extends BaseDataAction {
-	private static instance: actionSetDataColor | null = null;
+export default class ActionSetDataColor extends BaseDataAction {
+	private static instance: ActionSetDataColor | null = null;
 
 	private actionCard: FlowCardAction;
 
@@ -20,7 +20,7 @@ export default class actionSetDataColor extends BaseDataAction {
 	public static async initialize(
 		homey: Homey,
 		logger: DataVistaLogger
-	): Promise<actionSetDataColor> {
+	): Promise<ActionSetDataColor> {
 		if (this.instance === null) {
 			this.instance = new this(homey, logger);
 			await this.instance.setup();

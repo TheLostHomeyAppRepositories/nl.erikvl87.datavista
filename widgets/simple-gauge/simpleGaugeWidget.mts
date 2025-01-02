@@ -2,7 +2,7 @@ import { Widget } from 'homey';
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import { BaseWidget } from '../baseWidget.mjs';
-import DataVistaLogger from '../../dataVistaLogger.mjs';
+import DataVistaLogger from '../../DataVistaLogger.mjs';
 
 export default class SimpleGaugeWidget extends BaseWidget {
 	private static instance: SimpleGaugeWidget | null = null;

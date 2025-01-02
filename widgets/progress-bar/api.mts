@@ -1,13 +1,13 @@
-import type { ApiRequest } from '../../types.mjs';
+import type { ApiRequest } from '../../Types.mjs';
 import { BaseWidgetApi, WidgetDataPayload } from '../baseWidgetApi.mjs';
 
-export type progressBarWidgetPayload = {
+export type ProgressBarWidgetPayload = {
 	name: string,
 	value: number | null;
 	iconUrl?: string | null;
 };
 
-class progressBarWidgetApi extends BaseWidgetApi {
+class ProgressBarWidgetApi extends BaseWidgetApi {
 	public async datasource({ homey, body }: ApiRequest): Promise<WidgetDataPayload | null> {
 		const data = await this.getDatasource(homey.app, body.datasource);
 		if (data == null) return null;
@@ -20,4 +20,4 @@ class progressBarWidgetApi extends BaseWidgetApi {
 	}
 }
 
-export default new progressBarWidgetApi();
+export default new ProgressBarWidgetApi();

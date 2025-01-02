@@ -2,10 +2,10 @@ import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import { Widget } from 'homey';
 import { BaseWidget } from '../baseWidget.mjs';
-import DataVistaLogger from '../../dataVistaLogger.mjs';
+import DataVistaLogger from '../../DataVistaLogger.mjs';
 
-export default class statusBadgeWidget extends BaseWidget {
-	private static instance: statusBadgeWidget | null = null;
+export default class StatusBadgeWidget extends BaseWidget {
+	private static instance: StatusBadgeWidget | null = null;
 	private widget: Widget;
 
 	private constructor(
@@ -21,7 +21,7 @@ export default class statusBadgeWidget extends BaseWidget {
 		homey: Homey,
 		homeyApi: ExtendedHomeyAPIV3Local,
 		logger: DataVistaLogger
-	): Promise<statusBadgeWidget> {
+	): Promise<StatusBadgeWidget> {
 		if (this.instance === null) {
 			this.instance = new this(homey, homeyApi, logger);
 			await this.instance.setup();

@@ -3,8 +3,8 @@ import type { SimpleGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
 import { WidgetDataPayload } from '../../baseWidgetApi.mjs';
 import { CapabilitiesObject, ExtendedVariable } from 'homey-api';
-import { BaseSettings } from '../../../datavistasettings/baseSettings.mjs';
-import { PercentageData } from '../../../datavistasettings/percentageSettings.mjs';
+import { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
+import { PercentageData } from '../../../datavistasettings/PercentageSettings.mjs';
 
 type Settings = {
 	transparent: boolean;
