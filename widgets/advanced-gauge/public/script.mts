@@ -495,7 +495,7 @@ class AdvancedGaugeWidgetScript {
 							this.data = {
 								min: 0,
 								max: 100,
-								value: percentageData.settings.percentage,
+								value: percentageData.settings.percentage ?? 0,
 								unit: '%',
 								unitPosition: 'suffix',
 							};
@@ -543,7 +543,7 @@ class AdvancedGaugeWidgetScript {
 							this.data = {
 								min: 0,
 								max: 100,
-								value: settings.percentage,
+								value: settings.percentage ?? 0,
 								unit: '%',
 								unitPosition: 'suffix',
 							};
