@@ -76,5 +76,8 @@
   },
   "0.9.2": {
     "en": "Added \"Status\" options to the app settings page"
+  },
+  "0.9.3": {
+    "en": "Fixed bugs that caused widgets to get stuck at the loading animation"
   }
 }
