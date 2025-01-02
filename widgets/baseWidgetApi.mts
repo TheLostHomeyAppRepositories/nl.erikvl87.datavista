@@ -56,7 +56,11 @@ export class BaseWidgetApi {
 				};
 			}
 			default:
-				void app.logger.logMessage(`[${this.constructor.name}]: Unsupported data source type: ${datasource.type}`, true, datasource);
+				void app.logger.logMessage(
+					`[${this.constructor.name}]: Unsupported data source type: ${datasource.type}`,
+					true,
+					datasource,
+				);
 				return null;
 		}
 	}
@@ -120,13 +124,23 @@ export class BaseWidgetApi {
 		id: string,
 		deviceId: string,
 	): Promise<{ device: ExtendedDevice; capability: CapabilitiesObject } | null> {
-		const device = await app.homeyApi.devices.getDevice({ id: deviceId });
-		if (!device) {
-			void app.logger.logMessage(`[${this.constructor.name}]: Device with id '${deviceId}' not found.`);
+		let device = null;
+		try {
+			device = await app.homeyApi.devices.getDevice({ id: deviceId });
+		} catch (error) {
+			if (error instanceof Error && error.message.startsWith('Not Found')) {
+				void app.logger.logMessage(`[${this.constructor.name}]: Device with id '${deviceId}' not found.`);
+			} else {
+				void app.logger.logException(error);
+			}
 			return null;
 		}
 
 		const capability = device.capabilitiesObj[id];
+		if (!capability) {
+			void app.logger.logMessage(`[${this.constructor.name}]: Capability with id '${id}' not found.`);
+			return null;
+		}
 
 		return {
 			device,
@@ -159,7 +173,11 @@ export class BaseWidgetApi {
 	 * Log a message.
 	 */
 	public async logMessage({ homey, body }: ApiRequest): Promise<void> {
-		await homey.app.logger.logMessage(`[${this.constructor.name}]: ${body.message}`, body.logToSentry, ...body.optionalParams);
+		await homey.app.logger.logMessage(
+			`[${this.constructor.name}]: ${body.message}`,
+			body.logToSentry,
+			...body.optionalParams,
+		);
 	}
 
 	/**
