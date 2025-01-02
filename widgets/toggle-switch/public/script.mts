@@ -64,33 +64,41 @@ class toggleSwitchWidgetScript {
 	}
 
 	async updateIcon(iconUrl: string | null): Promise<void> {
-		if (this.settings.showIcon === false) return;
-		if (this.iconUrl === iconUrl) return;
+		try {
+			if (this.settings.showIcon === false) return;
+			if (this.iconUrl === iconUrl) return;
 
-		const iconEl = document.getElementById('icon')!;
-		if (iconUrl == null) {
-			iconEl.style.display = 'none';
-			return;
+			const iconEl = document.getElementById('icon')!;
+			if (iconUrl == null) {
+				iconEl.style.display = 'none';
+				return;
+			}
+
+			this.iconUrl = iconUrl;
+			const widgetDiv = document.querySelector('.homey-widget')!;
+			const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
+			const rgbMatch = bgColor.match(/\d+/g)!;
+			const [r, g, b, a = 1] = rgbMatch.map(Number);
+			const isTransparent = a === 0;
+			const isWhitish = r > 240 && g > 240 && b > 240;
+			const color =
+				isTransparent || !isWhitish
+					? getComputedStyle(document.documentElement).getPropertyValue('--homey-text-color').trim()
+					: null;
+
+			let url = `/icon?url=${iconUrl}`;
+			if (color != null) url += `&color=${encodeURIComponent(color)}`;
+
+			const result = (await this.homey.api('GET', url)) as string;
+			iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
+			iconEl.style.display = 'block';
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An error occured while updating the icon', error);
+			} else {
+				await this.logMessage('An error occured while updating the icon', true, error);
+			}
 		}
-
-		this.iconUrl = iconUrl;
-		const widgetDiv = document.querySelector('.homey-widget')!;
-		const bgColor = window.getComputedStyle(widgetDiv).backgroundColor;
-		const rgbMatch = bgColor.match(/\d+/g)!;
-		const [r, g, b, a = 1] = rgbMatch.map(Number);
-		const isTransparent = a === 0;
-		const isWhitish = r > 240 && g > 240 && b > 240;
-		const color =
-			isTransparent || !isWhitish
-				? getComputedStyle(document.documentElement).getPropertyValue('--homey-text-color').trim()
-				: null;
-
-		let url = `/icon?url=${iconUrl}`;
-		if (color != null) url += `&color=${encodeURIComponent(color)}`;
-
-		const result = (await this.homey.api('GET', url)) as string;
-		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
-		iconEl.style.display = 'block';
 	}
 
 	private async getData(): Promise<void> {

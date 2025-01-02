@@ -94,26 +94,34 @@ class LabelWidgetScript {
 	}
 
 	private async updateIcon(iconUrl?: string | null): Promise<void> {
-		if (!this.settings.showIcon || this.iconUrl === iconUrl) return;
-		this.iconUrl = iconUrl || null;
+		try {
+			if (!this.settings.showIcon || this.iconUrl === iconUrl) return;
+			this.iconUrl = iconUrl || null;
 
-		const iconEl = document.getElementById('icon')!;
-		if (!iconUrl) {
-			iconEl.style.display = 'none';
-			return;
+			const iconEl = document.getElementById('icon')!;
+			if (!iconUrl) {
+				iconEl.style.display = 'none';
+				return;
+			}
+
+			const color = this.getIconColor();
+			let url = `/icon?url=${iconUrl}`;
+			if (color) url += `&color=${encodeURIComponent(color)}`;
+
+			const result = (await this.homey.api('GET', url)) as string;
+			iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
+			iconEl.style.display = 'block';
+			const lineEl = document.getElementById('line')!;
+			const lineOffset = iconEl.getBoundingClientRect().width;
+			const iconMarginRight = parseFloat(getComputedStyle(iconEl).marginRight);
+			lineEl.style.marginLeft = `${lineOffset + iconMarginRight}px`;
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An error occured while updating the icon', error);
+			} else {
+				await this.logMessage('An error occured while updating the icon', true, error);
+			}
 		}
-
-		const color = this.getIconColor();
-		let url = `/icon?url=${iconUrl}`;
-		if (color) url += `&color=${encodeURIComponent(color)}`;
-
-		const result = (await this.homey.api('GET', url)) as string;
-		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
-		iconEl.style.display = 'block';
-		const lineEl = document.getElementById('line')!;
-		const lineOffset = iconEl.getBoundingClientRect().width;
-		const iconMarginRight = parseFloat(getComputedStyle(iconEl).marginRight);
-		lineEl.style.marginLeft = `${lineOffset + iconMarginRight}px`;
 	}
 
 	private getIconColor(): string | null {
@@ -249,15 +257,15 @@ class LabelWidgetScript {
 
 		const messages = !errored
 			? [
-				{ message: 'I can display text', interval: 3000 },
-				{ message: 'I can show emoticons 🥳', interval: 4000 },
-				{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
-				{ message: 'Are you still here? Go configure me!', interval: 7000 },
-			]
+					{ message: 'I can display text', interval: 3000 },
+					{ message: 'I can show emoticons 🥳', interval: 4000 },
+					{ message: 'I am capable of displaying long sentences by scrolling horizontally.', interval: 7000 },
+					{ message: 'Are you still here? Go configure me!', interval: 7000 },
+			  ]
 			: [
-				{ message: 'An error occured', interval: 3000 },
-				{ message: 'Please check the settings or contact the developer', interval: 6000 },
-			];
+					{ message: 'An error occured', interval: 3000 },
+					{ message: 'Please check the settings or contact the developer', interval: 6000 },
+			  ];
 		let i = 0;
 
 		const update = async (): Promise<void> => {
@@ -279,11 +287,9 @@ class LabelWidgetScript {
 
 	public async onHomeyReady(): Promise<void> {
 		try {
-			if (!this.settings.transparent)
-				document.querySelector('.homey-widget')!.classList.add('with-background');
+			if (!this.settings.transparent) document.querySelector('.homey-widget')!.classList.add('with-background');
 
 			if (this.settings.textBold) document.documentElement.style.setProperty('--font-weight', 'bold');
-
 
 			let height = 74;
 			if (!this.settings.showName) height -= 22;

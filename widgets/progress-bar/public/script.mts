@@ -101,8 +101,8 @@ class ProgressBarWidgetScript {
 					unit == null
 						? `${displayValue}`
 						: unitLocation == 'prefix'
-							? ` ${unit} ${displayValue}`
-							: `${displayValue} ${unit}`;
+						? ` ${unit} ${displayValue}`
+						: `${displayValue} ${unit}`;
 			} else {
 				progressLabel.textContent = overwriteLabel;
 			}
@@ -245,22 +245,30 @@ class ProgressBarWidgetScript {
 	}
 
 	private async updateIcon(iconUrl?: string | null): Promise<void> {
-		if (!this.settings.showIcon || this.iconUrl === iconUrl) return;
-		this.iconUrl = iconUrl || null;
+		try {
+			if (!this.settings.showIcon || this.iconUrl === iconUrl) return;
+			this.iconUrl = iconUrl || null;
 
-		const iconEl = document.getElementById('icon')!;
-		if (!iconUrl) {
-			iconEl.style.display = 'none';
-			return;
+			const iconEl = document.getElementById('icon')!;
+			if (!iconUrl) {
+				iconEl.style.display = 'none';
+				return;
+			}
+
+			const color = this.getIconColor();
+			let url = `/icon?url=${iconUrl}`;
+			if (color) url += `&color=${encodeURIComponent(color)}`;
+
+			const result = (await this.homey.api('GET', url)) as string;
+			iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
+			iconEl.style.display = 'block';
+		} catch (error) {
+			if (error instanceof Error) {
+				await this.logError('An error occured while updating the icon', error);
+			} else {
+				await this.logMessage('An error occured while updating the icon', true, error);
+			}
 		}
-
-		const color = this.getIconColor();
-		let url = `/icon?url=${iconUrl}`;
-		if (color) url += `&color=${encodeURIComponent(color)}`;
-
-		const result = (await this.homey.api('GET', url)) as string;
-		iconEl.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(result)}")`;
-		iconEl.style.display = 'block';
 	}
 
 	private getIconColor(): string | null {

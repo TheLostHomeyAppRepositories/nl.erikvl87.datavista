@@ -18,6 +18,7 @@ import labelWidget from './widgets/label/labelWidget.mjs';
 import ActionSetDataString from './actions/actionSetDataString.mjs';
 import statusBadgeWidget from './widgets/status-badge/statusBadgeWidget.mjs';
 import actionSetDataColor from './actions/actionSetDataStatus.mjs';
+import { ExtendedError } from './common/ExtendedError.mjs';
 
 export default class DataVista extends Homey.App {
 	homeyApi!: ExtendedHomeyAPIV3Local;
@@ -110,10 +111,14 @@ export default class DataVista extends Homey.App {
 	 * @returns The svg source.
 	 */
 	public async getSvgForUrl(url: string, color: string | null): Promise<string> {
-		const response = await fetch(url);
-		if (!response.ok || !response.headers.get('content-type')?.includes('image/svg+xml')) {
-			throw new Error('Invalid response while fetching icon');
-		} else {
+		try {
+			const response = await fetch(url);
+			if (!response.ok)
+				throw new ExtendedError('Invalid response while fetching icon. Status: ', { response });
+
+			if (!response.headers.get('content-type')?.includes('image/svg+xml'))
+				throw new ExtendedError('Invalid content type while fetching icon.', { response });
+
 			let iconSvgSource = await response.text();
 			if (color == null) return iconSvgSource;
 
@@ -165,6 +170,10 @@ export default class DataVista extends Homey.App {
 			iconSvgSource = new XMLSerializer().serializeToString(svgDoc);
 
 			return iconSvgSource;
+			
+		} catch (error) {
+			void this.logger.logException(error);
+			throw error;
 		}
 	}
 }
