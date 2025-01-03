@@ -247,8 +247,12 @@ class LabelWidgetScript {
 
 		if (isMarquee) {
 			await new Promise(resolve => setTimeout(resolve, timeoutForMarquee + 1000));
-			const lettersEl = document.querySelectorAll('.letters')! as NodeListOf<HTMLElement>;
-			lettersEl.forEach(el => el.classList.add('marquee'));
+			const animationDuration = text.length * 130;
+			const lettersEls = document.querySelectorAll('.letters')! as NodeListOf<HTMLElement>;
+			lettersEls.forEach(el => {
+				el.style.animationDuration = `${animationDuration}ms`;
+				el.classList.add('marquee');
+			});
 		}
 	}
 
