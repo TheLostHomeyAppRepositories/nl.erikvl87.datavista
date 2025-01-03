@@ -1,7 +1,7 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { SimpleGaugeWidgetPayload } from '../api.mjs';
 import type * as echarts from 'echarts';
-import { WidgetDataPayload } from '../../baseWidgetApi.mjs';
+import { WidgetDataPayload } from '../../BaseWidgetApi.mjs';
 import { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
 import { PercentageData } from '../../../datavistasettings/PercentageSettings.mjs';

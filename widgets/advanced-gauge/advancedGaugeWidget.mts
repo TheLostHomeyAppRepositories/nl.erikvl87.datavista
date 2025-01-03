@@ -2,7 +2,7 @@ import Homey from 'homey/lib/Homey';
 import { BaseSettings } from '../../datavistasettings/BaseSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../../datavistasettings/AdvancedGaugeWidgetSettings.mjs';
 import { Widget } from 'homey';
-import { BaseWidget } from '../baseWidget.mjs';
+import { BaseWidget } from '../BaseWidget.mjs';
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import DataVistaLogger from '../../DataVistaLogger.mjs';
 

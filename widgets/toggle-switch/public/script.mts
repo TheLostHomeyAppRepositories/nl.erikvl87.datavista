@@ -2,7 +2,7 @@ import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
 import type { BooleanData } from '../../../datavistasettings/BooleanSettings.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
-import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
+import type { WidgetDataPayload } from '../../BaseWidgetApi.mjs';
 
 type Settings = {
 	datasource?: {

@@ -3,7 +3,7 @@ import DataVista from '../app.mjs';
 import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
 import { ApiRequest } from '../Types.mjs';
 import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
-import { DataSource } from './baseWidget.mjs';
+import { DataSource } from './BaseWidget.mjs';
 
 export type WidgetDataPayload = {
 	type: 'capability' | 'variable' | 'advanced';

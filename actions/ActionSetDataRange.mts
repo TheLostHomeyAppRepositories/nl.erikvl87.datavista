@@ -1,6 +1,6 @@
 import Homey from 'homey/lib/Homey';
 import { FlowCardAction } from 'homey';
-import { BaseDataAction } from './baseActionData.mjs';
+import { BaseDataAction } from './BaseActionData.mjs';
 import { RangeSettings } from '../datavistasettings/RangeSettings.mjs';
 import DataVistaLogger from '../DataVistaLogger.mjs';
 

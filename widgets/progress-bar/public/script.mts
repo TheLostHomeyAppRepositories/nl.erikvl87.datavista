@@ -1,7 +1,7 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type { BaseSettings } from '../../../datavistasettings/BaseSettings.mjs';
 import type { PercentageData } from '../../../datavistasettings/PercentageSettings.mjs';
-import type { WidgetDataPayload } from '../../baseWidgetApi.mjs';
+import type { WidgetDataPayload } from '../../BaseWidgetApi.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import type { RangeData } from '../../../datavistasettings/RangeSettings.mjs';
 

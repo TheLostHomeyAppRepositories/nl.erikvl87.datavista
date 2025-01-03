@@ -1,5 +1,5 @@
 import { ApiRequest } from '../../Types.mjs';
-import { BaseWidgetApi, WidgetDataPayload } from '../baseWidgetApi.mjs';
+import { BaseWidgetApi, WidgetDataPayload } from '../BaseWidgetApi.mjs';
 
 class StatusBadgeWidgetApi extends BaseWidgetApi {
 	public async datasource({ homey, body }: ApiRequest): Promise<{

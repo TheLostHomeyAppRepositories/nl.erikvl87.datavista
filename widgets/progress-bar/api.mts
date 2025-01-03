@@ -1,5 +1,5 @@
 import type { ApiRequest } from '../../Types.mjs';
-import { BaseWidgetApi, WidgetDataPayload } from '../baseWidgetApi.mjs';
+import { BaseWidgetApi, WidgetDataPayload } from '../BaseWidgetApi.mjs';
 
 export type ProgressBarWidgetPayload = {
 	name: string,

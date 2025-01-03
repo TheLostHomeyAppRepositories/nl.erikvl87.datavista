@@ -1,7 +1,7 @@
 import { ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import { Widget } from 'homey';
-import { BaseWidget } from '../baseWidget.mjs';
+import { BaseWidget } from '../BaseWidget.mjs';
 import DataVistaLogger from '../../DataVistaLogger.mjs';
 
 export default class LabelWidget extends BaseWidget {
