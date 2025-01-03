@@ -65,7 +65,7 @@ You are currently configuring the colors statically, but you can choose to use o
 {% step %}
 ### Add the widget to your dashboard
 
-Finally, follow the steps outlined in "[Gauge - Adding the widget to your dashboard](./#adding-the-widget-to-your-dashboard)" and select the DataVista identifier you created in step 3.1 as the datasource. Then, select the configsource you created in step 4.1. This will link the range, value, and visualization to the gauge.
+Finally, follow the steps outlined in "[Gauge - Adding the widget to your dashboard](./#adding-the-widget-to-your-dashboard)" to add an **Advanced Gauge** and select the DataVista identifier you created in step `3.1` as the datasource. Then, select the configsource you created in step `4.1`. This will link the range, value, and visualization to the gauge.
 {% endstep %}
 {% endstepper %}
 

@@ -18,7 +18,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 After adding the widget, you can customize it to reflect specific statuses.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark (2).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (2).png" alt="" width="375"></picture><figcaption><p>Status badge preview</p></figcaption></figure>
+<figure><picture><source srcset="../.gitbook/assets/preview-dark (3).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (3).png" alt="" width="375"></picture><figcaption><p>Status badge preview</p></figcaption></figure>
 
 ## Configuring the Status badge
 
