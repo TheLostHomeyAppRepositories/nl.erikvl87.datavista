@@ -79,5 +79,8 @@
   },
   "0.9.3": {
     "en": "Fixed bugs that caused widgets to get stuck at the loading animation"
+  },
+  "0.9.4": {
+    "en": "Update status widget previews according to guidelines"
   }
 }
