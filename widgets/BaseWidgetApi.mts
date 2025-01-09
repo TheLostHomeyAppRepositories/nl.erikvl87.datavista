@@ -160,9 +160,15 @@ export class BaseWidgetApi {
 	 * Get a variable by id.
 	 */
 	private async getVariable(app: DataVista, id: string): Promise<ExtendedVariable | null> {
-		const variable = await app.homeyApi.logic.getVariable({ id: id });
-		if (!variable) {
-			void app.logger.logMessage(`[${this.constructor.name}]: Variable with id '${id}' not found.`);
+		let variable = null;
+		try {
+			variable = await app.homeyApi.logic.getVariable({ id: id });
+		} catch (error) {
+			if (error instanceof Error && error.message.startsWith('Not Found')) {
+				void app.logger.logMessage(`[${this.constructor.name}]: Variable with id '${id}' not found.`);
+			} else {
+				void app.logger.logException(error);
+			}
 			return null;
 		}
 
