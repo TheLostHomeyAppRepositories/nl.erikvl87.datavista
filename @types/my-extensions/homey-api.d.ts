@@ -66,6 +66,39 @@ declare module 'homey-api' {
 		uri: string;
 	}
 
+	class ExtendedManagerInsights extends HomeyAPIV3Local.ManagerInsights {
+		getLog(opts: { id: string }): Promise<ExtendedLog>;
+		getLogs(): Promise<{ [key: string]: ExtendedLog }>;
+		getLogEntries(opts: { id: string; uri?: string; resolution?: string; }): Promise<ExtendedInsightsLogs>;
+	}
+
+	class ExtendedLog extends HomeyAPIV3Local.ManagerInsights.Log {
+		type: string;
+		units?: string;
+		lastValue?: any;
+		title?: string;
+		ownerUri: string;
+		ownerId: string;
+	}
+
+	type ExtendedInsightsLogs = {
+		updatesIn: number;
+		values: Array<{
+			t: string;
+			v: number;
+		}>;
+		start: string;
+		end: string;
+		step: number;
+		uri: string;
+		id: string;
+		lastValue: {
+			t: string;
+			v: number;
+		};
+	};
+
+
 	export class ExtendedHomeyAPIV3Local extends HomeyAPIV3Local { 
 
 		// manager: HomeyAPIV3Local.Manager;
@@ -118,5 +151,6 @@ declare module 'homey-api' {
 		zones: ExtendedManagerZones;
 		devices: ExtendedManagerDevices;
 		logic: ExtendedManagerLogic;
+		insights: ExtendedManagerInsights;
 	}
 }

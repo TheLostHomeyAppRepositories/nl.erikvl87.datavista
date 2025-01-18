@@ -5,5 +5,16 @@
 	"text": "text",
 	"status": "status",
 	"homey_variable": "Homey variable",
-	"none": "None"
+	"homey_insight": "Homey insight",
+	"none": "None",
+	"today": "today",
+	"yesterday": "yesterday",
+	"thisWeek": "this week",
+	"lastWeek": "last week",
+	"thisMonth": "this month",
+	"lastMonth": "last month",
+	"thisYear": "this year",
+	"lastYear": "last year",
+	"unknown": "unknown",
+	"day": "day"
 }

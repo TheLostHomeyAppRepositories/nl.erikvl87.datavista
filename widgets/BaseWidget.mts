@@ -10,13 +10,33 @@ import DataVistaLogger from '../DataVistaLogger.mjs';
 import { TextData } from '../datavistasettings/TextSettings.mjs';
 import { StatusData } from '../datavistasettings/StatusSettings.mjs';
 
+// TODO abstraction & per type?
 export type DataSource = {
 	name: string;
 	description?: string;
 	id: string;
-	type?: 'capability' | 'advanced' | 'variable';
+	type?: 'capability' | 'advanced' | 'variable' | 'insight';
 	deviceId?: string;
 	deviceName: string;
+	insightResolution?: | 'yesterday'
+	| 'lastWeek'
+	| 'lastMonth'
+	| 'lastYear'
+	| 'last2Years'
+	| 'today'
+	| 'thisWeek'
+	| 'thisMonth'
+	| 'thisYear'
+	| 'lastHour'
+	| 'last6Hours'
+	| 'last24Hours'
+	| 'last3Days'
+	| 'last7Days'
+	| 'last14Days'
+	| 'last31Days'
+	| 'last3Months'
+	| 'last6Months'
+	| 'lastYear';
 };
 
 type AutocompleteQueryOptions = {
@@ -28,15 +48,20 @@ type AutocompleteQueryOptions = {
 	includeRanges?: boolean;
 	includeNumbers?: boolean;
 	includeStatus?: boolean;
+	includeDataPoints?: boolean;
 	fromCapabilities?: boolean;
 	fromSettings?: boolean;
 	fromVariables?: boolean;
+	fromInsights?: boolean;
 };
 
 export class BaseWidget {
 	protected homey: Homey;
 	protected homeyApi: ExtendedHomeyAPIV3Local;
 	protected logger: DataVistaLogger;
+
+	// TODO to a singleton for the whole app
+	private deviceCache: Map<string, any> = new Map();
 
 	constructor(homey: Homey, homeyApi: ExtendedHomeyAPIV3Local, logger: DataVistaLogger) {
 		this.homey = homey;
@@ -115,7 +140,9 @@ export class BaseWidget {
 							const data: BaseSettings<StatusData> = this.homey.settings.get(key);
 							results.push({
 								name: data.identifier,
-								description: `${DATAVISTA_APP_NAME} ${this.homey.__('status')} (${data.settings.color} - ${data.settings.text})`,
+								description: `${DATAVISTA_APP_NAME} ${this.homey.__('status')} (${data.settings.color} - ${
+									data.settings.text
+								})`,
 								id: key,
 								type: 'advanced',
 								deviceName: DATAVISTA_APP_NAME,
@@ -237,6 +264,51 @@ export class BaseWidget {
 							type: 'variable',
 							deviceName: HOMEY_LOGIC,
 						});
+					}
+				}
+			}
+
+			if (options.fromInsights) {
+				if (options.includeDataPoints) {
+					const insights = await this.homeyApi.insights.getLogs();
+					if (insights != null) {
+						for (const [key, insight] of Object.entries(insights)) {
+							// TODO FILTER INSIGHTS!
+							if (insight.type !== 'number') continue;
+
+							let deviceName;
+							if (insight.ownerUri.startsWith('homey:device:')) {
+								const deviceId = insight.ownerUri.split('homey:device:')[1];
+								try {
+									if (this.deviceCache.has(deviceId)) {
+										deviceName = this.deviceCache.get(deviceId).name;
+									} else {
+										const device = await this.homeyApi.devices.getDevice({ id: deviceId });
+										deviceName = device.name;
+										this.deviceCache.set(deviceId, device);
+									}
+								} catch (_e) {
+									deviceName = key;
+								}
+							} else {
+								deviceName = key;
+							}
+
+							let description = this.homey.__('homey_insight');
+							if(deviceName)
+								description += ` - ${deviceName}`;
+
+							if (insight.units != null || insight.lastValue != null) {
+								description += ` (${insight.lastValue ?? '0'}${insight.units ? ` ${insight.units}` : ''})`;
+							}
+							results.push({
+								name: insight.title ?? '[No name]',
+								description: description,
+								id: insight.id,
+								type: 'insight',
+								deviceName: deviceName ?? '[No name]',
+							});
+						}
 					}
 				}
 			}

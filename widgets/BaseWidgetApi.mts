@@ -1,18 +1,25 @@
-import { CapabilitiesObject, ExtendedDevice, ExtendedVariable } from 'homey-api';
+import { CapabilitiesObject, ExtendedDevice, ExtendedInsightsLogs, ExtendedLog, ExtendedVariable } from 'homey-api';
 import DataVista from '../app.mjs';
 import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
 import { ApiRequest } from '../Types.mjs';
-import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
+import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_INSIGHT, HOMEY_LOGIC } from '../constants.mjs';
 import { DataSource } from './BaseWidget.mjs';
 
 export type WidgetDataPayload = {
-	type: 'capability' | 'variable' | 'advanced';
+	type: 'capability' | 'variable' | 'advanced' | 'insight';
 	name: string;
 	fallbackIcon?: string | null;
-	data: CapabilitiesObject | BaseSettings<unknown> | ExtendedVariable;
+	data: any;
 };
 
 export class BaseWidgetApi {
+	/**
+	 * Get the time and language.
+	 */
+	protected async getTimeAndLanguage({ homey }: ApiRequest): Promise<{ timezone: string; language: string }> {
+		return await homey.app.getTimeAndLanguage();
+	}
+
 	/**
 	 * Get the data source.
 	 */
@@ -55,6 +62,20 @@ export class BaseWidgetApi {
 					data: result,
 				};
 			}
+			case 'insight': {
+				const result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+				if (result == null) return null;
+
+				return {
+					type: 'insight',
+					name: result.insight.title ?? '[No name]',
+					data: {
+						friendlyResolution: BaseWidgetApi.getFriendlyResolution(datasource.insightResolution!),
+						insight: result.insight,
+						logs: result.logs 
+					},
+				};
+			}
 			default:
 				void app.logger.logMessage(
 					`[${this.constructor.name}]: Unsupported data source type: ${datasource.type}`,
@@ -62,6 +83,29 @@ export class BaseWidgetApi {
 					datasource,
 				);
 				return null;
+		}
+	}
+
+	private static getFriendlyResolution(resolution: string): string {
+		switch (resolution) {
+			case 'today':
+				return 'today';
+			case 'yesterday':
+				return 'yesterday';
+			case 'thisWeek':
+				return 'this week';
+			case 'lastWeek':
+				return 'last week';
+			case 'thisMonth':
+				return 'this month';
+			case 'lastMonth':
+				return 'last month';
+			case 'thisYear':
+				return 'this year';
+			case 'lastYear':
+				return 'last year';
+			default:
+				return 'unknown';
 		}
 	}
 
@@ -77,6 +121,7 @@ export class BaseWidgetApi {
 			percentage?: boolean;
 			number?: boolean;
 			range?: boolean;
+			datapoint?: boolean;
 		},
 	): boolean {
 		switch (payload.type) {
@@ -109,6 +154,10 @@ export class BaseWidgetApi {
 				if (options.range && advanced.type === DATA_TYPE_IDS.RANGE) return true;
 				if (options.string && advanced.type === DATA_TYPE_IDS.TEXT) return true;
 				if (options.status && advanced.type === DATA_TYPE_IDS.STATUS) return true;
+				return false;
+			}
+			case 'insight': {
+				if (options.datapoint) return true;
 				return false;
 			}
 			default:
@@ -173,6 +222,46 @@ export class BaseWidgetApi {
 		}
 
 		return variable;
+	}
+
+	/**
+	 * Get a capability by id and deviceId.
+	 */
+	private async getInsight(
+		app: DataVista,
+		id: string,
+		resolution:
+			| 'yesterday'
+			| 'lastWeek'
+			| 'lastMonth'
+			| 'lastYear'
+			| 'last2Years'
+			| 'today'
+			| 'thisWeek'
+			| 'thisMonth'
+			| 'thisYear'
+			| 'lastHour'
+			| 'last6Hours'
+			| 'last24Hours'
+			| 'last3Days'
+			| 'last7Days'
+			| 'last14Days'
+			| 'last31Days'
+			| 'last3Months'
+			| 'last6Months'
+			| 'lastYear',
+	): Promise<{ logs: ExtendedInsightsLogs; insight: ExtendedLog } | null> {
+		const insight = await app.homeyApi.insights.getLog({ id: id });
+		const logs = await app.homeyApi.insights.getLogEntries({ id: id, resolution });
+		if (!logs) {
+			void app.logger.logMessage(`[${this.constructor.name}]: Insight with id '${id}' not found.`);
+			return null;
+		}
+
+		return {
+			logs,
+			insight
+		};
 	}
 
 	/**

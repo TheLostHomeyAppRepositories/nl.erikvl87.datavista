@@ -5,5 +5,16 @@
 	"text": "tekst",
 	"status": "status",
 	"homey_variable": "Homey variabele",
-	"none": "Geen"
+	"homey_insight": "Homey inzicht",
+	"none": "Geen",
+	"today": "vandaag",
+	"yesterday": "gisteren",
+	"thisWeek": "deze week",
+	"lastWeek": "vorige week",
+	"thisMonth": "deze maand",
+	"lastMonth": "vorige maand",
+	"thisYear": "dit jaar",
+	"lastYear": "vorig jaar",
+	"unknown": "onbekend",
+	"day": "dag"
 }

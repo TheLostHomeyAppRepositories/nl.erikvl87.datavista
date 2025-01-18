@@ -19,6 +19,7 @@ import ActionSetDataString from './actions/ActionSetDataString.mjs';
 import StatusBadgeWidget from './widgets/status-badge/StatusBadgeWidget.mjs';
 import ActionSetDataColor from './actions/ActionSetDataStatus.mjs';
 import { ExtendedError } from './common/ExtendedError.mjs';
+import LineChartWidget from './widgets/line-chart/LineChartWidget.mjs';
 
 let fetch: typeof globalThis.fetch;
 
@@ -50,6 +51,7 @@ export default class DataVista extends Homey.App {
 		await ToggleSwitchWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await LabelWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await StatusBadgeWidget.initialize(this.homey, this.homeyApi, this.logger);
+		await LineChartWidget.initialize(this.homey, this.homeyApi, this.logger);
 
 		await ActionSetDataPercentage.initialize(this.homey, this.logger);
 		await ActionSetRange.initialize(this.homey, this.logger);
@@ -61,7 +63,7 @@ export default class DataVista extends Homey.App {
 
 	/**
 	 * Get the timezone and language of this Homey.
-	 * @returns An object containing the timezone and language.
+	 * @returns An object containing the timezone and language. Example: { timezone: 'Europe/Amsterdam', language: 'nl' }
 	 */
 	public async getTimeAndLanguage(): Promise<{ timezone: string; language: string }> {
 		const timezone = await this.homey.clock.getTimezone();

@@ -489,7 +489,8 @@ class AdvancedGaugeWidgetScript {
 
 			if (payload.data != null) {
 				if (payload.data.type === 'advanced') {
-					switch (payload.data.data.type) {
+					const advancedData = payload.data.data as BaseSettings<unknown>;
+					switch (advancedData.type) {
 						case 'percentage': {
 							const percentageData = payload.data.data as BaseSettings<PercentageData>;
 							this.data = {
@@ -502,7 +503,7 @@ class AdvancedGaugeWidgetScript {
 							break;
 						}
 						case 'range': {
-							const rangeData = payload.data.data as BaseSettings<RangeData>;
+							const rangeData = advancedData as BaseSettings<RangeData>;
 							this.data = {
 								min: rangeData.settings.min,
 								max: rangeData.settings.max,
@@ -514,7 +515,7 @@ class AdvancedGaugeWidgetScript {
 							break;
 						}
 						default: {
-							await this.logMessage(`Type '${payload.data.data.type}' is not implemented.`, true);
+							await this.logMessage(`Type '${advancedData.type}' is not implemented.`, true);
 							await this.startConfigurationAnimation();
 						}
 					}
