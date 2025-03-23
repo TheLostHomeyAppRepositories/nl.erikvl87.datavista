@@ -20,7 +20,7 @@ To add the progress bar widget to your dashboard, follow these simple steps:
 
 Once the widget is added, you can personalize it to display specific text from device capabilities, Homey variables, or flows, tailoring the widget to suit your needs.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark.png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light.png" alt="" width="375"></picture><figcaption><p>Label widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../.gitbook/assets/preview-dark (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1).png" alt="" width="375"></picture><figcaption><p>Label widget preview</p></figcaption></figure>
 
 ## Configuring the Label
 

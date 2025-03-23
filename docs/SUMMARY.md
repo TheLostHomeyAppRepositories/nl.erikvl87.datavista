@@ -13,6 +13,7 @@
   * [Tutorial: Visualizing temperature with a Progress bar](widgets/progress-bar/tutorial-visualizing-temperature-with-a-progress-bar.md)
 * [Status badge](widgets/status-badge.md)
 * [Toggle switch](widgets/toggle-switch.md)
+* [Line chart](widgets/line-chart.md)
 
 ## Community
 

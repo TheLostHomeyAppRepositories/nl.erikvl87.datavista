@@ -20,7 +20,7 @@ To add the toggle switch widget to your dashboard, follow these simple steps:
 
 After adding it, you can customize the widget to display the state of specific devices or binary conditions based on your preferences.
 
-<figure><picture><source srcset="../.gitbook/assets/preview-dark (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1) (1).png" alt="" width="375"></picture><figcaption><p>Toggle switch widget preview</p></figcaption></figure>
+<figure><picture><source srcset="../.gitbook/assets/preview-dark (1) (1) (1).png" media="(prefers-color-scheme: dark)"><img src="../.gitbook/assets/preview-light (1) (1) (1).png" alt="" width="375"></picture><figcaption><p>Toggle switch widget preview</p></figcaption></figure>
 
 ## Configuring the widget
 
