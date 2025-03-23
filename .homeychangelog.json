@@ -85,5 +85,8 @@
   },
   "0.9.5": {
     "en": "Fixed an issue for the label widget by calculating the animation speed based on the label length, ensuring consistent animation speed regardless of text length"
+  },
+  "0.10.0": {
+    "en": "Added a line chart widget"
   }
 }
