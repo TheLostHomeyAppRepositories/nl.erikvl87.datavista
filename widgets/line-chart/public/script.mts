@@ -29,6 +29,7 @@ type Settings = {
 	timeframe: Timeframe;
 	period1: Period;
 	period2: Period;
+	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
 };
 
 class LineChartWidgetScript {
@@ -281,6 +282,87 @@ class LineChartWidgetScript {
 		}
 	}
 
+	private async determineOffTheScale(data1: [Date, number | '-'][], data2: [Date, number | '-'][]): Promise<boolean> {
+		// Helper function to calculate the range of a dataset
+		const calculateRange = async (data: [Date, number | '-'][]): Promise<number> => {
+			const numericValues = data
+				.filter(point => typeof point[1] === 'number')
+				.map(point => point[1] as number);
+
+			// Early exit if no numeric values exist
+			if (numericValues.length === 0) return 0;
+
+			// Apply IQR method if selected
+			if (this.settings.yAxisCalculationMethod === "iqr") {
+				const sortedValues = numericValues.sort((a, b) => a - b);
+				const q1 = sortedValues[Math.floor(sortedValues.length / 4)];
+				const q3 = sortedValues[Math.floor((sortedValues.length * 3) / 4)];
+				const iqr = q3 - q1;
+
+				const lowerBound = q1 - 1.5 * iqr;
+				const upperBound = q3 + 1.5 * iqr;
+
+				// Log the calculated bounds
+				await this.logMessage(`Lower Bound: ${lowerBound}, Upper Bound: ${upperBound}`, false);
+
+				// Filter values within bounds
+				const filteredValues = numericValues.filter(value => value >= lowerBound && value <= upperBound);
+
+				// Calculate the range of the filtered dataset
+				return Math.max(...filteredValues) - Math.min(...filteredValues);
+			}
+
+			// If not using IQR, calculate the full range
+			return Math.max(...numericValues) - Math.min(...numericValues);
+		};
+
+		// Early exit if both datasets are empty
+		if (data1.length === 0 && data2.length === 0) {
+			await this.logMessage('Both datasets are empty, no need for a second axis.', false);
+			return false;
+		}
+
+		// Handle "Force Same Axis" option
+		if (this.settings.yAxisCalculationMethod === "sameAxis") {
+			await this.logMessage('Forcing both series to use the same axis.', false);
+			return false; // Force same axis, no second axis needed
+		}
+
+		// Calculate ranges for both datasets
+		const range1 = await calculateRange(data1);
+		const range2 = await calculateRange(data2);
+
+		// Handle cases where both ranges are 0
+		if (range1 === 0 && range2 === 0) {
+			await this.logMessage('Both datasets have a range of 0, no need for a second axis.', false);
+			return false;
+		}
+
+		// Handle cases where one range is 0
+		if (range1 === 0 || range2 === 0) {
+			await this.logMessage('One dataset has a range of 0, requiring a second axis.', false);
+			return true;
+		}
+
+		// Check if units are different
+		if (this.units1 !== this.units2) {
+			await this.logMessage('Datasets have different units, requiring a second axis.', false);
+			return true; // Different units always require a second axis
+		}
+
+		// Calculate the range ratio
+		const rangeRatio = Math.max(range1, range2) / Math.min(range1, range2);
+
+		// Log the range ratio for debugging
+		await this.logMessage(
+			`${this.settings.datasource1?.name} Range ratio: ${rangeRatio} (Dataset 1: ${range1}, Dataset 2: ${range2})`,
+			false
+		);
+
+		const threshold = 10;
+		return rangeRatio > threshold;
+	}
+
 	private async render(): Promise<void> {
 		if (!this.data1 && !this.data2) {
 			await this.logMessage('The payload is null', false);
@@ -308,25 +390,8 @@ class LineChartWidgetScript {
 				break;
 		}
 
-		if (this.data1 != null && this.data2 != null) {
-			const threshold = 0.3; // 30%
-			const percentageOff = 1.0; // 100%
-			const countOffPoints = this.data1.reduce((count, point1, index) => {
-				const point2 = this.data2 ? this.data2[index] : null;
-				if (point1 && point2 && typeof point1[1] === 'number' && typeof point2[1] === 'number') {
-					const diff = Math.abs(point1[1] - point2[1]);
-					const avg = (point1[1] + point2[1]) / 2;
-					if (diff / avg > percentageOff) {
-						return count + 1;
-					}
-				}
-				return count;
-			}, 0);
-
-			const totalPoints = Math.min(this.data1!.length, this.data2!.length);
-			const offPercentage = countOffPoints / totalPoints;
-			this.isOffTheScale = offPercentage > threshold;
-		}
+		if (this.data1 != null && this.data2 != null)
+			this.isOffTheScale = await this.determineOffTheScale(this.data1, this.data2);
 
 		const primaryAxisY = {
 			type: 'value',

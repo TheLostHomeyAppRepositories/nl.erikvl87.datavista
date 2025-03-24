@@ -130,6 +130,38 @@
 				"nl": "Toon aftelklok"
 			},
 			"value": false
+		},
+		{
+			"id": "yAxisCalculationMethod",
+			"type": "dropdown",
+			"title": {
+				"en": "Y-Axis Calculation Method",
+				"nl": "Y-asberekeningsmethode"
+			},
+			"value": "fullRange",
+			"values": [
+				{
+					"id": "fullRange",
+					"title": {
+						"en": "Full range",
+						"nl": "Volledig bereik"
+					}
+				},
+				{
+					"id": "iqr",
+					"title": {
+						"en": "Interquartile Range (IQR)",
+						"nl": "Interkwartielafstand (IQR)"
+					}
+				},
+				{
+					"id": "sameAxis",
+					"title": {
+						"en": "Force the same axis",
+						"nl": "Forceer dezelfde as"
+					}
+				}
+			]
 		}
 	],
 	"api": {
