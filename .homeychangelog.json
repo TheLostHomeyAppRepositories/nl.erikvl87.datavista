@@ -88,5 +88,8 @@
   },
   "0.10.0": {
     "en": "Added a line chart widget"
+  },
+  "0.10.1": {
+    "en": "Added new configuration options to the Line chart widget"
   }
 }
