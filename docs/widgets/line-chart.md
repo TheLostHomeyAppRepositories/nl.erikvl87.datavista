@@ -38,7 +38,7 @@ To display only the primary data source, simply leave datasource 2 unconfigured.
 
 To compare the same data source for the current period vs the previous one, leave datasource 2 empty. Then, set period 2 to a different period than period 1, such as selecting "this" for period 1 and "previous" for period 2. This will allow you to visualize the comparison between the two periods using the same data source.
 
-### How do I close the tooltip?
+### How does the "Y-Axis Calculation Method" setting affect the chart rendering?
 
 The "Y-Axis Calculation Method" setting determines how the Y-axis range is calculated and helps decide whether one or two Y-axes are required.
 
