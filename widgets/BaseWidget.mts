@@ -1,4 +1,4 @@
-import { ExtendedHomeyAPIV3Local } from 'homey-api';
+import { ExtendedDevice, ExtendedHomeyAPIV3Local } from 'homey-api';
 import Homey from 'homey/lib/Homey';
 import Widget from 'homey/lib/Widget';
 import { BooleanData } from '../datavistasettings/BooleanSettings.mjs';
@@ -61,7 +61,7 @@ export class BaseWidget {
 	protected logger: DataVistaLogger;
 
 	// TODO to a singleton for the whole app
-	private deviceCache: Map<string, any> = new Map();
+	private deviceCache: Map<string, ExtendedDevice> = new Map();
 
 	constructor(homey: Homey, homeyApi: ExtendedHomeyAPIV3Local, logger: DataVistaLogger) {
 		this.homey = homey;
@@ -280,8 +280,9 @@ export class BaseWidget {
 							if (insight.ownerUri.startsWith('homey:device:')) {
 								const deviceId = insight.ownerUri.split('homey:device:')[1];
 								try {
-									if (this.deviceCache.has(deviceId)) {
-										deviceName = this.deviceCache.get(deviceId).name;
+									const device = this.deviceCache.get(deviceId);
+									if (device) {
+										deviceName = device.name;
 									} else {
 										const device = await this.homeyApi.devices.getDevice({ id: deviceId });
 										deviceName = device.name;
@@ -295,14 +296,17 @@ export class BaseWidget {
 							}
 
 							let description = this.homey.__('homey_insight');
-							if(deviceName)
-								description += ` - ${deviceName}`;
 
 							if (insight.units != null || insight.lastValue != null) {
 								description += ` (${insight.lastValue ?? '0'}${insight.units ? ` ${insight.units}` : ''})`;
 							}
+
+							let name = deviceName;
+							if (insight.title)
+								name += `: ${insight.title}`;
+
 							results.push({
-								name: insight.title ?? '[No name]',
+								name: name,
 								description: description,
 								id: insight.id,
 								type: 'insight',

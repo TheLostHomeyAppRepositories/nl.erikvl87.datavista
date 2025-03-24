@@ -827,6 +827,15 @@
           "value": "#32cd32"
         },
         {
+          "id": "overwriteName1",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name 1",
+            "nl": "Overschrijf naam 1"
+          },
+          "value": ""
+        },
+        {
           "id": "datasource2",
           "type": "autocomplete",
           "title": {
@@ -1002,6 +1011,15 @@
             }
           ],
           "value": "#1e90ff"
+        },
+        {
+          "id": "overwriteName2",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name 2",
+            "nl": "Overschrijf naam 2"
+          },
+          "value": ""
         },
         {
           "id": "showRefreshCountdown",

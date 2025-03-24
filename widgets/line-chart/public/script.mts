@@ -18,6 +18,7 @@ type Settings = {
 		type: 'insight';
 	};
 	color1: string;
+	overwriteName1: string;
 	datasource2?: {
 		deviceId: string;
 		deviceName: string;
@@ -26,6 +27,7 @@ type Settings = {
 		type: 'insight';
 	};
 	color2: string;
+	overwriteName2: string;
 	timeframe: Timeframe;
 	period1: Period;
 	period2: Period;
@@ -113,7 +115,10 @@ class LineChartWidgetScript {
 				},
 			})) as WidgetDataPayload;
 
-			this.name1 = payload1.name + ' (' + this.homey.__(this.resolution1) + ')';
+			
+			this.name1 = (this.settings.overwriteName1?.trim())
+				? this.settings.overwriteName1
+				: payload1.name + ' (' + this.homey.__(this.resolution1) + ')';
 		}
 
 		if (this.settings.datasource2?.id.trim()) {
@@ -124,7 +129,9 @@ class LineChartWidgetScript {
 				},
 			})) as WidgetDataPayload;
 
-			this.name2 = payload2.name + ' (' + this.homey.__(this.resolution2) + ')';
+			this.name2 = (this.settings.overwriteName2?.trim())
+				? this.settings.overwriteName2
+				: payload2.name + ' (' + this.homey.__(this.resolution2) + ')';
 		}
 
 		const insights1 = payload1?.data.logs as ExtendedInsightsLogs | null;
