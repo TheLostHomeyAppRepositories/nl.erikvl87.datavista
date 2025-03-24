@@ -70,7 +70,6 @@ export class BaseWidgetApi {
 					type: 'insight',
 					name: result.insight.title ?? '[No name]',
 					data: {
-						friendlyResolution: BaseWidgetApi.getFriendlyResolution(datasource.insightResolution!),
 						insight: result.insight,
 						logs: result.logs 
 					},
@@ -83,29 +82,6 @@ export class BaseWidgetApi {
 					datasource,
 				);
 				return null;
-		}
-	}
-
-	private static getFriendlyResolution(resolution: string): string {
-		switch (resolution) {
-			case 'today':
-				return 'today';
-			case 'yesterday':
-				return 'yesterday';
-			case 'thisWeek':
-				return 'this week';
-			case 'lastWeek':
-				return 'last week';
-			case 'thisMonth':
-				return 'this month';
-			case 'lastMonth':
-				return 'last month';
-			case 'thisYear':
-				return 'this year';
-			case 'lastYear':
-				return 'last year';
-			default:
-				return 'unknown';
 		}
 	}
 
