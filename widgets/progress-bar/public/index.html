@@ -4,7 +4,7 @@
 			.homey-widget {
 				width: 100%;
 				flex-direction: column;
-				padding: 0 0.15em !important;
+				padding: 0;
 			}
 
 			.container {
@@ -12,23 +12,24 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				height: 25px;
 			}
 
 			.title {
-				margin-top: 2px;
 				width: 100%;
 				text-align: left;
 				overflow: hidden;
 				white-space: nowrap;
 				text-overflow: ellipsis;
+				height: 21px;
+				font-size: var(--homey-font-size-small);
+				/* This accounts for 21(height)+2(margin)=23px height */
 			}
 
 			body {
 				display: flex;
+				/* background-color: blue; */
 				justify-content: center;
 				align-items: center;
-				height: 100vh;
 				font-family: Arial, sans-serif;
 			}
 
@@ -38,7 +39,8 @@
 			}
 
 			#progressPercentage {
-				font-size: 14px;
+				font-size: var(--homey-font-size-small); /* --homey-font-size-small = 14px */
+				height: 18px;
 				margin-right: 10px;
 				width: 35px;
 			}
@@ -49,7 +51,7 @@
 				position: relative;
 				border-radius: 15px;
 				overflow: hidden;
-				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 				background-color: var(--homey-color-mono-200);
 			}
 
@@ -63,7 +65,8 @@
 			}
 
 			.displayRange {
-				height: 21px !important;
+				height: 20px !important;
+				/* Dynamically added to both #progressBackground and #progressBar */
 			}
 
 			#progressLabel {

@@ -370,10 +370,17 @@ class ProgressBarWidgetScript {
 
 			if (this.settings.datasource) await this.syncData();
 
-			// # Temporary fix for the height of the widget causing the widget's height to be too small
-			// # This can be reverted once Athom has fixed the issue.
-			// this.homey.ready({ height: this.settings.showName ? 45 : 20 });
-			this.homey.ready({ height: 45 });
+			// The title height is 23px
+			// The progress bar height is 20px
+			// The progress bar has a box-shadow with a vertical offset of 4px
+			
+			// When the "show name"" is enabled (and shown below the progress bar), the box-shadow has room to be displayed,
+			// regardless of the smaller or larger progress bar version.
+			// When the "show name"" is disabled, the box-shadow is cut off at the bottom of the widget when the larger progress bar version is shown.
+
+			const titleHeight = 23;
+			const progressBarHeight = this.settings.showName ? 20 : 20 + 4;
+			this.homey.ready({ height: this.settings.showName ? titleHeight + progressBarHeight : progressBarHeight });
 
 			if (!this.settings.datasource) {
 				await this.startConfigurationAnimation();

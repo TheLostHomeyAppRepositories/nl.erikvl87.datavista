@@ -30,14 +30,6 @@ The widget has the following configurable settings:
 
 <table><thead><tr><th width="143">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*, DataVista range value*, device capability</em> or <em>Homey variable</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Show Name</strong></td><td>If checked the name of the datasource will be displayed in the widget.</td></tr><tr><td><strong>Overwrite Name</strong></td><td>If set, this name will be displayed instead of the datasource name.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 50%.</td></tr><tr><td><strong>Color 3</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
 
-{% hint style="danger" %}
-#### Known Issue: "Show Name" Setting
-
-**Issue:** Disabling the "Show name" setting causes the widget to remain stuck on the loading screen when the dashboard is reopened.
-
-**Resolution:** Athom has acknowledged this issue and has confirmed that it will be fixed in an upcoming release. In the meantime, please avoid disabling the "Show name" setting to ensure proper functionality.
-{% endhint %}
-
 {% hint style="warning" %}
 To use a **DataVista percentage value** or **DataVista range value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
 
