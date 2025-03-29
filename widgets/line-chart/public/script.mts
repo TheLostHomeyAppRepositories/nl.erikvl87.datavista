@@ -51,6 +51,8 @@ class LineChartWidgetScript {
 	name2: string = 'datasource2';
 	timezone: string | undefined;
 	language: string | undefined;
+	dateMin: Date | null = null;
+	dateMax: Date | null = null;
 
 	constructor(homey: HomeyWidget) {
 		this.settings = homey.getSettings() as Settings;
@@ -65,15 +67,32 @@ class LineChartWidgetScript {
 		this.resolution2 = LineChartWidgetScript.getResolution(this.settings.timeframe, this.settings.period2);
 	}
 
+	/**
+	 * Logs a message to the Homey API.
+	 * @param message - The message to log.
+	 * @param logToSentry - Whether to log the message to Sentry.
+	 * @param optionalParams - Additional parameters to include in the log.
+	 */
 	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {
 		await this.homey.api('POST', '/logMessage', { message, logToSentry, optionalParams });
 	}
 
+	/**
+	 * Logs an error to the Homey API.
+	 * @param message - The error message to log.
+	 * @param error - The error object to serialize and log.
+	 */
 	private async logError(message: string, error: Error): Promise<void> {
 		const serializedError = JSON.stringify(error, Object.getOwnPropertyNames(error));
 		await this.homey.api('POST', '/logError', { message, error: serializedError });
 	}
 
+	/**
+	 * Determines the resolution string based on the granularity and timeframe.
+	 * @param granularity - The granularity of the data (e.g., 'day', 'week').
+	 * @param timeframe - The timeframe of the data (e.g., 'this', 'last').
+	 * @returns The resolution string (e.g., 'today', 'thisWeek').
+	 */
 	private static getResolution(granularity: Timeframe, timeframe: Period): string {
 		switch (granularity) {
 			case 'day':
@@ -87,6 +106,13 @@ class LineChartWidgetScript {
 		}
 	}
 
+	/**
+	 * Converts a hex color to an RGBA string.
+	 * @param hex - The hex color string (e.g., "#ff0000").
+	 * @param opacity - The opacity value (0 to 1).
+	 * @returns The RGBA color string.
+	 * @throws Error if the hex color is invalid.
+	 */
 	private static hexToRgba(hex: string, opacity: number): string {
 		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 		hex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
@@ -103,7 +129,11 @@ class LineChartWidgetScript {
 		return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 	}
 
-	private async syncData(): Promise<void> {
+	/**
+	 * Synchronizes data from the Homey API for the configured datasources.
+	 * Updates the chart data, units, and other related properties.
+	 */
+	private async getData(): Promise<void> {
 		let payload1: WidgetDataPayload | null = null;
 		let payload2: WidgetDataPayload | null = null;
 
@@ -151,26 +181,28 @@ class LineChartWidgetScript {
 
 		const differentTimeframes = this.settings.period1 !== this.settings.period2;
 		const normalizeData = (
-			timeframe: Period,
+			period: Period,
 			point: {
 				t: string;
 				v: number;
 			},
+			periodToAdjust: Period,
 		): [Date, number | '-'] => {
 			const date = new Date(point.t);
-			if (differentTimeframes && timeframe === 'this') {
+
+			if (differentTimeframes && period === periodToAdjust) {
 				switch (this.settings.timeframe) {
 					case 'day':
-						date.setHours(date.getHours() - 24);
+						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -24 : 24));
 						break;
 					case 'week':
-						date.setDate(date.getDate() - 7);
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -7 : 7));
 						break;
 					case 'month':
-						date.setMonth(date.getMonth() - 1);
+						date.setMonth(date.getMonth() + (periodToAdjust === 'this' ? -1 : 1));
 						break;
 					case 'year':
-						date.setFullYear(date.getFullYear() - 1);
+						date.setFullYear(date.getFullYear() + (periodToAdjust === 'this' ? -1 : 1));
 						break;
 				}
 			}
@@ -180,29 +212,80 @@ class LineChartWidgetScript {
 			return [date, parseFloat(point.v.toFixed(2))];
 		};
 
+		// When the granularity is month or year, the first point is the last point of the previous resolution
+		if (this.settings.timeframe === 'month' || this.settings.timeframe === 'year') {
+			insights1?.values?.shift();
+			insights2?.values?.shift();
+		}
+		
+		let timeframeToAdjust: Period = 'this';
+		if (differentTimeframes && this.settings.timeframe === 'month') {
+			const firstDate1 = insights1?.values?.[0]?.t ?? null;
+			const firstDate2 = insights2?.values?.[0]?.t ?? null;
+			if (firstDate1 && firstDate2) {
+				const date1 = new Date(firstDate1);
+				const date2 = new Date(firstDate2);
+				const daysInMonth1 = new Date(date1.getFullYear(), date1.getMonth() + 1, 0).getDate();
+				const daysInMonth2 = new Date(date2.getFullYear(), date2.getMonth() + 1, 0).getDate();
+				if (daysInMonth1 < daysInMonth2) {
+					timeframeToAdjust = this.settings.period1;
+				} else if (daysInMonth1 > daysInMonth2) {
+					timeframeToAdjust = this.settings.period2;
+				}
+			}
+		}
+
 		const data1: [Date, number | '-'][] = insights1
 			? [...(insights1.values ?? []), insights1.lastValue].map((point, _index) =>
-				normalizeData(this.settings.period1, point),
+				normalizeData(this.settings.period1, point, timeframeToAdjust),
 			)
 			: [];
 		const data2: [Date, number | '-'][] = insights2
 			? [...(insights2.values ?? []), insights2.lastValue].map((point, _index) =>
-				normalizeData(this.settings.period2, point),
+				normalizeData(this.settings.period2, point, timeframeToAdjust),
 			)
 			: [];
 
-		// When the granularity is month or year, the first point is the last point of the previous resolution
-		if (this.settings.timeframe === 'month' || this.settings.timeframe === 'year') {
-			data1.shift();
-			data2.shift();
-		}
+		// For debugging purposes only.
+		// const percentageToRemove = 0.95;
+		// data1.splice(Math.floor(data1.length * (1 - percentageToRemove)));
+		// data2.splice(Math.floor(data2.length * (1 - percentageToRemove)));
 
-		this.data1 = data1;
-		this.data2 = data2;
-		this.units1 = payload1?.data.insight.units ?? '';
-		this.units2 = payload2?.data.insight.units ?? '';
+		await this.setData(data1, payload1?.data.insight.units ?? '', data2, payload2?.data.insight.units ?? '');
 	}
 
+	private async setData(
+		data1: [Date, number | '-'][],
+		units1: string,
+		data2: [Date, number | '-'][],
+		units2: string
+	): Promise<void> {
+		this.data1 = data1;
+		this.data2 = data2;
+		this.units1 = units1;
+		this.units2 = units2;
+
+		if (this.data1 != null && this.data2 != null)
+			this.isOffTheScale = await this.determineOffTheScale(this.data1, this.data2);
+
+		const lowestDate1 = this.data1?.length ? this.data1[0][0] : null;
+		const lowestDate2 = this.data2?.length ? this.data2[0][0] : null;
+		this.dateMin = lowestDate1 && lowestDate2
+			? new Date(Math.min(lowestDate1.getTime(), lowestDate2.getTime()))
+			: lowestDate1 ?? lowestDate2;
+
+		const highestDate1 = this.data1?.length ? this.data1[this.data1.length - 1][0] : null;
+		const highestDate2 = this.data2?.length ? this.data2[this.data2.length - 1][0] : null;
+		
+		this.dateMax = highestDate1 && highestDate2
+			? new Date(Math.max(highestDate1.getTime(), highestDate2.getTime()))
+			: highestDate1 ?? highestDate2;
+	}
+
+	/**
+	 * Schedules a countdown timer for data refresh.
+	 * @param updatesIn - The time in milliseconds until the next update.
+	 */
 	private scheduleCountdown(updatesIn: number): void {
 		const progressBar = document.getElementById('progress-bar')!;
 
@@ -237,7 +320,7 @@ class LineChartWidgetScript {
 				}
 
 				// Perform the action when countdown reaches 0
-				await this.syncData();
+				await this.getData();
 				await this.render();
 			} else {
 				const percentage = (countdown / (updatesIn / 1000)) * 100;
@@ -248,47 +331,125 @@ class LineChartWidgetScript {
 		}, 1000);
 	}
 
-	private formatXAxisValue(value: string, legend: boolean = false): string {
-		const capitalizeFirstLetter = (str: string): string => {
-			return str.charAt(0).toUpperCase() + str.slice(1);
-		};
-
-		const date = new Date(value);
-
-		if (!legend)
-			return new Intl.DateTimeFormat(this.language, {
-				timeZone: this.timezone,
-				weekday: this.settings.timeframe === 'week' ? 'short' : undefined,
-				day: this.settings.timeframe === 'month' ? 'numeric' : undefined,
-				month: this.settings.timeframe === 'year' ? 'short' : undefined,
-				hour: this.settings.timeframe === 'day' ? 'numeric' : undefined,
-				minute: this.settings.timeframe === 'day' ? '2-digit' : undefined,
-				hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
-			}).format(date);
-
-		const formatted = Intl.DateTimeFormat(this.language, {
-			timeZone: this.timezone,
-			weekday: this.settings.timeframe === 'week' ? 'long' : undefined,
-			day: (this.settings.timeframe === 'month' || this.settings.timeframe === 'year') ? 'numeric' : undefined,
-			month: this.settings.timeframe === 'year' ? 'long' : undefined,
-			hour: this.settings.timeframe !== 'year' ? '2-digit': undefined,
-			minute: this.settings.timeframe !== 'year' ? '2-digit': undefined,
-			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
-
-		}).format(date);
-		
-		switch (this.settings.timeframe) {
-			case 'day':
-				return formatted;
-			case 'week':
-				return capitalizeFirstLetter(formatted);
-			case 'month':
-				return capitalizeFirstLetter(this.homey.__('day')) + ' ' + formatted;
-			case 'year':
-				return capitalizeFirstLetter(formatted);
-		}
+	/**
+	 * Determines whether the data for the current timeframe is potentially incomplete.
+	 * @returns True if the data might not be complete, otherwise false.
+	 */
+	private potentiallyNotComplete(): boolean {
+		if (['day', 'week', 'month', 'year'].includes(this.settings.timeframe) &&
+			((this.settings.datasource1?.id && this.settings.period1 === 'this') &&
+				(!this.settings.datasource2?.id || (this.settings.datasource2?.id && this.settings.period2 === 'this'))))
+			return true;
+		return false;
 	}
 
+	/**
+	 * Determines the appropriate options for rendering based on the timeframe and data range.
+	 * @param timeframe - The selected timeframe (e.g., 'week', 'month', 'year').
+	 * @param dateMin - The minimum date in the dataset.
+	 * @param dateMax - The maximum date in the dataset.
+	 * @returns An object containing options for rendering and intervals.
+	 */
+	private getTimeframeOptions(timeframe: Timeframe): {
+		options: Intl.DateTimeFormatOptions;
+		interval: number;
+	} {
+		const dateMin = this.dateMin!;
+		const dateMax = this.dateMax!;
+		const diff = Math.abs(dateMin.getTime() - dateMax.getTime());
+		const options: Intl.DateTimeFormatOptions = {};
+		let interval = 0;
+
+		switch (timeframe) {
+			case 'day': {
+				const diffInMinutes = Math.ceil(diff / (1000 * 60));
+				if (diffInMinutes < 2) {
+					// Probably in demo mode
+					interval = 10000; // 10 seconds
+				} else {
+					interval = 1000 * 60; // 1 minute
+				}
+				break;
+			}
+			case 'week': {
+				const diffInDays = Math.ceil(diff / (1000 * 3600 * 24));
+				if (diffInDays < 4) {
+					options.hour = '2-digit';
+					options.minute = '2-digit';
+					interval = 3600 * 1000 * 4; // 4 hours
+				} else {
+					interval = 3600 * 1000 * 24; // 1 day
+				}
+				break;
+			}
+			case 'month': {
+				const diffInDays = Math.ceil(diff / (1000 * 3600 * 24));
+				if (diffInDays < 3) {
+					options.hour = '2-digit';
+					options.minute = '2-digit';
+					interval = 3600 * 1000 * 6; // 6 hours
+				} else {
+					interval = 3600 * 1000 * 24; // 1 day
+				}
+				break;
+			}
+			case 'year': {
+				const diffInMonths = Math.ceil(diff / (1000 * 3600 * 24 * 30));
+				if (diffInMonths < 3) {
+					options.month = '2-digit';
+					options.day = '2-digit';
+					interval = 3600 * 1000 * 24; // 1 day
+				} else {
+					interval = 3600 * 1000 * 24 * 27; // 27 days
+				}
+				break;
+			}
+		}
+
+		return { options, interval };
+	}
+
+	/**
+	 * Formats the X-axis value based on the selected timeframe and language.
+	 * * @param value - The value to format.
+	 * @param friendly - Whether the value is for a tooltip or not.
+	 * @return The formatted value as a string.
+	 * @throws Error if the value is not a valid date.
+	 * */
+	private formatXAxisValue(value: string, friendly: boolean = false): string {
+		const capitalizeFirstLetter = (str: string): string =>
+			str.charAt(0).toUpperCase() + str.slice(1);
+	
+		const date = new Date(value);
+
+		const options: Intl.DateTimeFormatOptions = {
+			timeZone: this.timezone,
+			weekday: this.settings.timeframe === 'week' ? (friendly ? 'long' : 'short') : undefined,
+			day: (this.settings.timeframe === 'month') ? 'numeric' : undefined,
+			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
+			hour: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day') ? 'numeric' : undefined,
+			minute: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day') ? '2-digit' : undefined,
+			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
+		};
+
+		if (!friendly && this.potentiallyNotComplete() && this.dateMin && this.dateMax) {
+			const { options: adjustedOptions } = this.getTimeframeOptions(this.settings.timeframe);
+			Object.assign(options, adjustedOptions);
+		}
+
+		const formattedDate = Intl.DateTimeFormat(this.language, options).format(date).replace(',', '');
+		if (options.hour || options.minute)
+			return formattedDate.replace(' ', '\n');
+
+		return capitalizeFirstLetter(formattedDate);
+	}
+
+	/**
+	 * Determines whether a second Y-axis is required based on the data ranges and settings.
+	 * @param data1 - The first dataset.
+	 * @param data2 - The second dataset.
+	 * @returns True if a second axis is required, otherwise false.
+	 */
 	private async determineOffTheScale(data1: [Date, number | '-'][], data2: [Date, number | '-'][]): Promise<boolean> {
 		// Helper function to calculate the range of a dataset
 		const calculateRange = async (data: [Date, number | '-'][]): Promise<number> => {
@@ -370,6 +531,10 @@ class LineChartWidgetScript {
 		return rangeRatio > threshold;
 	}
 
+	/**
+	 * Renders the chart using the current data and settings.
+	 * Updates the chart options and legend toggles.
+	 */
 	private async render(): Promise<void> {
 		if (!this.data1 && !this.data2) {
 			await this.logMessage('The payload is null', false);
@@ -396,9 +561,6 @@ class LineChartWidgetScript {
 				splitNumber = 12;
 				break;
 		}
-
-		if (this.data1 != null && this.data2 != null)
-			this.isOffTheScale = await this.determineOffTheScale(this.data1, this.data2);
 
 		const primaryAxisY = {
 			type: 'value',
@@ -509,6 +671,8 @@ class LineChartWidgetScript {
 			});
 		}
 
+		const { interval } = this.getTimeframeOptions(this.settings.timeframe);
+
 		const option = {
 			legend: {
 				show: false,
@@ -545,8 +709,8 @@ class LineChartWidgetScript {
 			},
 			grid: {
 				top: '30',
-				left: '0',
-				right: '0',
+				left: '10',
+				right: '10',
 				bottom: '0',
 				height: 'auto',
 				containLabel: true,
@@ -562,13 +726,17 @@ class LineChartWidgetScript {
 				splitLine: {
 					show: false,
 				},
+				minInterval: interval,
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel: true,
-					showMaxLabel: this.settings.timeframe === 'day' || this.settings.timeframe === 'month' ? true : false,
-					alignMinLabel: 'left',
-					alignMaxLabel: 'right'
+					showMinLabel:true,
+					showMaxLabel: this.settings.timeframe === 'day' || this.settings.timeframe === 'month' ? this.potentiallyNotComplete() ? false : true : false,
+					alignMinLabel: this.settings.timeframe !== 'month' ? 'center' : 'left',
+					alignMaxLabel: this.settings.timeframe !== 'month' ? 'center' : 'right',
+					rotate: this.settings.timeframe !== 'month' ? 45 : 0,
+					align: 'center',
+					margin: this.settings.timeframe !== 'month' ? 20 : 8,
 				},
 			},
 			yAxis: yAxis,
@@ -598,17 +766,22 @@ class LineChartWidgetScript {
 		this.chart.resize();
 	}
 
+	/**
+	 * Starts a configuration animation for the chart.
+	 * Used when no data is available or during initialization.
+	 */
 	private async startConfigurationAnimation(): Promise<void> {
 		if (this.configurationAnimationTimeout) return;
 
 		const interval = 750;
 		const data: [Date, number][] = [];
+		
 
 		const update = async (): Promise<void> => {
 			const randomValue = Math.floor(Math.random() * 101);
 			data.push([new Date(), randomValue]);
 			if (data.length > 20) data.shift();
-			this.data1 = data;
+			await this.setData(data, 'Demo', [], '');
 			this.resolution1 = 'today';
 			this.units1 = 'Demo mode';
 
@@ -629,11 +802,18 @@ class LineChartWidgetScript {
 		this.configurationAnimationTimeout = setTimeout(update, interval);
 	}
 
+	/**
+	 * Stops the configuration animation for the chart.
+	 */
 	private async stopConfigurationAnimation(): Promise<void> {
 		if (this.configurationAnimationTimeout) clearTimeout(this.configurationAnimationTimeout);
 		this.configurationAnimationTimeout = null;
 	}
 
+	/**
+	 * Toggles the visibility of a series in the chart.
+	 * @param indexToToggle - The index of the series to toggle (0 or 1).
+	 */
 	private toggleSeries(indexToToggle: number): void {
 		const options: echarts.EChartsOption = this.chart.getOption() as echarts.EChartsOption;
 
@@ -709,7 +889,7 @@ class LineChartWidgetScript {
 			this.language = result.language;
 			
 			this.chart = window.echarts.init(document.getElementById('line-chart'));
-			if (this.settings.datasource1 || this.settings.datasource2) await this.syncData();
+			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
 
 			this.homey.ready();
 			await this.render();
