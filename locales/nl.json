@@ -18,5 +18,6 @@
 	"unknown": "onbekend",
 	"day": "dag",
 	"thisHour": "dit uur",
-	"lastHour": "vorig uur"
+	"lastHour": "vorig uur",
+	"minute": "minuut"
 }

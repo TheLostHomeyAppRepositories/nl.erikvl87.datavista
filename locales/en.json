@@ -18,5 +18,6 @@
 	"unknown": "unknown",
 	"day": "day",
 	"thisHour": "this hour",
-	"lastHour": "last hour"
+	"lastHour": "last hour",
+	"minute": "minute"
 }

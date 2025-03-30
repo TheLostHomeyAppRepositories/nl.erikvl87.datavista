@@ -482,7 +482,7 @@ class LineChartWidgetScript {
 			weekday: this.settings.timeframe === 'week' ? (friendly ? 'long' : 'short') : undefined,
 			day: (this.settings.timeframe === 'month') ? 'numeric' : undefined,
 			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
-			hour: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day') ? 'numeric' : undefined,
+			hour: (friendly ? this.settings.timeframe !== 'year' &&  this.settings.timeframe !== 'hour' : this.settings.timeframe === 'day') ? 'numeric' : undefined,
 			minute: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day' || this.settings.timeframe === 'hour') ? '2-digit' : undefined,
 			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
 		};
@@ -492,10 +492,21 @@ class LineChartWidgetScript {
 			Object.assign(options, adjustedOptions);
 		}
 
-		const formattedDate = Intl.DateTimeFormat(this.language, options).format(date).replace(',', '');
-		if (options.hour || options.minute)
-			return formattedDate.replace(' ', '\n');
+		let formattedDate = Intl.DateTimeFormat(this.language, options).format(date).replace(',', '');
 
+		if(friendly) {
+			switch (this.settings.timeframe) {
+				case 'hour':
+					formattedDate = this.homey.__('minute') + ' ' + formattedDate;
+					break;
+				case 'month':
+					formattedDate = this.homey.__('day') + ' ' + formattedDate;
+					break;
+			}
+		} else {
+			if (options.hour || options.minute)
+				formattedDate = formattedDate.replace(' ', '\n');
+		}
 		return capitalizeFirstLetter(formattedDate);
 	}
 
