@@ -536,9 +536,6 @@ class LineChartWidgetScript {
 				const lowerBound = q1 - 1.5 * iqr;
 				const upperBound = q3 + 1.5 * iqr;
 
-				// Log the calculated bounds
-				await this.logMessage(`Lower Bound: ${lowerBound}, Upper Bound: ${upperBound}`, false);
-
 				// Filter values within bounds
 				const filteredValues = numericValues.filter(value => value >= lowerBound && value <= upperBound);
 
@@ -551,38 +548,28 @@ class LineChartWidgetScript {
 		};
 
 		// Early exit if both datasets are empty
-		if (data1.length === 0 && data2.length === 0) {
-			await this.logMessage('Both datasets are empty, no need for a second axis.', false);
+		if (data1.length === 0 && data2.length === 0)
 			return false;
-		}
 
 		// Handle "Force Same Axis" option
-		if (this.settings.yAxisCalculationMethod === "sameAxis") {
-			await this.logMessage('Forcing both series to use the same axis.', false);
+		if (this.settings.yAxisCalculationMethod === "sameAxis")
 			return false; // Force same axis, no second axis needed
-		}
 
 		// Calculate ranges for both datasets
 		const range1 = await calculateRange(data1);
 		const range2 = await calculateRange(data2);
 
 		// Handle cases where both ranges are 0
-		if (range1 === 0 && range2 === 0) {
-			await this.logMessage('Both datasets have a range of 0, no need for a second axis.', false);
+		if (range1 === 0 && range2 === 0)
 			return false;
-		}
 
 		// Handle cases where one range is 0
-		if (range1 === 0 || range2 === 0) {
-			await this.logMessage('One dataset has a range of 0, requiring a second axis.', false);
+		if (range1 === 0 || range2 === 0)
 			return true;
-		}
 
 		// Check if units are different
-		if (this.units1 !== this.units2) {
-			await this.logMessage('Datasets have different units, requiring a second axis.', false);
+		if (this.units1 !== this.units2)
 			return true; // Different units always require a second axis
-		}
 
 		// Calculate the range ratio
 		const rangeRatio = Math.max(range1, range2) / Math.min(range1, range2);
@@ -888,10 +875,8 @@ class LineChartWidgetScript {
 	private toggleSeries(indexToToggle: number): void {
 		const options: echarts.EChartsOption = this.chart.getOption() as echarts.EChartsOption;
 
-		if (!options.series) {
-			void this.logMessage('No series found in the options', false);
+		if (!options.series)
 			return;
-		}
 
 		const series = Array.isArray(options.series) ? options.series : [options.series];
 		const legend = Array.isArray(options.legend) ? options.legend[0] : options.legend;
