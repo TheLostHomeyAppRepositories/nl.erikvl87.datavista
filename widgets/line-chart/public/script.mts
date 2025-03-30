@@ -5,7 +5,7 @@ import { ExtendedInsightsLogs } from 'homey-api';
 
 // TODO: Merge all datasource type definitions!
 
-type Timeframe = 'day' | 'week' | 'month' | 'year';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
 type Period = 'this' | 'last';
 
 type Settings = {
@@ -95,6 +95,8 @@ class LineChartWidgetScript {
 	 */
 	private static getResolution(granularity: Timeframe, timeframe: Period): string {
 		switch (granularity) {
+			case 'hour':
+				return 'last6Hours';
 			case 'day':
 				return timeframe === 'this' ? 'today' : 'yesterday';
 			case 'week':
@@ -129,6 +131,18 @@ class LineChartWidgetScript {
 		return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 	}
 
+	private getFriendlyResolutionTranslationId(resolution: string, period: Period): string {
+		if (this.settings.timeframe !== 'hour')
+			return resolution;
+		{
+			if(period === 'this') {
+				return 'thisHour';
+			} else {
+				return 'lastHour';
+			}
+		}
+	}
+
 	/**
 	 * Synchronizes data from the Homey API for the configured datasources.
 	 * Updates the chart data, units, and other related properties.
@@ -148,7 +162,7 @@ class LineChartWidgetScript {
 			
 			this.name1 = (this.settings.overwriteName1?.trim())
 				? this.settings.overwriteName1
-				: payload1.name + ' (' + this.homey.__(this.resolution1) + ')';
+				: payload1.name + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution1, this.settings.period1)) + ')';
 		}
 
 		if (this.settings.datasource2?.id.trim()) {
@@ -161,7 +175,7 @@ class LineChartWidgetScript {
 
 			this.name2 = (this.settings.overwriteName2?.trim())
 				? this.settings.overwriteName2
-				: payload2.name + ' (' + this.homey.__(this.resolution2) + ')';
+				: payload2.name + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution2, this.settings.period2)) + ')';
 		}
 
 		const insights1 = payload1?.data.logs as ExtendedInsightsLogs | null;
@@ -192,6 +206,9 @@ class LineChartWidgetScript {
 
 			if (differentTimeframes && period === periodToAdjust) {
 				switch (this.settings.timeframe) {
+					case 'hour':
+						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
 					case 'day':
 						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -24 : 24));
 						break;
@@ -235,13 +252,50 @@ class LineChartWidgetScript {
 			}
 		}
 
+		let entries1 = insights1 ? [...(insights1.values ?? []), insights1.lastValue] : [];
+		let entries2 = insights2 ? [...(insights2.values ?? []), insights2.lastValue] : [];
+
+		if (this.settings.timeframe === 'hour') {
+			// Hours need adjustments as it is subdata from last6Hours
+
+			const filterEntries = (entries: { t: string; v: number }[], period: Period): { t: string; v: number }[] => {
+				const last = new Date(entries[entries.length - 1].t);
+				let start: Date;
+				let end: Date;
+		
+				if (period === 'last') {
+					start = new Date(last.getTime() - 1 * 3600000); // Subtract 1 hour
+					start.setMinutes(0, 0, 0);
+					end = new Date(start.getTime() + 3600000); // Add 1 hour
+				} else {
+					start = new Date(last.getTime());
+					start.setMinutes(0, 0, 0);
+					end = last;
+				}
+		
+				return entries.filter(({ t }) => {
+					const date = new Date(t);
+					return date >= start && date <= end;
+				});
+			};
+
+			// Apply the inline function to both entries1 and entries2
+			if (entries1.length)
+				entries1 = filterEntries(entries1, this.settings.period1);
+			
+
+			if (entries2.length)
+				entries2 = filterEntries(entries2, this.settings.period2);
+		}
+
 		const data1: [Date, number | '-'][] = insights1
-			? [...(insights1.values ?? []), insights1.lastValue].map((point, _index) =>
+			? entries1.map((point, _index) =>
 				normalizeData(this.settings.period1, point, timeframeToAdjust),
 			)
 			: [];
+
 		const data2: [Date, number | '-'][] = insights2
-			? [...(insights2.values ?? []), insights2.lastValue].map((point, _index) =>
+			? entries2.map((point, _index) =>
 				normalizeData(this.settings.period2, point, timeframeToAdjust),
 			)
 			: [];
@@ -336,7 +390,7 @@ class LineChartWidgetScript {
 	 * @returns True if the data might not be complete, otherwise false.
 	 */
 	private potentiallyNotComplete(): boolean {
-		if (['day', 'week', 'month', 'year'].includes(this.settings.timeframe) &&
+		if (['hour', 'day', 'week', 'month', 'year'].includes(this.settings.timeframe) &&
 			((this.settings.datasource1?.id && this.settings.period1 === 'this') &&
 				(!this.settings.datasource2?.id || (this.settings.datasource2?.id && this.settings.period2 === 'this'))))
 			return true;
@@ -361,13 +415,14 @@ class LineChartWidgetScript {
 		let interval = 0;
 
 		switch (timeframe) {
+			case 'hour':
 			case 'day': {
 				const diffInMinutes = Math.ceil(diff / (1000 * 60));
 				if (diffInMinutes < 2) {
 					// Probably in demo mode
 					interval = 10000; // 10 seconds
 				} else {
-					interval = 1000 * 60; // 1 minute
+					interval = 1000 * 60 * 10;
 				}
 				break;
 			}
@@ -428,7 +483,7 @@ class LineChartWidgetScript {
 			day: (this.settings.timeframe === 'month') ? 'numeric' : undefined,
 			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
 			hour: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day') ? 'numeric' : undefined,
-			minute: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day') ? '2-digit' : undefined,
+			minute: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day' || this.settings.timeframe === 'hour') ? '2-digit' : undefined,
 			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
 		};
 
@@ -546,6 +601,9 @@ class LineChartWidgetScript {
 
 		let splitNumber = 1;
 		switch (this.settings.timeframe) {
+			case 'hour':
+				splitNumber = 6;
+				break;
 			case 'day':
 				splitNumber = 6;
 				break;
@@ -711,8 +769,8 @@ class LineChartWidgetScript {
 			},
 			grid: {
 				top: '30',
-				left: '10',
-				right: '10',
+				left: '12',
+				right: '12',
 				bottom: '0',
 				height: 'auto',
 				containLabel: true,
@@ -733,10 +791,10 @@ class LineChartWidgetScript {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
 					showMinLabel:true,
-					showMaxLabel: this.settings.timeframe === 'day' || this.settings.timeframe === 'month' ? this.potentiallyNotComplete() ? false : true : false,
+					showMaxLabel: this.settings.timeframe === 'hour' || this.settings.timeframe === 'day' || this.settings.timeframe === 'month' ? this.potentiallyNotComplete() ? false : true : false,
 					alignMinLabel: this.settings.timeframe !== 'month' ? 'center' : 'left',
 					alignMaxLabel: this.settings.timeframe !== 'month' ? 'center' : 'right',
-					rotate: this.settings.timeframe !== 'month' ? 45 : 0,
+					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== 'hour' ? 45 : 0,
 					align: 'center',
 					margin: this.settings.timeframe !== 'month' ? 20 : 8,
 				},

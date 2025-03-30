@@ -16,5 +16,7 @@
 	"thisYear": "dit jaar",
 	"lastYear": "vorig jaar",
 	"unknown": "onbekend",
-	"day": "dag"
+	"day": "dag",
+	"thisHour": "dit uur",
+	"lastHour": "vorig uur"
 }

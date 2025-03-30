@@ -16,5 +16,7 @@
 	"thisYear": "this year",
 	"lastYear": "last year",
 	"unknown": "unknown",
-	"day": "day"
+	"day": "day",
+	"thisHour": "this hour",
+	"lastHour": "last hour"
 }

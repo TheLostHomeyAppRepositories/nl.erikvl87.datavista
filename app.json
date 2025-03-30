@@ -620,6 +620,13 @@
           "value": "day",
           "values": [
             {
+              "id": "hour",
+              "title": {
+                "en": "Hour",
+                "nl": "Uur"
+              }
+            },
+            {
               "id": "day",
               "title": {
                 "en": "Day",

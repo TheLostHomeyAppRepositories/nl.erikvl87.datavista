@@ -14,6 +14,7 @@
 			},
 			"value": "day",
 			"values": [
+				{ "id": "hour", "title": { "en": "Hour", "nl": "Uur" } },
 				{ "id": "day", "title": { "en": "Day", "nl": "Dag" } },
 				{ "id": "week", "title": { "en": "Week", "nl": "Week" } },
 				{ "id": "month", "title": { "en": "Month", "nl": "Maand" } },
