@@ -619,6 +619,7 @@ class LineChartWidgetScript {
 				name: this.name1,
 				type: 'line',
 				data: this.data1,
+				sampling: this.settings.timeframe === 'year' ? 'lttb' : undefined,
 				showSymbol: false,
 				itemStyle: {
 					color: this.settings.color1,
@@ -648,6 +649,7 @@ class LineChartWidgetScript {
 				name: this.name2,
 				type: 'line',
 				data: this.data2,
+				sampling: this.settings.timeframe === 'year' ? 'lttb' : undefined,
 				showSymbol: false,
 				itemStyle: {
 					color: LineChartWidgetScript.hexToRgba(this.settings.color2, 0.7),
