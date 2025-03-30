@@ -91,5 +91,8 @@
   },
   "0.10.1": {
     "en": "Added new configuration options to the Line chart widget"
+  },
+  "0.10.2": {
+    "en": "Small improvements to the line chart widget"
   }
 }
