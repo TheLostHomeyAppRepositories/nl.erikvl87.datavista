@@ -94,5 +94,8 @@
   },
   "0.10.2": {
     "en": "Small improvements to the line chart widget"
+  },
+  "0.10.3": {
+    "en": "Switched gauge and line chart rendering engine to potentially fix dashboard crashes"
   }
 }
