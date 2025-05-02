@@ -379,7 +379,9 @@ class SimpleGaugeWidgetScript {
 					.trim();
 				document.querySelector('.homey-widget')!.setAttribute('style', `background-color: ${widgetBackgroundColor};`);
 			}
-			this.chart = window.echarts.init(document.getElementById('gauge'));
+			this.chart = window.echarts.init(document.getElementById('gauge'), null, {
+				renderer: 'svg'
+			});
 			const height = this.settings.style === 'style1' ? 200 : 165;
 			this.homey.ready({ height });
 			if (this.settings.datasource?.id == null) {

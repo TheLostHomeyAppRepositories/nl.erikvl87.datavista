@@ -944,7 +944,9 @@ class LineChartWidgetScript {
 			this.timezone = result.timezone;
 			this.language = result.language;
 			
-			this.chart = window.echarts.init(document.getElementById('line-chart'));
+			this.chart = window.echarts.init(document.getElementById('line-chart'), null, {
+				renderer: 'svg'
+			});
 			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
 
 			this.homey.ready();
