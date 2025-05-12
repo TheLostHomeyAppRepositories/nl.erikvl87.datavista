@@ -97,5 +97,8 @@
   },
   "0.10.3": {
     "en": "Switched gauge and line chart rendering engine to potentially fix dashboard crashes"
+  },
+  "0.10.4": {
+    "en": "Fixes the initial- and legend rendering on iOS for the Line Chart widget"
   }
 }
