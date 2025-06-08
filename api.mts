@@ -58,6 +58,17 @@ class AppApi {
 		return true;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	public addProgressBar({ homey, params, body }: ApiRequest): boolean {
+		const identifier = body.identifier;
+		if (homey.settings.get(identifier)) {
+			return false;
+		}
+
+		homey.app.addProgressBar(identifier, {});
+		return true;
+	}
+
 	private convertToNumber(value: string | null | undefined): number | undefined {
 		if (value == null || String(value).trim() === '') {
 			return undefined;

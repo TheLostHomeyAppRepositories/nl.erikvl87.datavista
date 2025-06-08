@@ -7,7 +7,8 @@ export enum DATA_TYPE_IDS {
 }
 
 export enum WIDGET_TYPE_IDS {
-	GAUGE = "gauge"
+	GAUGE = "gauge",
+	PROGRESS_BAR = "progress-bar",
 }
 
 export const DATAVISTA_APP_NAME = 'DataVista';

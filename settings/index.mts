@@ -3,6 +3,7 @@ import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
 import { PercentageData } from '../datavistasettings/PercentageSettings.mjs';
 import { RangeData } from '../datavistasettings/RangeSettings.mjs';
 import { AdvancedGaugeWidgetData } from '../datavistasettings/AdvancedGaugeWidgetSettings.mjs';
+import { ProgressBarWidgetData } from '../datavistasettings/ProgressBarWidgetSettings.mjs';
 import { BooleanData } from '../datavistasettings/BooleanSettings.mjs';
 import { TextData } from '../datavistasettings/TextSettings.mjs';
 import { StatusData } from '../datavistasettings/StatusSettings.mjs';
@@ -77,6 +78,64 @@ class SettingsScript {
 
 	private createGaugeElement(data: BaseSettings<AdvancedGaugeWidgetData>, key: string): HTMLElement {
 		const element = this.createElement('gauge-template', data, key);
+		const colorInputs = [
+			{
+				color: element.querySelector('#color1-input') as HTMLInputElement,
+				hex: element.querySelector('#color1-hex') as HTMLInputElement,
+				offset: element.querySelector('#offset1-input') as HTMLInputElement,
+				value: data.settings.color1,
+				offsetValue: data.settings.colorOffset1,
+			},
+			{
+				color: element.querySelector('#color2-input') as HTMLInputElement,
+				hex: element.querySelector('#color2-hex') as HTMLInputElement,
+				offset: element.querySelector('#offset2-input') as HTMLInputElement,
+				value: data.settings.color2,
+				offsetValue: data.settings.colorOffset2,
+			},
+			{
+				color: element.querySelector('#color3-input') as HTMLInputElement,
+				hex: element.querySelector('#color3-hex') as HTMLInputElement,
+				offset: element.querySelector('#offset3-input') as HTMLInputElement,
+				value: data.settings.color3,
+				offsetValue: data.settings.colorOffset3,
+			},
+			{
+				color: element.querySelector('#color4-input') as HTMLInputElement,
+				hex: element.querySelector('#color4-hex') as HTMLInputElement,
+				offset: element.querySelector('#offset4-input') as HTMLInputElement,
+				value: data.settings.color4,
+				offsetValue: data.settings.colorOffset4,
+			},
+			{
+				color: element.querySelector('#color5-input') as HTMLInputElement,
+				hex: element.querySelector('#color5-hex') as HTMLInputElement,
+				offset: element.querySelector('#offset5-input') as HTMLInputElement,
+				value: data.settings.color5,
+				offsetValue: data.settings.colorOffset5,
+			},
+		];
+
+		colorInputs.forEach(({ color, hex, offset, value, offsetValue }) => {
+			if (value != null) {
+				color.value = `${value}`;
+				hex.value = `${value}`;
+			} else {
+				// (color.closest('.input-group') as HTMLElement)!.style.display = 'none';
+			}
+			if (offsetValue != null) {
+				offset.value = `${offsetValue}`;
+			}
+		});
+
+		this.addColorInputListeners(element);
+		this.addClearButtonListeners(element);
+		this.addSaveButtonListener(element, key);
+		return element;
+	}
+
+	private createProgressBarElement(data: BaseSettings<ProgressBarWidgetData>, key: string): HTMLElement {
+		const element = this.createElement('progress-bar-template', data, key);
 		const colorInputs = [
 			{
 				color: element.querySelector('#color1-input') as HTMLInputElement,
@@ -300,12 +359,14 @@ class SettingsScript {
 		const textContent = document.querySelector('#text-container .content') as HTMLElement;
 		const statusContent = document.querySelector('#status-container .content') as HTMLElement;
 		const gaugeContent = document.querySelector('#gauge-container .content') as HTMLElement;
+		const progressBarContent = document.querySelector('#progress-bar-container .content') as HTMLElement;
 
 		percentageContent.innerHTML = '';
 		rangeContent.innerHTML = '';
 		booleanContent.innerHTML = '';
 		textContent.innerHTML = '';
 		gaugeContent.innerHTML = '';
+		progressBarContent.innerHTML = '';
 
 		const dataKeys = Object.keys(settings).filter(key => dataTypeIds.some(id => key.startsWith(`${id}-`)));
 		const groupedData: Record<string, { key: string; item: BaseSettings<unknown> }[]> = {};
@@ -362,6 +423,12 @@ class SettingsScript {
 								gaugeContent.appendChild(element);
 								break;
 							}
+							case 'progress-bar': {
+								element = this.createProgressBarElement(settings as BaseSettings<ProgressBarWidgetData>, key);
+								this.addListenerToRemoveButton(element, key);
+								progressBarContent.appendChild(element);
+								break;
+							}
 							default: {
 								// const baseData: BaseData = item;
 								// TODO: Log this.
@@ -377,9 +444,19 @@ class SettingsScript {
 		this.timezone = timeAndLanguage.timezone;
 		this.language = timeAndLanguage.language;
 
-		const addButton = document.getElementById('add-gauge-button') as HTMLButtonElement;
-		addButton.addEventListener('click', () => {
+		const addGaugeButton = document.getElementById('add-gauge-button') as HTMLButtonElement;
+		addGaugeButton.addEventListener('click', () => {
 			const modal = document.getElementById('identifier-modal') as HTMLElement;
+			(document.getElementById('type-input') as HTMLInputElement).value = 'gauge';
+			modal.style.display = 'block';
+			const identifierInput = document.getElementById('identifier-input') as HTMLInputElement;
+			identifierInput.focus();
+		});
+
+		const addProgressBarButton = document.getElementById('add-progress-bar-button') as HTMLButtonElement;
+		addProgressBarButton.addEventListener('click', () => {
+			const modal = document.getElementById('identifier-modal') as HTMLElement;
+			(document.getElementById('type-input') as HTMLInputElement).value = 'progress-bar';
 			modal.style.display = 'block';
 			const identifierInput = document.getElementById('identifier-input') as HTMLInputElement;
 			identifierInput.focus();
@@ -387,10 +464,21 @@ class SettingsScript {
 
 		const modalSubmitButton = document.getElementById('modal-submit-button') as HTMLButtonElement;
 		modalSubmitButton.addEventListener('click', async () => {
+			const typeInput = document.getElementById('type-input') as HTMLInputElement;
 			const identifierInput = document.getElementById('identifier-input') as HTMLInputElement;
 			const identifier = identifierInput.value;
 			if (identifier) {
-				await this.addGauge(identifier);
+				switch (typeInput.value) {
+					case 'gauge':
+						await this.addGauge(identifier);
+						break;
+					case 'progress-bar':
+						await this.addProgressBar(identifier);
+						break;
+				}
+
+				// Clear the inputs and close the modal
+				typeInput.value = '';
 				identifierInput.value = '';
 				const modal = document.getElementById('identifier-modal') as HTMLElement;
 				modal.style.display = 'none';
@@ -414,6 +502,21 @@ class SettingsScript {
 					await this.loadData();
 				} else {
 					await this.homey.alert('Failed to add gauge');
+					// TODO: Failed
+				}
+			});
+		} catch (error) {
+			// TODO
+		}
+	}
+
+	private async addProgressBar(identifier: string): Promise<void> {
+		try {
+			this.homey.api('POST', '/progressbar', { identifier }, async (err: string, result: boolean) => {
+				if (result) {
+					await this.loadData();
+				} else {
+					await this.homey.alert('Failed to add progress bar');
 					// TODO: Failed
 				}
 			});

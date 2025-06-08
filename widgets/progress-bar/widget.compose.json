@@ -50,6 +50,14 @@
 			}
 		},
 		{
+			"id": "configsource",
+			"type": "autocomplete",
+			"title": {
+				"en": "Config source",
+				"nl": "Configuratiebron"
+			}
+		},
+		{
 			"id": "color1",
 			"type": "dropdown",
 			"title": {
@@ -149,6 +157,10 @@
 		"datasource": {
 			"method": "POST",
 			"path": "/datasource"
+		},
+		"configsource": {
+			"method": "POST",
+			"path": "/configsource"
 		},
 		"getIcon": {
 			"method": "GET",

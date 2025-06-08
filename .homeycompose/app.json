@@ -85,6 +85,10 @@
     "addGauge": {
       "method": "POST",
       "path": "/gauge"
+    },
+    "addProgressBar": {
+      "method": "POST",
+      "path": "/progressbar"
     }
   }
 }
