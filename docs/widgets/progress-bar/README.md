@@ -8,8 +8,6 @@ The configuration allows you to customize two colors: one for **0%** and one for
 
 <figure><img src="../../.gitbook/assets/progress-bar-light.gif" alt=""><figcaption></figcaption></figure>
 
-
-
 ## Adding the widget to your dashboard
 
 To add the progress bar widget to your dashboard, follow these simple steps:
@@ -28,7 +26,7 @@ After adding it, you can customize the widget to display the progress of specifi
 
 The widget has the following configurable settings:
 
-<table><thead><tr><th width="143">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*, DataVista range value*, device capability</em> or <em>Homey variable</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Show Name</strong></td><td>If checked the name of the datasource will be displayed in the widget.</td></tr><tr><td><strong>Overwrite Name</strong></td><td>If set, this name will be displayed instead of the datasource name.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 50%.</td></tr><tr><td><strong>Color 3</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
+<table><thead><tr><th width="143">Setting</th><th>Description</th></tr></thead><tbody><tr><td><strong>Datasource</strong></td><td>Select either a <em>DataVista percentage value*, DataVista range value*, device capability</em> or <em>Homey variable</em> to use for the progress bar value.</td></tr><tr><td><strong>Refresh Interval</strong></td><td>When a device capability is selected, this determines how often the widget updates to reflect new values.</td></tr><tr><td><strong>Show Icon</strong></td><td>Enable to show the capability or device icon (if available), with priority given to the capability icon.</td></tr><tr><td><strong>Show Name</strong></td><td>If checked the name of the datasource will be displayed in the widget.</td></tr><tr><td><strong>Overwrite Name</strong></td><td>If set, this name will be displayed instead of the datasource name.</td></tr><tr><td><strong>Configuration source*</strong></td><td>The <em>DataVista configuration source</em>, which contains the progress bar colors along with their respective offset settings.</td></tr><tr><td><strong>Color 1</strong></td><td>The color for when the percentage is at 0%.</td></tr><tr><td><strong>Color 2</strong></td><td>The color for when the percentage is at 50%.</td></tr><tr><td><strong>Color 3</strong></td><td>The color for when the percentage is at 100%.</td></tr></tbody></table>
 
 {% hint style="warning" %}
 To use a **DataVista percentage value** or **DataVista range value**, you must first create a flow that sets this value using a **DataVista action card**. The flow needs to be run **once initially** in order to make the value visible and selectable in the widget settings. After running the flow, the value will appear at the top of the list in the **Datasource** setting.
@@ -38,11 +36,15 @@ To use a **DataVista percentage value** or **DataVista range value**, you must f
 ![](<../../.gitbook/assets/action-set-range (3).png>)
 {% endhint %}
 
-{% hint style="info" %}
-You are allowed to configure just one, two or all three colors. The colors will spread evenly across the progress bar.
+{% hint style="warning" %}
+\*The **configuration source** requires a flow with a DataVista action card to configure the progress bar. This action card must be run at least once before the source can be selected in the widget settings. When used, this will overwrite color settings 1-2-3.
+
+![](../../.gitbook/assets/progress-bar-action-card.png)
 {% endhint %}
 
-
+{% hint style="info" %}
+When using the widget color settings, you are allowed to configure one, two or all three colors. The colors will spread evenly across the progress bar.
+{% endhint %}
 
 ## Tutorials
 
@@ -73,8 +75,3 @@ The widget checks for an icon associated with the selected capability. If no ico
 ### Why don’t I see an icon?
 
 Make sure the "Show Icon" setting is enabled in the widget settings. Additionally, please note that icons are currently only supported for device capabilities and not for DataVista percentage values.
-
-
-
-
-
