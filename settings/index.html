@@ -164,7 +164,7 @@
 				cursor: pointer;
 			}
 
-			#add-gauge-button {
+			button.add-settings {
 				margin-bottom: 10px;
 			}
 
@@ -194,6 +194,7 @@
 				<button class="dropbtn">Visualizations</button>
 				<div class="dropdown-content">
 					<a href="#" data-target="#gauge-container">Gauges</a>
+					<a href="#" data-target="#progress-bar-container">Progress Bars</a>
 				</div>
 			</div>
 		</div>
@@ -227,7 +228,14 @@
 			<div class="container-header">Gauges</div>
 			<p>View and manage all gauge visualizations. You can also create and update these via flows.</p>
 			<p>You can configure an advanced gauge widget in its settings by linking it to an identifier. The identifier is used to differentiate between configurations.</p>
-			<button id="add-gauge-button" class="homey-button-primary-small">Add new gauge visualuzation</button>
+			<button id="add-gauge-button" class="homey-button-primary-small add-settings">Add new gauge visualuzation</button>
+			<div class="content"></div>
+		</div>
+		<div id="progress-bar-container" class="tab-content">
+			<div class="container-header">Progress Bars</div>
+			<p>View and manage all progress bar visualizations. You can also create and update these via flows.</p>
+			<p>You can configure a progress bar widget in its settings by linking it to an identifier. The identifier is used to differentiate between configurations.</p>
+			<button id="add-progress-bar-button" class="homey-button-primary-small add-settings">Add new progress bar visualization</button>
 			<div class="content"></div>
 		</div>
 
@@ -236,6 +244,7 @@
 				<span class="close-button" id="modal-cancel-button">&times;</span>
 				<h2>Create a New Configuration</h2>
 				<p>Please enter a unique identifier for the new configuration. You can modify its settings later.</p>
+				<input type="hidden" id="type-input" value="" />
 				<input type="text" id="identifier-input" placeholder="Identifier" />
 				<button id="modal-submit-button" class="homey-button-primary-small">Submit</button>
 			</div>
@@ -385,6 +394,72 @@
 		</template>
 
 		<template id="gauge-template">
+			<div class="data-row">
+				<div class="data-label">
+					<div class="data-field-row">
+						<div class="input-group">
+							<div class="identifier-label"></div>
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Color1:</label>
+							<button class="clear-button">✖</button>
+							<input id="color1-input" type="color" value="" />
+							<input id="color1-hex" class="hex" type="text" value="" readonly />
+							<label class="sublabel">offset:</label>
+							<input id="offset1-input" type="text" />
+						</div>
+						<div class="input-group">
+							<label>Color2:</label>
+							<button class="clear-button">✖</button>
+							<input id="color2-input" type="color" value="" />
+							<input id="color2-hex" class="hex" type="text" value="" readonly />
+							<label class="sublabel">offset:</label>
+							<input id="offset2-input" type="text" />
+						</div>
+						<div class="input-group">
+							<label>Color3:</label>
+							<button class="clear-button">✖</button>
+							<input id="color3-input" type="color" value="" />
+							<input id="color3-hex" class="hex" type="text" value="" readonly />
+							<label class="sublabel">offset:</label>
+							<input id="offset3-input" type="text" />
+						</div>
+						<div class="input-group">
+							<label>Color4:</label>
+							<button class="clear-button">✖</button>
+							<input id="color4-input" type="color" value="" />
+							<input id="color4-hex" class="hex" type="text" value="" readonly />
+							<label class="sublabel">offset:</label>
+							<input id="offset4-input" type="text" />
+						</div>
+						<div class="input-group">
+							<label>Color5:</label>
+							<button class="clear-button">✖</button>
+							<input id="color5-input" type="color" value="" />
+							<input id="color5-hex" class="hex" type="text" value="" readonly />
+							<label class="sublabel">offset:</label>
+							<input id="offset5-input" type="text" />
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<label>Last updated:</label>
+							<input id="last-updated-label" type="text" readonly />
+						</div>
+					</div>
+					<div class="data-field-row">
+						<div class="input-group">
+							<button class="save-button homey-button-secondary-small">Save changes</button>
+							<button class="remove-button homey-button-danger-small">Remove</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id="progress-bar-template">
 			<div class="data-row">
 				<div class="data-label">
 					<div class="data-field-row">

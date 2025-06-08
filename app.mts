@@ -20,6 +20,8 @@ import StatusBadgeWidget from './widgets/status-badge/StatusBadgeWidget.mjs';
 import ActionSetDataColor from './actions/ActionSetDataStatus.mjs';
 import { ExtendedError } from './common/ExtendedError.mjs';
 import LineChartWidget from './widgets/line-chart/LineChartWidget.mjs';
+import ActionSetProgressBarConfiguration from './actions/ActionSetProgressBarConfiguration.mjs';
+import { ProgressBarWidgetData, ProgressBarWidgetSettings } from './datavistasettings/ProgressBarWidgetSettings.mjs';
 
 let fetch: typeof globalThis.fetch;
 
@@ -59,6 +61,7 @@ export default class DataVista extends Homey.App {
 		await ActionSetDataBoolean.initialize(this.homey, this.logger);
 		await ActionSetDataString.initialize(this.homey, this.logger);
 		await ActionSetDataColor.initialize(this.homey, this.logger);
+		await ActionSetProgressBarConfiguration.initialize(this.homey, this.logger);
 	}
 
 	/**
@@ -114,8 +117,19 @@ export default class DataVista extends Homey.App {
 	 * @returns A boolean indicating a successful removal.
 	 */
 	public addGauge(key: string, data: AdvancedGaugeWidgetData): void {
-		const rangeSettings = new AdvancedGaugeWidgetSettings(key, data);
-		rangeSettings.setSettings(this.homey, this.logger);
+		const settings = new AdvancedGaugeWidgetSettings(key, data);
+		settings.setSettings(this.homey, this.logger);
+	}
+
+	/**
+	 * Add a gauge to the settings.
+	 * @param key The settings key to add.
+	 * @param data The data to add.
+	 * @returns A boolean indicating a successful removal.
+	 */
+	public addProgressBar(key: string, data: ProgressBarWidgetData): void {
+		const settings = new ProgressBarWidgetSettings(key, data);
+		settings.setSettings(this.homey, this.logger);
 	}
 
 	/**

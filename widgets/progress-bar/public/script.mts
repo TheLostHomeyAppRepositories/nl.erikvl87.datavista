@@ -4,6 +4,7 @@ import type { PercentageData } from '../../../datavistasettings/PercentageSettin
 import type { WidgetDataPayload } from '../../BaseWidgetApi.mjs';
 import type { CapabilitiesObject, ExtendedVariable } from 'homey-api';
 import type { RangeData } from '../../../datavistasettings/RangeSettings.mjs';
+import type { ProgressBarWidgetData } from '../../../datavistasettings/ProgressBarWidgetSettings.mjs';
 
 type Settings = {
 	datasource?: {
@@ -12,6 +13,10 @@ type Settings = {
 		id: string;
 		name: string;
 		type: 'capability' | 'advanced' | 'variable';
+	};
+	configsource?: {
+		id: string;
+		name: string;
 	};
 	refreshSeconds: number;
 	color1: string;
@@ -22,12 +27,20 @@ type Settings = {
 	overwriteName: string;
 };
 
+type ColorStop = {
+	offset: number;
+	color: string;
+};
+
 class ProgressBarWidgetScript {
 	private homey: HomeyWidget;
 	private settings: Settings;
+	private configsource !: ProgressBarWidgetData | null;
 	progressBarEl!: HTMLProgressElement;
 	private refreshInterval: NodeJS.Timeout | null = null;
 	private configurationAnimationTimeout: NodeJS.Timeout | null | undefined;
+	private min: number = 0;
+	private max: number = 0;
 	private value: number = 0;
 	private percentage: number = 0;
 	private iconUrl: string | null = null;
@@ -78,6 +91,8 @@ class ProgressBarWidgetScript {
 		const startTime = performance.now();
 		const previousPercentage = this.percentage;
 		const percentage = ((Math.min(Math.max(value, min), max) - min) / (max - min)) * 100;
+		this.min = min;
+		this.max = max;
 		this.percentage = percentage;
 
 		const precision = ProgressBarWidgetScript.getPrecision(value);
@@ -163,6 +178,9 @@ class ProgressBarWidgetScript {
 				await this.startConfigurationAnimation();
 				break;
 		}
+
+		
+		await this.configureWidget();
 	}
 
 	private async fetchDataSourcePayload(): Promise<WidgetDataPayload | null> {
@@ -356,6 +374,54 @@ class ProgressBarWidgetScript {
 		return yiq >= 128 ? 'black' : 'white';
 	}
 
+	private async configureWidget() : Promise<void>{
+		const progressBackground = document.getElementById('progressBackground')!;
+
+		// Config source
+		const configsourceId = this.settings.configsource?.id;
+		const previousConfigsource = this.configsource;
+		if (configsourceId) {
+			this.configsource = (await this.homey.api('POST', `/configsource`, {
+				configsource: configsourceId,
+			})) as ProgressBarWidgetData;
+			await this.logMessage(
+				`Using configsource: ${configsourceId}`,
+				false,
+				this.configsource,
+			);
+		}
+
+		if (this.configsource) {
+			const stops = [
+				{ offset: this.configsource.colorOffset1, color: this.configsource.color1 },
+				{ offset: this.configsource.colorOffset2, color: this.configsource.color2 },
+				{ offset: this.configsource.colorOffset3, color: this.configsource.color3 },
+				{ offset: this.configsource.colorOffset4, color: this.configsource.color4 },
+				{ offset: this.configsource.colorOffset5, color: this.configsource.color5 },
+			].filter(stop => stop.color && stop.offset != null) as ColorStop[];
+			stops.sort((a, b) => a.offset - b.offset);
+
+			if (stops.length > 0) {
+				const min = this.min;
+				const max = this.max;
+				const getPercent = (offset: number): number => {
+					if (max === min) return 0;
+					return ((offset - min) / (max - min)) * 100;
+				};
+				const gradientStops = stops.map(stop => `${stop.color} ${getPercent(stop.offset)}%`).join(', ');
+				progressBackground.style.background = `linear-gradient(to right, ${gradientStops})`;
+			}
+		} else if (previousConfigsource !== null) {
+			const colors = [this.settings.color1, this.settings.color2, this.settings.color3].filter(
+				color => color && color.trim() !== '',
+			);
+			progressBackground.style.background =
+				colors.length === 1
+					? colors[0]
+					: (progressBackground.style.background = `linear-gradient(to right, ${colors.join(', ')})`);
+		}
+	}
+
 	public async onHomeyReady(): Promise<void> {
 		try {
 			this.progressBarEl = document.getElementById('progress')! as HTMLProgressElement;
@@ -368,7 +434,27 @@ class ProgressBarWidgetScript {
 					? colors[0]
 					: (progressBackground.style.background = `linear-gradient(to right, ${colors.join(', ')})`);
 
-			if (this.settings.datasource) await this.syncData();
+			if (this.settings.datasource) {
+				await this.syncData();
+				
+				// Updates
+				if (this.settings.datasource.type === 'capability') {
+					this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
+					this.refreshInterval = setInterval(async () => {
+						await this.syncData();
+					}, this.settings.refreshSeconds * 1000);
+				} else if (this.settings.datasource.type === 'advanced') {
+					this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
+						await this.syncData();
+					});
+				}
+
+				if(this.settings.configsource && this.configsource) {
+					this.homey.on(`settings/${this.settings.configsource.id}`, async (_data: BaseSettings<unknown> | null) => {
+						await this.syncData();
+					});
+				}
+			}
 
 			// The title height is 23px
 			// The progress bar height is 20px
@@ -381,22 +467,6 @@ class ProgressBarWidgetScript {
 			const titleHeight = 23;
 			const progressBarHeight = this.settings.showName ? 20 : 20 + 4;
 			this.homey.ready({ height: this.settings.showName ? titleHeight + progressBarHeight : progressBarHeight });
-
-			if (!this.settings.datasource) {
-				await this.startConfigurationAnimation();
-				return;
-			}
-
-			if (this.settings.datasource.type === 'capability') {
-				this.settings.refreshSeconds = this.settings.refreshSeconds ?? 5;
-				this.refreshInterval = setInterval(async () => {
-					await this.syncData();
-				}, this.settings.refreshSeconds * 1000);
-			} else if (this.settings.datasource.type === 'advanced') {
-				this.homey.on(`settings/${this.settings.datasource.id}`, async (_data: BaseSettings<unknown> | null) => {
-					await this.syncData();
-				});
-			}
 		} catch (error) {
 			if (error instanceof Error) {
 				await this.logError('An error occured while initializing the widget', error);

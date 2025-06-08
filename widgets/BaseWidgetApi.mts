@@ -20,6 +20,18 @@ export class BaseWidgetApi {
 		return await homey.app.getTimeAndLanguage();
 	}
 
+	protected async getConfigsource<T>(app: DataVista, configsource: string): Promise<BaseSettings<T> | null> {
+		if (configsource == null) return null;
+
+		const data = app.homey.settings.get(configsource) as BaseSettings<T>;
+		if (data == null) {
+			void app.logger.logMessage(`[${this.constructor.name}]: Config source with id '${configsource}' not found.`);
+			return null;
+		}
+
+		return data;
+	}
+
 	/**
 	 * Get the data source.
 	 */

@@ -1,0 +1,90 @@
+{
+	"title": {
+		"en": "Set gauge configuration"
+	},
+	"titleFormatted": {
+		"en": "[Progress bar configuration] Set progress bar color to [[color1]] at value [[colorOffset1]], [[color2]] at [[colorOffset2]], [[color3]] value [[colorOffset3]], [[color4]] at [[colorOffset4]], [[color5]]  at [[colorOffset5]] for configuration id [[identifier]]"
+	},
+	"hint": {
+		"en": "Set configuration that can be used in Progress Bar widgets.",
+		"nl": "Zet configuratie die gebruikt kan worden in Voortgangsbalk widgets."
+	},
+	"args": [
+		{
+			"type": "color",
+			"name": "color1"
+		},
+		{
+			"type": "number",
+			"name": "colorOffset1",
+			"placeholder": {
+				"en": "value",
+				"nl": "waarde"
+			},
+			"required": false
+		},
+		{
+			"type": "color",
+			"name": "color2",
+			"required": false
+		},
+		{
+			"type": "number",
+			"name": "colorOffset2",
+			"placeholder": {
+				"en": "value",
+				"nl": "waarde"
+			},
+			"required": false
+		},
+		{
+			"type": "color",
+			"name": "color3",
+			"required": false
+		},
+		{
+			"type": "number",
+			"name": "colorOffset3",
+			"placeholder": {
+				"en": "value",
+				"nl": "waarde"
+			},
+			"required": false
+		},
+		{
+			"type": "color",
+			"name": "color4",
+			"required": false
+		},
+		{
+			"type": "number",
+			"name": "colorOffset4",
+			"placeholder": {
+				"en": "value",
+				"nl": "waarde"
+			},
+			"required": false
+		},
+		{
+			"type": "color",
+			"name": "color5",
+			"required": false
+		},
+		{
+			"type": "number",
+			"name": "colorOffset5",
+			"placeholder": {
+				"en": "value",
+				"nl": "waarde"
+			},
+			"required": false
+		},
+		{
+			"type": "text",
+			"name": "identifier",
+			"placeholder": {
+				"en": "identifier"
+			}
+		}
+	]
+}
