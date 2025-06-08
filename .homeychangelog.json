@@ -100,5 +100,8 @@
   },
   "0.10.4": {
     "en": "Fixes the initial- and legend rendering on iOS for the Line Chart widget"
+  },
+  "0.11.0": {
+    "en": "Added the option to configure progress bar colors via action cards"
   }
 }
