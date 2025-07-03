@@ -1,7 +1,5 @@
 import type HomeyWidget from 'homey/lib/HomeyWidget';
 import type * as echarts from 'echarts';
-import type { WidgetDataPayload } from '../../BaseWidgetApi.mjs';
-import { ExtendedInsightsLogs } from 'homey-api';
 
 // TODO: Merge all datasource type definitions!
 
@@ -143,169 +141,66 @@ class LineChartWidgetScript {
 		}
 	}
 
-	/**
-	 * Synchronizes data from the Homey API for the configured datasources.
-	 * Updates the chart data, units, and other related properties.
-	 */
 	private async getData(): Promise<void> {
-		let payload1: WidgetDataPayload | null = null;
-		let payload2: WidgetDataPayload | null = null;
-
-		if (this.settings.datasource1?.id) {
-			payload1 = (await this.homey.api('POST', `/datasource`, {
-				datasource: {
-					...this.settings.datasource1,
-					insightResolution: this.resolution1,
-				},
-			})) as WidgetDataPayload;
-
-			
-			this.name1 = (this.settings.overwriteName1?.trim())
-				? this.settings.overwriteName1
-				: payload1.name + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution1, this.settings.period1)) + ')';
-		}
-
-		if (this.settings.datasource2?.id.trim()) {
-			payload2 = (await this.homey.api('POST', `/datasource`, {
-				datasource: {
-					...this.settings.datasource2,
-					insightResolution: this.resolution2,
-				},
-			})) as WidgetDataPayload;
-
-			this.name2 = (this.settings.overwriteName2?.trim())
-				? this.settings.overwriteName2
-				: payload2.name + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution2, this.settings.period2)) + ')';
-		}
-
-		const insights1 = payload1?.data.logs as ExtendedInsightsLogs | null;
-		const insights2 = payload2?.data.logs as ExtendedInsightsLogs | null;
-
-		const step1 = insights1?.step ?? Number.MAX_SAFE_INTEGER;
-		const updatesIn1 = insights1?.updatesIn ?? 0;
-		const step2 = insights2?.step ?? Number.MAX_SAFE_INTEGER;
-		const updatesIn2 = insights2?.updatesIn ?? 0;
-
-		const updatesIn = Math.min(step1 - updatesIn1, step2 - updatesIn2);
-		if (updatesIn !== Number.MAX_SAFE_INTEGER) {
-			if (this.settings.showRefreshCountdown)
-				document.getElementById('progress')!.style.display = 'block';
-			this.scheduleCountdown(updatesIn);
-		}
-
-		const differentTimeframes = this.settings.period1 !== this.settings.period2;
-		const normalizeData = (
-			period: Period,
-			point: {
-				t: string;
-				v: number;
-			},
-			periodToAdjust: Period,
-		): [Date, number | '-'] => {
-			const date = new Date(point.t);
-
-			if (differentTimeframes && period === periodToAdjust) {
-				switch (this.settings.timeframe) {
-					case 'hour':
-						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-					case 'day':
-						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -24 : 24));
-						break;
-					case 'week':
-						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -7 : 7));
-						break;
-					case 'month':
-						date.setMonth(date.getMonth() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-					case 'year':
-						date.setFullYear(date.getFullYear() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-				}
+		const request : { 
+			datasource1?: { id: string; insightResolution: string };
+			datasource2?: { id: string; insightResolution: string };
+			settings: {
+				timeframe: Timeframe;
+				period1: Period;
+				period2: Period;
 			}
+		} = {
+			settings: {
+				timeframe: this.settings.timeframe,
+				period1: this.settings.period1,
+				period2: this.settings.period2,
+			}
+		};
+		
+		if (this.settings.datasource1?.id) {
+			request.datasource1 = {
+				...this.settings.datasource1,
+				insightResolution: this.resolution1,
+			};
+		}
+		
+		if (this.settings.datasource2?.id.trim()) {
+			request.datasource2 = {
+				...this.settings.datasource2,
+				insightResolution: this.resolution2,
+			};
+		}
 
-			if (point.v == null) return [date, '-'];
-
-			return [date, parseFloat(point.v.toFixed(2))];
+		const result = (await this.homey.api('POST', `/datasource`, request)) as {
+			data1: [Date, number | '-'][],
+			data2: [Date, number | '-'][],
+			updatesIn: number,
+			name1?: string;
+			name2?: string;
+			units1?: string;
+			units2?: string;
 		};
 
-		// When the granularity is month or year, the first point is the last point of the previous resolution
-		if (this.settings.timeframe === 'month' || this.settings.timeframe === 'year') {
-			insights1?.values?.shift();
-			insights2?.values?.shift();
-		}
-		
-		let timeframeToAdjust: Period = 'this';
-		if (differentTimeframes && this.settings.timeframe === 'month') {
-			const firstDate1 = insights1?.values?.[0]?.t ?? null;
-			const firstDate2 = insights2?.values?.[0]?.t ?? null;
-			if (firstDate1 && firstDate2) {
-				const date1 = new Date(firstDate1);
-				const date2 = new Date(firstDate2);
-				const daysInMonth1 = new Date(date1.getFullYear(), date1.getMonth() + 1, 0).getDate();
-				const daysInMonth2 = new Date(date2.getFullYear(), date2.getMonth() + 1, 0).getDate();
-				if (daysInMonth1 < daysInMonth2) {
-					timeframeToAdjust = this.settings.period1;
-				} else if (daysInMonth1 > daysInMonth2) {
-					timeframeToAdjust = this.settings.period2;
-				}
-			}
+		if (result.data1 !== null) {
+			this.name1 = (this.settings.overwriteName1?.trim())
+				? this.settings.overwriteName1
+				: result.name1 + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution1, this.settings.period1)) + ')';
 		}
 
-		let entries1 = insights1 ? [...(insights1.values ?? []), insights1.lastValue] : [];
-		let entries2 = insights2 ? [...(insights2.values ?? []), insights2.lastValue] : [];
-
-		if (this.settings.timeframe === 'hour') {
-			// Hours need adjustments as it is subdata from last6Hours
-
-			const filterEntries = (entries: { t: string; v: number }[], period: Period): { t: string; v: number }[] => {
-				const last = new Date(entries[entries.length - 1].t);
-				let start: Date;
-				let end: Date;
-		
-				if (period === 'last') {
-					start = new Date(last.getTime() - 1 * 3600000); // Subtract 1 hour
-					start.setMinutes(0, 0, 0);
-					end = new Date(start.getTime() + 3600000); // Add 1 hour
-				} else {
-					start = new Date(last.getTime());
-					start.setMinutes(0, 0, 0);
-					end = last;
-				}
-		
-				return entries.filter(({ t }) => {
-					const date = new Date(t);
-					return date >= start && date <= end;
-				});
-			};
-
-			// Apply the inline function to both entries1 and entries2
-			if (entries1.length)
-				entries1 = filterEntries(entries1, this.settings.period1);
-			
-
-			if (entries2.length)
-				entries2 = filterEntries(entries2, this.settings.period2);
+		if (result.data2 !== null) {
+			this.name2 = (this.settings.overwriteName2?.trim())
+				? this.settings.overwriteName2
+				: result.name2 + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution2, this.settings.period2)) + ')';
 		}
 
-		const data1: [Date, number | '-'][] = insights1
-			? entries1.map((point, _index) =>
-				normalizeData(this.settings.period1, point, timeframeToAdjust),
-			)
-			: [];
+		if (result.updatesIn !== Number.MAX_SAFE_INTEGER) {
+			if (this.settings.showRefreshCountdown)
+				document.getElementById('progress')!.style.display = 'block';
+			this.scheduleCountdown(result.updatesIn);
+		}
 
-		const data2: [Date, number | '-'][] = insights2
-			? entries2.map((point, _index) =>
-				normalizeData(this.settings.period2, point, timeframeToAdjust),
-			)
-			: [];
-
-		// For debugging purposes only.
-		// const percentageToRemove = 0.95;
-		// data1.splice(Math.floor(data1.length * (1 - percentageToRemove)));
-		// data2.splice(Math.floor(data2.length * (1 - percentageToRemove)));
-
-		await this.setData(data1, payload1?.data.insight.units ?? '', data2, payload2?.data.insight.units ?? '');
+		await this.setData(result.data1, result.units1 ?? '', result.data2, result.units2 ?? '');
 	}
 
 	private async setData(
@@ -322,14 +217,15 @@ class LineChartWidgetScript {
 		if (this.data1 != null && this.data2 != null)
 			this.isOffTheScale = await this.determineOffTheScale(this.data1, this.data2);
 
-		const lowestDate1 = this.data1?.length ? this.data1[0][0] : null;
-		const lowestDate2 = this.data2?.length ? this.data2[0][0] : null;
+		const lowestDate1 = this.data1?.length ? new Date(this.data1[0][0]) : null;
+		const lowestDate2 = this.data2?.length ? new Date(this.data2[0][0]) : null;
+
 		this.dateMin = lowestDate1 && lowestDate2
 			? new Date(Math.min(lowestDate1.getTime(), lowestDate2.getTime()))
 			: lowestDate1 ?? lowestDate2;
 
-		const highestDate1 = this.data1?.length ? this.data1[this.data1.length - 1][0] : null;
-		const highestDate2 = this.data2?.length ? this.data2[this.data2.length - 1][0] : null;
+		const highestDate1 = this.data1?.length ? new Date(this.data1[this.data1.length - 1][0]) : null;
+		const highestDate2 = this.data2?.length ? new Date(this.data2[this.data2.length - 1][0]) : null;
 		
 		this.dateMax = highestDate1 && highestDate2
 			? new Date(Math.max(highestDate1.getTime(), highestDate2.getTime()))
