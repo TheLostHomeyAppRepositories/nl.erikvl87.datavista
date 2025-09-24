@@ -103,5 +103,8 @@
   },
   "0.11.0": {
     "en": "Added the option to configure progress bar colors via action cards"
+  },
+  "1.0.0": {
+    "en": "Added support for rolling periods in the line chart widget"
   }
 }
