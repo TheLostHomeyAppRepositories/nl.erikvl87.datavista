@@ -2,11 +2,27 @@ import { ExtendedInsightsLogs } from 'homey-api';
 import type { ApiRequest } from '../../Types.mjs';
 import { BaseWidgetApi } from '../BaseWidgetApi.mjs';
 
+interface InsightWidgetDataPayload {
+	data: {
+		insight: { units?: string };
+		logs: ExtendedInsightsLogs;
+	};
+	name: string;
+}
+
 type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
-type Period = 'this' | 'last';
+type Period = 'this' | 'last' | 'rolling';
 
 class LineChartWidgetApi extends BaseWidgetApi {
-	public async datasource({ homey, body }: ApiRequest): Promise<any | null> {
+	public async datasource({ homey, body }: ApiRequest): Promise<{
+		data1: [Date, number | '-'][];
+		data2: [Date, number | '-'][];
+		updatesIn: number;
+		name1?: string;
+		name2?: string;
+		units1: string;
+		units2: string;
+	} | null> {
 		const settings = body.settings as {
 			timeframe: Timeframe;
 			period1: Period;
@@ -27,8 +43,8 @@ class LineChartWidgetApi extends BaseWidgetApi {
 			return null;
 		}
 
-		const insights1 = results1?.data.logs as ExtendedInsightsLogs | null;
-		const insights2 = results2?.data.logs as ExtendedInsightsLogs | null;
+		const insights1 = (results1 as InsightWidgetDataPayload | null)?.data.logs ?? null;
+		const insights2 = (results2 as InsightWidgetDataPayload | null)?.data.logs ?? null;
 
 		const step1 = insights1?.step ?? Number.MAX_SAFE_INTEGER;
 		const updatesIn1 = insights1?.updatesIn ?? 0;
@@ -36,7 +52,8 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		const updatesIn2 = insights2?.updatesIn ?? 0;
 		const updatesIn = Math.min(step1 - updatesIn1, step2 - updatesIn2);
 
-		const differentTimeframes = settings.period1 !== settings.period2;
+		// Rolling periods always overlap in time, so no need to adjust
+		const differentTimeframes = settings.period1 !== 'rolling' && settings.period2 !== 'rolling' && settings.period1 !== settings.period2;
 		const normalizeData = (
 			period: Period,
 			point: {
@@ -109,9 +126,12 @@ class LineChartWidgetApi extends BaseWidgetApi {
 					start = new Date(last.getTime() - 1 * 3600000); // Subtract 1 hour
 					start.setMinutes(0, 0, 0);
 					end = new Date(start.getTime() + 3600000); // Add 1 hour
-				} else {
+				} else if (period === 'this') {
 					start = new Date(last.getTime());
 					start.setMinutes(0, 0, 0);
+					end = last;
+				} else if (period === 'rolling') {
+					start = new Date(last.getTime() - 1 * 3600000);
 					end = last;
 				}
 		
@@ -128,6 +148,25 @@ class LineChartWidgetApi extends BaseWidgetApi {
 
 			if (entries2.length)
 				entries2 = filterEntries(entries2, settings.period2);
+		}
+
+		// Trim each rolling yearly period independently (no trimming for non-rolling)
+		const trimRollingYear = (entries: { t: string; v: number }[]): { t: string; v: number }[] => {
+			if (!entries.length) return entries;
+			const lastDate = new Date(entries[entries.length - 1].t);
+			const cutoff = new Date(lastDate.getTime());
+			cutoff.setDate(cutoff.getDate() - 365);
+			return entries.filter(({ t }) => {
+				const d = new Date(t);
+				return d >= cutoff && d <= lastDate;
+			});
+		};
+
+		if (settings.timeframe === 'year' && settings.period1 === 'rolling' && entries1.length) {
+			entries1 = trimRollingYear(entries1);
+		}
+		if (settings.timeframe === 'year' && settings.period2 === 'rolling' && entries2.length) {
+			entries2 = trimRollingYear(entries2);
 		}
 
 		const data1: [Date, number | '-'][] = insights1

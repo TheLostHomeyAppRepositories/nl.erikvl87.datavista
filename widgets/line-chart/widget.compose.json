@@ -39,7 +39,8 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
+				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
 			]
 		},
 		{
@@ -99,7 +100,8 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
+				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
 			]
 		},
 		{

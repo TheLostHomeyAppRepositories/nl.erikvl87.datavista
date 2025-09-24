@@ -2,7 +2,7 @@ import { CapabilitiesObject, ExtendedDevice, ExtendedInsightsLogs, ExtendedLog, 
 import DataVista from '../app.mjs';
 import { BaseSettings } from '../datavistasettings/BaseSettings.mjs';
 import { ApiRequest } from '../Types.mjs';
-import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_INSIGHT, HOMEY_LOGIC } from '../constants.mjs';
+import { DATA_TYPE_IDS, DATAVISTA_APP_NAME, HOMEY_LOGIC } from '../constants.mjs';
 import { DataSource } from './BaseWidget.mjs';
 
 export type WidgetDataPayload = {
@@ -75,7 +75,17 @@ export class BaseWidgetApi {
 				};
 			}
 			case 'insight': {
-				const result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+				let result = null;
+				if (datasource.insightResolution == 'last365Days') {
+					const partialResult1 = await this.getInsight(app, datasource.id, 'thisYear');
+					const partialResult2 = await this.getInsight(app, datasource.id, 'lastYear');
+					// Generic merge (no trimming); order older (lastYear) then newer (thisYear)
+					result = this.mergeInsights(partialResult2, partialResult1);
+
+				} else {
+					result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+				}
+				
 				if (result == null) return null;
 
 				return {
@@ -213,7 +223,7 @@ export class BaseWidgetApi {
 	}
 
 	/**
-	 * Get a capability by id and deviceId.
+	 * Get an insight log with a specific resolution.
 	 */
 	private async getInsight(
 		app: DataVista,
@@ -237,7 +247,7 @@ export class BaseWidgetApi {
 			| 'last31Days'
 			| 'last3Months'
 			| 'last6Months'
-			| 'lastYear',
+			| 'lastYear'
 	): Promise<{ logs: ExtendedInsightsLogs; insight: ExtendedLog } | null> {
 		const insight = await app.homeyApi.insights.getLog({ id: id });
 		const logs = await app.homeyApi.insights.getLogEntries({ id: id, resolution });
@@ -248,7 +258,60 @@ export class BaseWidgetApi {
 
 		return {
 			logs,
-			insight
+			insight,
+		};
+	}
+
+	/**
+	 * Merge two insight responses into a single chronological dataset without trimming.
+	 * The first parameter is assumed to be the older period, the second the newer.
+	 * Duplicate timestamps prefer the newer dataset's value.
+	 */
+	private mergeInsights(
+		older: { logs: ExtendedInsightsLogs; insight: ExtendedLog } | null,
+		newer: { logs: ExtendedInsightsLogs; insight: ExtendedLog } | null,
+	): { logs: ExtendedInsightsLogs; insight: ExtendedLog } | null {
+		if (!older && !newer) return null;
+		if (older && !newer) return older;
+		if (!older && newer) return newer;
+
+		const olderLogs = older!.logs;
+		const newerLogs = newer!.logs;
+
+		// Helper to gather all points (values + lastValue)
+		const gather = (l: ExtendedInsightsLogs): { t: string; v: number }[] => [
+			...(l.values ?? []),
+			l.lastValue,
+		];
+
+		const map = new Map<string, number>();
+		for (const p of gather(olderLogs)) map.set(p.t, p.v);
+		for (const p of gather(newerLogs)) map.set(p.t, p.v); // overwrite duplicates with newer value
+
+		const points = Array.from(map.entries()).map(([t, v]) => ({ t, v }));
+		points.sort((a, b) => new Date(a.t).getTime() - new Date(b.t).getTime());
+		if (points.length === 0) return newer; // fallback
+
+		const lastPoint = points[points.length - 1];
+		const values = points.slice(0, -1); // exclude last point -> becomes lastValue
+
+		const start = values.length ? values[0].t : lastPoint.t;
+		const end = lastPoint.t;
+		const step = newerLogs.step ?? olderLogs.step;
+		const updatesIn = newerLogs.updatesIn ?? olderLogs.updatesIn;
+
+		return {
+			insight: newer!.insight ?? older!.insight,
+			logs: {
+				updatesIn,
+				values,
+				start,
+				end,
+				step,
+				uri: newerLogs.uri || olderLogs.uri,
+				id: newerLogs.id || olderLogs.id,
+				lastValue: lastPoint,
+			},
 		};
 	}
 

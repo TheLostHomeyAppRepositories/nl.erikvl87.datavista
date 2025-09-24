@@ -19,5 +19,10 @@
 	"day": "dag",
 	"thisHour": "dit uur",
 	"lastHour": "vorig uur",
-	"minute": "minuut"
+	"minute": "minuut",
+	"rollingHour": "afgelopen uur",
+	"last24Hours": "afgelopen 24 uur",
+	"last7Days": "afgelopen 7 dagen",
+	"last31Days": "afgelopen 31 dagen",
+	"last365Days": "afgelopen 365 dagen"
 }

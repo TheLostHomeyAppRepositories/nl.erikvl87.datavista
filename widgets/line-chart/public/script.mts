@@ -4,10 +4,10 @@ import type * as echarts from 'echarts';
 // TODO: Merge all datasource type definitions!
 
 type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
-type Period = 'this' | 'last';
+type Period = 'this' | 'last' | 'rolling';
 
 type Settings = {
-	showRefreshCountdown : boolean;
+	showRefreshCountdown: boolean;
 	datasource1?: {
 		deviceId: string;
 		deviceName: string;
@@ -86,23 +86,59 @@ class LineChartWidgetScript {
 	}
 
 	/**
-	 * Determines the resolution string based on the granularity and timeframe.
-	 * @param granularity - The granularity of the data (e.g., 'day', 'week').
-	 * @param timeframe - The timeframe of the data (e.g., 'this', 'last').
+	 * Determines the resolution string based on the timeframe and period.
+	 * @param timeframe - The granularity of the data (e.g., 'day', 'week').
+	 * @param period - The timeframe of the data (e.g., 'this', 'last').
 	 * @returns The resolution string (e.g., 'today', 'thisWeek').
 	 */
-	private static getResolution(granularity: Timeframe, timeframe: Period): string {
-		switch (granularity) {
+	private static getResolution(timeframe: Timeframe, period: Period): string {
+		switch (timeframe) {
 			case 'hour':
 				return 'last6Hours';
 			case 'day':
-				return timeframe === 'this' ? 'today' : 'yesterday';
+				switch (period) {
+					case 'this':
+						return 'today';
+					case 'last':
+						return 'yesterday';
+					case 'rolling':
+						return 'last24Hours';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
 			case 'week':
-				return timeframe === 'this' ? 'thisWeek' : 'lastWeek';
+				switch (period) {
+					case 'this':
+						return 'thisWeek';
+					case 'last':
+						return 'lastWeek';
+					case 'rolling':
+						return 'last7Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
 			case 'month':
-				return timeframe === 'this' ? 'thisMonth' : 'lastMonth';
+				switch (period) {
+					case 'this':
+						return 'thisMonth';
+					case 'last':
+						return 'lastMonth';
+					case 'rolling':
+						return 'last31Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
 			case 'year':
-				return timeframe === 'this' ? 'thisYear' : 'lastYear';
+				switch (period) {
+					case 'this':
+						return 'thisYear';
+					case 'last':
+						return 'lastYear';
+					case 'rolling':
+						return 'last365Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
 		}
 	}
 
@@ -130,41 +166,42 @@ class LineChartWidgetScript {
 	}
 
 	private getFriendlyResolutionTranslationId(resolution: string, period: Period): string {
-		if (this.settings.timeframe !== 'hour')
-			return resolution;
+		if (this.settings.timeframe !== 'hour') return resolution;
 		{
-			if(period === 'this') {
+			if (period === 'this') {
 				return 'thisHour';
-			} else {
+			} else if (period === 'last') {
 				return 'lastHour';
+			} else {
+				return 'rollingHour';
 			}
 		}
 	}
 
 	private async getData(): Promise<void> {
-		const request : { 
+		const request: {
 			datasource1?: { id: string; insightResolution: string };
 			datasource2?: { id: string; insightResolution: string };
 			settings: {
 				timeframe: Timeframe;
 				period1: Period;
 				period2: Period;
-			}
+			};
 		} = {
 			settings: {
 				timeframe: this.settings.timeframe,
 				period1: this.settings.period1,
 				period2: this.settings.period2,
-			}
+			},
 		};
-		
+
 		if (this.settings.datasource1?.id) {
 			request.datasource1 = {
 				...this.settings.datasource1,
 				insightResolution: this.resolution1,
 			};
 		}
-		
+
 		if (this.settings.datasource2?.id.trim()) {
 			request.datasource2 = {
 				...this.settings.datasource2,
@@ -173,9 +210,9 @@ class LineChartWidgetScript {
 		}
 
 		const result = (await this.homey.api('POST', `/datasource`, request)) as {
-			data1: [Date, number | '-'][],
-			data2: [Date, number | '-'][],
-			updatesIn: number,
+			data1: [Date, number | '-'][];
+			data2: [Date, number | '-'][];
+			updatesIn: number;
 			name1?: string;
 			name2?: string;
 			units1?: string;
@@ -195,8 +232,7 @@ class LineChartWidgetScript {
 		}
 
 		if (result.updatesIn !== Number.MAX_SAFE_INTEGER) {
-			if (this.settings.showRefreshCountdown)
-				document.getElementById('progress')!.style.display = 'block';
+			if (this.settings.showRefreshCountdown) document.getElementById('progress')!.style.display = 'block';
 			this.scheduleCountdown(result.updatesIn);
 		}
 
@@ -207,10 +243,15 @@ class LineChartWidgetScript {
 		data1: [Date, number | '-'][],
 		units1: string,
 		data2: [Date, number | '-'][],
-		units2: string
+		units2: string,
 	): Promise<void> {
-		this.data1 = data1;
-		this.data2 = data2;
+		const normalize = (data: [Date | string, number | '-'][] | undefined): [Date, number | '-'][] => {
+			if (!data) return [];
+			return data.map(([d, v]) => [d instanceof Date ? d : new Date(d), v]);
+		};
+		this.data1 = normalize(data1);
+		this.data2 = normalize(data2);
+
 		this.units1 = units1;
 		this.units2 = units2;
 
@@ -220,16 +261,18 @@ class LineChartWidgetScript {
 		const lowestDate1 = this.data1?.length ? new Date(this.data1[0][0]) : null;
 		const lowestDate2 = this.data2?.length ? new Date(this.data2[0][0]) : null;
 
-		this.dateMin = lowestDate1 && lowestDate2
-			? new Date(Math.min(lowestDate1.getTime(), lowestDate2.getTime()))
-			: lowestDate1 ?? lowestDate2;
+		this.dateMin =
+			lowestDate1 && lowestDate2
+				? new Date(Math.min(lowestDate1.getTime(), lowestDate2.getTime()))
+				: lowestDate1 ?? lowestDate2;
 
 		const highestDate1 = this.data1?.length ? new Date(this.data1[this.data1.length - 1][0]) : null;
 		const highestDate2 = this.data2?.length ? new Date(this.data2[this.data2.length - 1][0]) : null;
-		
-		this.dateMax = highestDate1 && highestDate2
-			? new Date(Math.max(highestDate1.getTime(), highestDate2.getTime()))
-			: highestDate1 ?? highestDate2;
+
+		this.dateMax =
+			highestDate1 && highestDate2
+				? new Date(Math.max(highestDate1.getTime(), highestDate2.getTime()))
+				: highestDate1 ?? highestDate2;
 	}
 
 	/**
@@ -286,9 +329,12 @@ class LineChartWidgetScript {
 	 * @returns True if the data might not be complete, otherwise false.
 	 */
 	private potentiallyNotComplete(): boolean {
-		if (['hour', 'day', 'week', 'month', 'year'].includes(this.settings.timeframe) &&
-			((this.settings.datasource1?.id && this.settings.period1 === 'this') &&
-				(!this.settings.datasource2?.id || (this.settings.datasource2?.id && this.settings.period2 === 'this'))))
+		if (
+			['hour', 'day', 'week', 'month', 'year'].includes(this.settings.timeframe) &&
+			this.settings.datasource1?.id &&
+			this.settings.period1 === 'this' &&
+			(!this.settings.datasource2?.id || (this.settings.datasource2?.id && this.settings.period2 === 'this'))
+		)
 			return true;
 		return false;
 	}
@@ -368,18 +414,29 @@ class LineChartWidgetScript {
 	 * @throws Error if the value is not a valid date.
 	 * */
 	private formatXAxisValue(value: string, friendly: boolean = false): string {
-		const capitalizeFirstLetter = (str: string): string =>
-			str.charAt(0).toUpperCase() + str.slice(1);
-	
+		const capitalizeFirstLetter = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
+
 		const date = new Date(value);
 
 		const options: Intl.DateTimeFormatOptions = {
 			timeZone: this.timezone,
 			weekday: this.settings.timeframe === 'week' ? (friendly ? 'long' : 'short') : undefined,
-			day: (this.settings.timeframe === 'month') ? 'numeric' : undefined,
+			day: this.settings.timeframe === 'month' ? 'numeric' : undefined,
 			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
-			hour: (friendly ? this.settings.timeframe !== 'year' &&  this.settings.timeframe !== 'hour' : this.settings.timeframe === 'day') ? 'numeric' : undefined,
-			minute: (friendly ? this.settings.timeframe !== 'year' : this.settings.timeframe === 'day' || this.settings.timeframe === 'hour') ? '2-digit' : undefined,
+			hour: (
+				friendly
+					? this.settings.timeframe !== 'year' && this.settings.timeframe !== 'hour'
+					: this.settings.timeframe === 'day'
+			)
+				? 'numeric'
+				: undefined,
+			minute: (
+				friendly
+					? this.settings.timeframe !== 'year'
+					: this.settings.timeframe === 'day' || this.settings.timeframe === 'hour'
+			)
+				? '2-digit'
+				: undefined,
 			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
 		};
 
@@ -390,7 +447,7 @@ class LineChartWidgetScript {
 
 		let formattedDate = Intl.DateTimeFormat(this.language, options).format(date).replace(',', '');
 
-		if(friendly) {
+		if (friendly) {
 			switch (this.settings.timeframe) {
 				case 'hour':
 					formattedDate = this.homey.__('minute') + ' ' + formattedDate;
@@ -400,8 +457,7 @@ class LineChartWidgetScript {
 					break;
 			}
 		} else {
-			if (options.hour || options.minute)
-				formattedDate = formattedDate.replace(' ', '\n');
+			if (options.hour || options.minute) formattedDate = formattedDate.replace(' ', '\n');
 		}
 		return capitalizeFirstLetter(formattedDate);
 	}
@@ -415,15 +471,13 @@ class LineChartWidgetScript {
 	private async determineOffTheScale(data1: [Date, number | '-'][], data2: [Date, number | '-'][]): Promise<boolean> {
 		// Helper function to calculate the range of a dataset
 		const calculateRange = async (data: [Date, number | '-'][]): Promise<number> => {
-			const numericValues = data
-				.filter(point => typeof point[1] === 'number')
-				.map(point => point[1] as number);
+			const numericValues = data.filter(point => typeof point[1] === 'number').map(point => point[1] as number);
 
 			// Early exit if no numeric values exist
 			if (numericValues.length === 0) return 0;
 
 			// Apply IQR method if selected
-			if (this.settings.yAxisCalculationMethod === "iqr") {
+			if (this.settings.yAxisCalculationMethod === 'iqr') {
 				const sortedValues = numericValues.sort((a, b) => a - b);
 				const q1 = sortedValues[Math.floor(sortedValues.length / 4)];
 				const q3 = sortedValues[Math.floor((sortedValues.length * 3) / 4)];
@@ -444,28 +498,23 @@ class LineChartWidgetScript {
 		};
 
 		// Early exit if both datasets are empty
-		if (data1.length === 0 && data2.length === 0)
-			return false;
+		if (data1.length === 0 && data2.length === 0) return false;
 
 		// Handle "Force Same Axis" option
-		if (this.settings.yAxisCalculationMethod === "sameAxis")
-			return false; // Force same axis, no second axis needed
+		if (this.settings.yAxisCalculationMethod === 'sameAxis') return false; // Force same axis, no second axis needed
 
 		// Calculate ranges for both datasets
 		const range1 = await calculateRange(data1);
 		const range2 = await calculateRange(data2);
 
 		// Handle cases where both ranges are 0
-		if (range1 === 0 && range2 === 0)
-			return false;
+		if (range1 === 0 && range2 === 0) return false;
 
 		// Handle cases where one range is 0
-		if (range1 === 0 || range2 === 0)
-			return true;
+		if (range1 === 0 || range2 === 0) return true;
 
 		// Check if units are different
-		if (this.units1 !== this.units2)
-			return true; // Different units always require a second axis
+		if (this.units1 !== this.units2) return true; // Different units always require a second axis
 
 		// Calculate the range ratio
 		const rangeRatio = Math.max(range1, range2) / Math.min(range1, range2);
@@ -473,7 +522,7 @@ class LineChartWidgetScript {
 		// Log the range ratio for debugging
 		await this.logMessage(
 			`${this.settings.datasource1?.name} Range ratio: ${rangeRatio} (Dataset 1: ${range1}, Dataset 2: ${range2})`,
-			false
+			false,
 		);
 
 		const threshold = 10;
@@ -539,26 +588,26 @@ class LineChartWidgetScript {
 
 		const yAxis = this.isOffTheScale
 			? [
-				primaryAxisY,
-				{
-					type: 'value',
-					name: this.units2,
-					nameTextStyle: {
-						color: this.settings.color2,
-						align: 'right',
-					},
-					scale: true,
-					splitLine: {
-						show: false,
-						lineStyle: {
-							color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-							width: 1,
-							opacity: 0.5,
-							type: 'dashed',
+					primaryAxisY,
+					{
+						type: 'value',
+						name: this.units2,
+						nameTextStyle: {
+							color: this.settings.color2,
+							align: 'right',
+						},
+						scale: true,
+						splitLine: {
+							show: false,
+							lineStyle: {
+								color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
+								width: 1,
+								opacity: 0.5,
+								type: 'dashed',
+							},
 						},
 					},
-				},
-			]
+			  ]
 			: primaryAxisY;
 
 		const legendData = [];
@@ -684,8 +733,15 @@ class LineChartWidgetScript {
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel:true,
-					showMaxLabel: this.settings.timeframe === 'hour' || this.settings.timeframe === 'day' || this.settings.timeframe === 'month' ? this.potentiallyNotComplete() ? false : true : false,
+					showMinLabel: true,
+					showMaxLabel:
+						this.settings.timeframe === 'hour' ||
+						this.settings.timeframe === 'day' ||
+						this.settings.timeframe === 'month'
+							? this.potentiallyNotComplete()
+								? false
+								: true
+							: false,
 					alignMinLabel: this.settings.timeframe !== 'month' ? 'center' : 'left',
 					alignMaxLabel: this.settings.timeframe !== 'month' ? 'center' : 'right',
 					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== 'hour' ? 45 : 0,
@@ -729,7 +785,6 @@ class LineChartWidgetScript {
 
 		const interval = 750;
 		const data: [Date, number][] = [];
-		
 
 		const update = async (): Promise<void> => {
 			const randomValue = Math.floor(Math.random() * 101);
@@ -771,8 +826,7 @@ class LineChartWidgetScript {
 	private toggleSeries(indexToToggle: number): void {
 		const options: echarts.EChartsOption = this.chart.getOption() as echarts.EChartsOption;
 
-		if (!options.series)
-			return;
+		if (!options.series) return;
 
 		const series = Array.isArray(options.series) ? options.series : [options.series];
 		const legend = Array.isArray(options.legend) ? options.legend[0] : options.legend;
@@ -836,12 +890,12 @@ class LineChartWidgetScript {
 	 */
 	public async onHomeyReady(): Promise<void> {
 		try {
-			const result = await this.homey.api('GET', '/getTimeAndLanguage') as { timezone: string; language: string };
+			const result = (await this.homey.api('GET', '/getTimeAndLanguage')) as { timezone: string; language: string };
 			this.timezone = result.timezone;
 			this.language = result.language;
-			
+
 			this.chart = window.echarts.init(document.getElementById('line-chart'), null, {
-				renderer: 'svg'
+				renderer: 'svg',
 			});
 			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
 

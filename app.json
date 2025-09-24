@@ -781,6 +781,13 @@
                 "en": "Last period",
                 "nl": "Vorige periode"
               }
+            },
+            {
+              "id": "rolling",
+              "title": {
+                "en": "Rolling period",
+                "nl": "Rollende periode"
+              }
             }
           ]
         },
@@ -966,6 +973,13 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
+              }
+            },
+            {
+              "id": "rolling",
+              "title": {
+                "en": "Rolling period",
+                "nl": "Rollende periode"
               }
             }
           ]
