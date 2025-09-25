@@ -42,3 +42,4 @@ jobs:
         with:
           environment: production
           release: ${{ env.version }}
+          ignore_missing: true
