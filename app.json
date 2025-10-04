@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.erikvl87.datavista",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "support": "https://datavista.erikvl87.nl/",
   "homeyCommunityTopicId": 121482,
   "bugs": {
@@ -781,6 +781,13 @@
                 "en": "Last period",
                 "nl": "Vorige periode"
               }
+            },
+            {
+              "id": "rolling",
+              "title": {
+                "en": "Rolling period",
+                "nl": "Rollende periode"
+              }
             }
           ]
         },
@@ -966,6 +973,13 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
+              }
+            },
+            {
+              "id": "rolling",
+              "title": {
+                "en": "Rolling period",
+                "nl": "Rollende periode"
               }
             }
           ]

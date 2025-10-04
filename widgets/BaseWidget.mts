@@ -36,7 +36,9 @@ export type DataSource = {
 	| 'last31Days'
 	| 'last3Months'
 	| 'last6Months'
-	| 'lastYear';
+	| 'lastYear'
+	| 'last365Days' // This is custom, not from Homey
+	;
 };
 
 type AutocompleteQueryOptions = {
