@@ -3,8 +3,8 @@ import type * as echarts from 'echarts';
 
 // TODO: Merge all datasource type definitions!
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
-type Period = 'this' | 'last' | 'rolling';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Period = 'this' | 'last';
 
 type Settings = {
 	showRefreshCountdown: boolean;
@@ -101,8 +101,6 @@ class LineChartWidgetScript {
 						return 'today';
 					case 'last':
 						return 'yesterday';
-					case 'rolling':
-						return 'last24Hours';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -112,8 +110,6 @@ class LineChartWidgetScript {
 						return 'thisWeek';
 					case 'last':
 						return 'lastWeek';
-					case 'rolling':
-						return 'last7Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -123,8 +119,6 @@ class LineChartWidgetScript {
 						return 'thisMonth';
 					case 'last':
 						return 'lastMonth';
-					case 'rolling':
-						return 'last31Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -134,7 +128,50 @@ class LineChartWidgetScript {
 						return 'thisYear';
 					case 'last':
 						return 'lastYear';
-					case 'rolling':
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '60minutes':
+				switch (period) {
+					case 'this':
+						return 'this60Minutes';
+					case 'last':
+						return 'last60Minutes';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '24hours':
+				switch (period) {
+					case 'this':
+						return 'this24Hours';
+					case 'last':
+						return 'last24Hours';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '7days':
+				switch (period) {
+					case 'this':
+						return 'this7Days';
+					case 'last':
+						return 'last7Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '31days':
+				switch (period) {
+					case 'this':
+						return 'this31Days';
+					case 'last':
+						return 'last31Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '365days':
+				switch (period) {
+					case 'this':
+						return 'this365Days';
+					case 'last':
 						return 'last365Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
@@ -420,24 +457,24 @@ class LineChartWidgetScript {
 
 		const options: Intl.DateTimeFormatOptions = {
 			timeZone: this.timezone,
-			weekday: this.settings.timeframe === 'week' ? (friendly ? 'long' : 'short') : undefined,
-			day: this.settings.timeframe === 'month' ? 'numeric' : undefined,
-			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
+			weekday: this.settings.timeframe === 'week' || this.settings.timeframe === '7days' ? (friendly ? 'long' : 'short') : undefined,
+			day: this.settings.timeframe === 'month' || this.settings.timeframe === '31days' ? 'numeric' : undefined,
+			month: this.settings.timeframe === 'year' || this.settings.timeframe === '365days' ? (friendly ? 'long' : 'short') : undefined,
 			hour: (
 				friendly
-					? this.settings.timeframe !== 'year' && this.settings.timeframe !== 'hour'
-					: this.settings.timeframe === 'day'
+					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes'
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours'
 			)
 				? 'numeric'
 				: undefined,
 			minute: (
 				friendly
-					? this.settings.timeframe !== 'year'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === 'hour'
+					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days'
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes'
 			)
 				? '2-digit'
 				: undefined,
-			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
+			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' ? 'h23' : undefined,
 		};
 
 		if (!friendly && this.potentiallyNotComplete() && this.dateMin && this.dateMax) {
@@ -450,14 +487,17 @@ class LineChartWidgetScript {
 		if (friendly) {
 			switch (this.settings.timeframe) {
 				case 'hour':
+				case '60minutes':
 					formattedDate = this.homey.__('minute') + ' ' + formattedDate;
 					break;
 				case 'month':
+				case '31days':
 					formattedDate = this.homey.__('day') + ' ' + formattedDate;
 					break;
 			}
 		} else {
-			if (options.hour || options.minute) formattedDate = formattedDate.replace(' ', '\n');
+			if (options.hour || options.minute) 
+				formattedDate = formattedDate.replace(' ', '\n');
 		}
 		return capitalizeFirstLetter(formattedDate);
 	}
@@ -545,20 +585,25 @@ class LineChartWidgetScript {
 		let splitNumber = 1;
 		switch (this.settings.timeframe) {
 			case 'hour':
+			case '60minutes':
 				splitNumber = 6;
 				break;
 			case 'day':
+			case '24hours':
 				splitNumber = 6;
 				break;
 			case 'week':
+			case '7days':
 				splitNumber = 7;
 				break;
-			case 'month': {
+			case 'month':
+			case '31days': {
 				const daysInMonth = new Date(this.data1![0][0].getFullYear(), this.data1![0][0].getMonth() + 1, 0).getDate();
 				splitNumber = Math.ceil(daysInMonth / 2);
 				break;
 			}
 			case 'year':
+			case '365days':
 				splitNumber = 12;
 				break;
 		}
@@ -588,26 +633,26 @@ class LineChartWidgetScript {
 
 		const yAxis = this.isOffTheScale
 			? [
-					primaryAxisY,
-					{
-						type: 'value',
-						name: this.units2,
-						nameTextStyle: {
-							color: this.settings.color2,
-							align: 'right',
-						},
-						scale: true,
-						splitLine: {
-							show: false,
-							lineStyle: {
-								color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-								width: 1,
-								opacity: 0.5,
-								type: 'dashed',
-							},
+				primaryAxisY,
+				{
+					type: 'value',
+					name: this.units2,
+					nameTextStyle: {
+						color: this.settings.color2,
+						align: 'right',
+					},
+					scale: true,
+					splitLine: {
+						show: false,
+						lineStyle: {
+							color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
+							width: 1,
+							opacity: 0.5,
+							type: 'dashed',
 						},
 					},
-			  ]
+				},
+			]
 			: primaryAxisY;
 
 		const legendData = [];
@@ -733,20 +778,17 @@ class LineChartWidgetScript {
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel: true,
-					showMaxLabel:
-						this.settings.timeframe === 'hour' ||
-						this.settings.timeframe === 'day' ||
-						this.settings.timeframe === 'month'
-							? this.potentiallyNotComplete()
-								? false
-								: true
-							: false,
-					alignMinLabel: this.settings.timeframe !== 'month' ? 'center' : 'left',
-					alignMaxLabel: this.settings.timeframe !== 'month' ? 'center' : 'right',
-					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== 'hour' ? 45 : 0,
+					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
+					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
+						this.potentiallyNotComplete()
+							? false
+							: true
+						: false,
+					alignMinLabel: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 'center' : 'left',
+					alignMaxLabel: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 'center' : 'right',
+					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes' ? 45 : 0,
 					align: 'center',
-					margin: this.settings.timeframe !== 'month' ? 20 : 8,
+					margin: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 20 : 8,
 				},
 			},
 			yAxis: yAxis,

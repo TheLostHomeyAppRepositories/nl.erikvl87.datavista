@@ -37,7 +37,17 @@ export type DataSource = {
 	| 'last3Months'
 	| 'last6Months'
 	| 'lastYear'
-	| 'last365Days' // This is custom, not from Homey
+	// Customly added for rolling periods
+	| 'this60Minutes'
+	| 'last60Minutes'
+	| 'this24Hours'
+	| 'last24Hours'
+	| 'this7Days'
+	| 'last7Days'
+	| 'this31Days'
+	| 'last31Days'
+	| 'this365Days'
+	| 'last365Days'
 	;
 };
 

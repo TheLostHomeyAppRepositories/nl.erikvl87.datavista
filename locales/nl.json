@@ -20,9 +20,14 @@
 	"thisHour": "dit uur",
 	"lastHour": "vorig uur",
 	"minute": "minuut",
-	"rollingHour": "afgelopen uur",
-	"last24Hours": "afgelopen 24 uur",
-	"last7Days": "afgelopen 7 dagen",
-	"last31Days": "afgelopen 31 dagen",
-	"last365Days": "afgelopen 365 dagen"
+	"this60Minutes": "afgelopen 60 minuten",
+	"last60Minutes": "vorige 60 minuten",
+	"this24Hours": "afgelopen 24 uur",
+	"last24Hours": "vorige 24 uur",
+	"this7Days": "afgelopen 7 dagen",
+	"last7Days": "vorige 7 dagen",
+	"this31Days": "afgelopen 31 dagen",
+	"last31Days": "vorige 31 dagen",
+	"this365Days": "afgelopen 365 dagen",
+	"last365Days": "vorige 365 dagen"
 }

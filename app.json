@@ -748,6 +748,41 @@
                 "en": "Year",
                 "nl": "Jaar"
               }
+            },
+            {
+              "id": "60minutes",
+              "title": {
+                "en": "60 minutes",
+                "nl": "60 minuten"
+              }
+            },
+            {
+              "id": "24hours",
+              "title": {
+                "en": "24 hours",
+                "nl": "24 uur"
+              }
+            },
+            {
+              "id": "7days",
+              "title": {
+                "en": "7 days",
+                "nl": "7 dagen"
+              }
+            },
+            {
+              "id": "31days",
+              "title": {
+                "en": "31 days",
+                "nl": "31 dagen"
+              }
+            },
+            {
+              "id": "365days",
+              "title": {
+                "en": "365 days",
+                "nl": "365 dagen"
+              }
             }
           ]
         },
@@ -780,13 +815,6 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
-              }
-            },
-            {
-              "id": "rolling",
-              "title": {
-                "en": "Rolling period",
-                "nl": "Rollende periode"
               }
             }
           ]
@@ -973,13 +1001,6 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
-              }
-            },
-            {
-              "id": "rolling",
-              "title": {
-                "en": "Rolling period",
-                "nl": "Rollende periode"
               }
             }
           ]

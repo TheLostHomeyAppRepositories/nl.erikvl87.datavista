@@ -10,8 +10,8 @@ interface InsightWidgetDataPayload {
 	name: string;
 }
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
-type Period = 'this' | 'last' | 'rolling';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Period = 'this' | 'last';
 
 class LineChartWidgetApi extends BaseWidgetApi {
 	public async datasource({ homey, body }: ApiRequest): Promise<{
@@ -52,42 +52,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		const updatesIn2 = insights2?.updatesIn ?? 0;
 		const updatesIn = Math.min(step1 - updatesIn1, step2 - updatesIn2);
 
-		// Rolling periods always overlap in time, so no need to adjust
-		const differentTimeframes = settings.period1 !== 'rolling' && settings.period2 !== 'rolling' && settings.period1 !== settings.period2;
-		const normalizeData = (
-			period: Period,
-			point: {
-				t: string;
-				v: number;
-			},
-			periodToAdjust: Period,
-		): [Date, number | '-'] => {
-			const date = new Date(point.t);
-
-			if (differentTimeframes && period === periodToAdjust) {
-				switch (settings.timeframe) {
-					case 'hour':
-						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-					case 'day':
-						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -24 : 24));
-						break;
-					case 'week':
-						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -7 : 7));
-						break;
-					case 'month':
-						date.setMonth(date.getMonth() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-					case 'year':
-						date.setFullYear(date.getFullYear() + (periodToAdjust === 'this' ? -1 : 1));
-						break;
-				}
-			}
-
-			if (point.v == null) return [date, '-'];
-
-			return [date, parseFloat(point.v.toFixed(2))];
-		};
+		const differentTimeframes = settings.period1 !== settings.period2;
 
 		// When the granularity is month or year, the first point is the last point of the previous resolution
 		if (settings.timeframe === 'month' || settings.timeframe === 'year') {
@@ -95,6 +60,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 			insights2?.values?.shift();
 		}
 		
+		// This is to take the longest timeframe in case of different timeframes (e.g. month with 31 days and month with 30 days)
 		let timeframeToAdjust: Period = 'this';
 		if (differentTimeframes && settings.timeframe === 'month') {
 			const firstDate1 = insights1?.values?.[0]?.t ?? null;
@@ -130,9 +96,6 @@ class LineChartWidgetApi extends BaseWidgetApi {
 					start = new Date(last.getTime());
 					start.setMinutes(0, 0, 0);
 					end = last;
-				} else if (period === 'rolling') {
-					start = new Date(last.getTime() - 1 * 3600000);
-					end = last;
 				}
 		
 				return entries.filter(({ t }) => {
@@ -150,24 +113,55 @@ class LineChartWidgetApi extends BaseWidgetApi {
 				entries2 = filterEntries(entries2, settings.period2);
 		}
 
-		// Trim each rolling yearly period independently (no trimming for non-rolling)
-		const trimRollingYear = (entries: { t: string; v: number }[]): { t: string; v: number }[] => {
-			if (!entries.length) return entries;
-			const lastDate = new Date(entries[entries.length - 1].t);
-			const cutoff = new Date(lastDate.getTime());
-			cutoff.setDate(cutoff.getDate() - 365);
-			return entries.filter(({ t }) => {
-				const d = new Date(t);
-				return d >= cutoff && d <= lastDate;
-			});
-		};
+		const normalizeData = (
+			period: Period,
+			point: {
+				t: string;
+				v: number;
+			},
+			periodToAdjust: Period,
+		): [Date, number | '-'] => {
+			const date = new Date(point.t);
 
-		if (settings.timeframe === 'year' && settings.period1 === 'rolling' && entries1.length) {
-			entries1 = trimRollingYear(entries1);
-		}
-		if (settings.timeframe === 'year' && settings.period2 === 'rolling' && entries2.length) {
-			entries2 = trimRollingYear(entries2);
-		}
+			if (differentTimeframes && period === periodToAdjust) {
+				switch (settings.timeframe) {
+					case 'hour':
+						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
+					case 'day':
+						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -24 : 24));
+						break;
+					case 'week':
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -7 : 7));
+						break;
+					case 'month':
+						date.setMonth(date.getMonth() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
+					case 'year':
+						date.setFullYear(date.getFullYear() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
+					case '60minutes':
+						date.setHours(date.getHours() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
+					case '24hours':
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -1 : 1));
+						break;
+					case '7days':
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -7 : 7));
+						break;
+					case '31days':
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -31 : 31));
+						break;
+					case '365days':
+						date.setDate(date.getDate() + (periodToAdjust === 'this' ? -365 : 365));
+						break;
+				}
+			}
+
+			if (point.v == null) return [date, '-'];
+
+			return [date, parseFloat(point.v.toFixed(2))];
+		};
 
 		const data1: [Date, number | '-'][] = insights1
 			? entries1.map((point, _index) =>

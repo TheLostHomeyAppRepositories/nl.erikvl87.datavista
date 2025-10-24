@@ -76,14 +76,125 @@ export class BaseWidgetApi {
 			}
 			case 'insight': {
 				let result = null;
-				if (datasource.insightResolution == 'last365Days') {
-					const partialResult1 = await this.getInsight(app, datasource.id, 'thisYear');
-					const partialResult2 = await this.getInsight(app, datasource.id, 'lastYear');
-					// Generic merge (no trimming); order older (lastYear) then newer (thisYear)
-					result = this.mergeInsights(partialResult2, partialResult1);
-
-				} else {
-					result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+				switch (datasource.insightResolution) {
+					case 'this365Days': {
+						const partialResult1 = await this.getInsight(app, datasource.id, 'thisYear');
+						const partialResult2 = await this.getInsight(app, datasource.id, 'lastYear');
+						result = this.mergeInsights(partialResult2, partialResult1);
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(result, new Date(now - 365 * dayMs), new Date(now));
+						}
+						break;
+					}
+					case 'last365Days': {
+						const partialResult1 = await this.getInsight(app, datasource.id, 'lastYear');
+						const partialResult2 = await this.getInsight(app, datasource.id, 'last2Years');
+						result = this.mergeInsights(partialResult2, partialResult1);
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(
+								result,
+								new Date(now - 730 * dayMs),
+								new Date(now - 365 * dayMs),
+							);
+						}
+						break;
+					}
+					case 'this60Minutes': {
+						result = await this.getInsight(app, datasource.id, 'last6Hours');  // last6Hours instead of lastHour to have the same step sizes and datapoints as last24Hours
+						if (result) {
+							const now = Date.now();
+							const minuteMs = 60 * 1000;
+							result = this.trimInsightToWindow(result, new Date(now - 60 * minuteMs), new Date(now));
+						}
+						break;
+					}
+					case 'last60Minutes': {
+						result = await this.getInsight(app, datasource.id, 'last6Hours');
+						if (result) {
+							const now = Date.now();
+							const minuteMs = 60 * 1000;
+							result = this.trimInsightToWindow(
+								result,
+								new Date(now - 120 * minuteMs),
+								new Date(now - 60 * minuteMs),
+							);
+						}
+						break;
+					}
+					case 'this24Hours': {
+						result = await this.getInsight(app, datasource.id, 'last3Days'); // last3Days instead of last24Hours to have the same step sizes and datapoints as last24Hours
+						if (result) {
+							const now = Date.now();
+							const hourMs = 60 * 60 * 1000;
+							result = this.trimInsightToWindow(result, new Date(now - 24 * hourMs), new Date(now));
+						}
+						break;
+					}
+					case 'last24Hours': {
+						result = await this.getInsight(app, datasource.id, 'last3Days');
+						if (result) {
+							const now = Date.now();
+							const hourMs = 60 * 60 * 1000;
+							result = this.trimInsightToWindow(
+								result,
+								new Date(now - 48 * hourMs),
+								new Date(now - 24 * hourMs),
+							);
+						}
+						break;
+					}
+					case 'this7Days': {
+						result = await this.getInsight(app, datasource.id, 'last14Days'); // last14Days instead of last7Days to have the same step sizes and datapoints as last7Days
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(result, new Date(now - 7 * dayMs), new Date(now));
+						}
+						break;
+					}
+					case 'last7Days': {
+						result = await this.getInsight(app, datasource.id, 'last14Days');
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(
+								result,
+								new Date(now - 14 * dayMs),
+								new Date(now - 7 * dayMs),
+							);
+						}
+						break;
+					}
+					case 'this31Days': {
+						result = await this.getInsight(app, datasource.id, 'last31Days');
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(result, new Date(now - 31 * dayMs), new Date(now));
+						}
+						break;
+					}
+					case 'last31Days': {
+						result = await this.getInsight(app, datasource.id, 'last3Months');
+						if (result) {
+							const now = Date.now();
+							const dayMs = 24 * 60 * 60 * 1000;
+							result = this.trimInsightToWindow(
+								result,
+								new Date(now - 62 * dayMs),
+								new Date(now - 31 * dayMs),
+							);
+						}
+						break;
+					}
+					default: {
+						result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+						break;
+					}
 				}
 				
 				if (result == null) return null;
@@ -248,6 +359,7 @@ export class BaseWidgetApi {
 			| 'last3Months'
 			| 'last6Months'
 			| 'lastYear'
+			| 'last2Years'
 	): Promise<{ logs: ExtendedInsightsLogs; insight: ExtendedLog } | null> {
 		const insight = await app.homeyApi.insights.getLog({ id: id });
 		const logs = await app.homeyApi.insights.getLogEntries({ id: id, resolution });
@@ -310,6 +422,49 @@ export class BaseWidgetApi {
 				step,
 				uri: newerLogs.uri || olderLogs.uri,
 				id: newerLogs.id || olderLogs.id,
+				lastValue: lastPoint,
+			},
+		};
+	}
+
+	/**
+	 * Trim an insight response to a specific time window. Returns null if no data remains within the window.
+	 */
+	private trimInsightToWindow(
+		result: { logs: ExtendedInsightsLogs; insight: ExtendedLog } | null,
+		windowStart: Date,
+		windowEnd: Date,
+	): { logs: ExtendedInsightsLogs; insight: ExtendedLog } | null {
+		if (!result) return null;
+		const startMs = windowStart.getTime();
+		const endMs = windowEnd.getTime();
+		if (Number.isNaN(startMs) || Number.isNaN(endMs)) return result;
+		if (endMs <= startMs) return result;
+
+		const allPoints = [
+			...(result.logs.values ?? []),
+			result.logs.lastValue,
+		].filter((point): point is { t: string; v: number } => point != null);
+
+		const filtered = allPoints.filter((point) => {
+			const timestamp = new Date(point.t).getTime();
+			return timestamp >= startMs && timestamp <= endMs;
+		});
+		if (filtered.length === 0) return null;
+
+		filtered.sort((a, b) => new Date(a.t).getTime() - new Date(b.t).getTime());
+		const lastPoint = filtered[filtered.length - 1];
+		const values = filtered.slice(0, -1);
+		const start = values.length > 0 ? values[0].t : lastPoint.t;
+		const end = lastPoint.t;
+
+		return {
+			insight: result.insight,
+			logs: {
+				...result.logs,
+				values,
+				start,
+				end,
 				lastValue: lastPoint,
 			},
 		};

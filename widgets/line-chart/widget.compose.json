@@ -18,7 +18,12 @@
 				{ "id": "day", "title": { "en": "Day", "nl": "Dag" } },
 				{ "id": "week", "title": { "en": "Week", "nl": "Week" } },
 				{ "id": "month", "title": { "en": "Month", "nl": "Maand" } },
-				{ "id": "year", "title": { "en": "Year", "nl": "Jaar" } }
+				{ "id": "year", "title": { "en": "Year", "nl": "Jaar" } },
+				{ "id": "60minutes", "title": { "en": "60 minutes", "nl": "60 minuten" } },
+				{ "id": "24hours", "title": { "en": "24 hours", "nl": "24 uur" } },
+				{ "id": "7days", "title": { "en": "7 days", "nl": "7 dagen" } },
+				{ "id": "31days", "title": { "en": "31 days", "nl": "31 dagen" } },
+				{ "id": "365days", "title": { "en": "365 days", "nl": "365 dagen" } }
 			]
 		},
 		{
@@ -39,8 +44,7 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
-				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
 			]
 		},
 		{
@@ -100,8 +104,7 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
-				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
 			]
 		},
 		{
