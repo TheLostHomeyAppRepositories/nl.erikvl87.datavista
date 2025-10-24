@@ -186,6 +186,15 @@
 					}
 				}
 			]
+		},
+		{
+			"id": "hideLegend",
+			"type": "checkbox",
+			"title": {
+				"en": "Hide legend",
+				"nl": "Verberg legenda"
+			},
+			"value": false
 		}
 	],
 	"api": {

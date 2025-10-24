@@ -30,6 +30,7 @@ type Settings = {
 	period1: Period;
 	period2: Period;
 	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
+	hideLegend: boolean;
 };
 
 class LineChartWidgetScript {
@@ -798,7 +799,7 @@ class LineChartWidgetScript {
 		this.chart.setOption(option);
 
 		// render/update the legend toggles
-		if (this.settings.datasource1?.id) {
+		if (!this.settings.hideLegend && this.settings.datasource1?.id) {
 			document.querySelector('#toggle1 .label')!.textContent = this.name1;
 			(document.querySelector('#toggle1 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color1;
 			document.getElementById('toggle1')!.style.display = 'block';
@@ -806,7 +807,7 @@ class LineChartWidgetScript {
 			document.getElementById('toggle1')!.style.display = 'none';
 		}
 
-		if (this.settings.datasource2?.id) {
+		if (!this.settings.hideLegend && this.settings.datasource2?.id) {
 			document.querySelector('#toggle2 .label')!.textContent = this.name2;
 			(document.querySelector('#toggle2 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color2;
 			document.getElementById('toggle2')!.style.display = 'block';
