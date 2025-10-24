@@ -47,6 +47,16 @@ export class BaseWidgetApi {
 
 				if (device == null || capability == null) return null;
 
+				if (capability.type === 'number' && capability.units !== undefined && capability.units === '%') {
+					const min = capability.min ?? 0;
+					const max = capability.max ?? 100;
+					const currentValue = capability.value as number ?? 0;
+					const percentageValue = max !== min ? Math.round(((currentValue - min) / (max - min)) * 100) : 0;
+					capability.min = 0;
+					capability.max = 100;
+					capability.value = percentageValue;
+				}
+
 				return {
 					type: 'capability',
 					name: `${device.name} - ${capability.title}`,
