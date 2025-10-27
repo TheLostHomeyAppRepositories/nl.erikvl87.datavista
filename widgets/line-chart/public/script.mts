@@ -835,7 +835,7 @@ class LineChartWidgetScript {
 			if (data.length > 20) data.shift();
 			await this.setData(data, 'Demo', [], '');
 			this.resolution1 = 'today';
-			this.units1 = 'Demo mode';
+			this.units1 = 'Configure me';
 
 			// TODO
 			this.settings.timeframe = 'day';
