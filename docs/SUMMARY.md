@@ -8,6 +8,7 @@
 
 * [Gauge](widgets/gauge/README.md)
   * [Tutorial: Visualizing hourly energy prices with a Gauge](widgets/gauge/tutorial-visualizing-hourly-energy-prices-with-a-gauge.md)
+  * [Tutorial: Visualizing wind directions with a Gauge](widgets/gauge/tutorial-visualizing-hourly-energy-prices-with-a-gauge-1.md)
 * [Label](widgets/label.md)
 * [Progress bar](widgets/progress-bar/README.md)
   * [Tutorial: Visualizing temperature with a Progress bar](widgets/progress-bar/tutorial-visualizing-temperature-with-a-progress-bar.md)

@@ -52,6 +52,10 @@ The Advanced Gauge widget provides greater flexibility and customization but req
 [tutorial-visualizing-hourly-energy-prices-with-a-gauge.md](tutorial-visualizing-hourly-energy-prices-with-a-gauge.md)
 {% endcontent-ref %}
 
+{% content-ref url="tutorial-visualizing-hourly-energy-prices-with-a-gauge-1.md" %}
+[tutorial-visualizing-hourly-energy-prices-with-a-gauge-1.md](tutorial-visualizing-hourly-energy-prices-with-a-gauge-1.md)
+{% endcontent-ref %}
+
 ## FAQ
 
 ### Why is the gauge animating in steps from 0, 25, 50, 75, and 100?
