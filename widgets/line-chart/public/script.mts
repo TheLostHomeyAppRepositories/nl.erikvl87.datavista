@@ -31,6 +31,7 @@ type Settings = {
 	period2: Period;
 	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
 	hideLegend: boolean;
+	tooltipFontSize: string;
 };
 
 class LineChartWidgetScript {
@@ -760,7 +761,7 @@ class LineChartWidgetScript {
 					});
 
 					// Combine the title and series data
-					return `<strong>${formattedTitle}</strong><br/>${seriesData.join('<br/>')}`;
+					return `<div class="tooltip"><strong>${formattedTitle}</strong><br/>${seriesData.join('<br/>')}</div>`;
 				},
 			},
 			grid: {
@@ -948,6 +949,8 @@ class LineChartWidgetScript {
 				renderer: 'svg',
 			});
 			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
+
+			document.documentElement.style.setProperty('--tooltip-font-size', `${this.settings.tooltipFontSize}`);
 
 			this.homey.ready();
 			await this.render();
