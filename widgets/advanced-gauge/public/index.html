@@ -1,25 +1,42 @@
 <html>
 	<head>
 		<style>
-			#gauge {
-				width: 100%;
-				margin-top: 10px;
-				height: 270px;
+			.homey-widget {
+				height: 100%;
+				padding: 0 !important;
+				box-sizing: border-box;
 			}
 
-			.homey-widget {
+			#gauge-container {
+				position: relative;
+			}
+
+			.style1 #gauge-container,
+			.style2 #gauge-container {
+				height: 280px;
+				top: -60px;
+			}
+
+			.circular #gauge-container {
+				height: 300px;
+				padding: 10px;
+			}
+
+			#gauge {
+				height: 100%;
 				width: 100%;
-				height: 200px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
 			}
 		</style>
 		<script src="./echarts.min.js" charset="utf-8"></script>
 	</head>
 
 	<body class="homey-widget">
-		<div id="gauge"></div>
+		<div id="gauge-container">
+			<div id="gauge"></div>
+		</div>
+		<script charset="utf-8">
+			window.echarts = echarts
+		</script>
 		<script defer src="script.mjs"></script>
 	</body>
 </html>

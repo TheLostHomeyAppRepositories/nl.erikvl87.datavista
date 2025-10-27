@@ -510,4 +510,14 @@ export class BaseWidgetApi {
 		const svgSource = await homey.app.getSvgForUrl(query.url, query.color);
 		return svgSource;
 	}
+
+
+	/**
+	 * Interpolates the color at a specific offset within a ColorStop array.
+	 */
+	public interpolateColorAt({ homey, body }: ApiRequest): string {
+		const sortedStops: { offset?: number; color: string }[] = body.sortedStops;
+		const targetOffset: number = body.targetOffset;
+		return homey.app.colorUtils.interpolateColorAt(sortedStops, targetOffset);
+	}
 }

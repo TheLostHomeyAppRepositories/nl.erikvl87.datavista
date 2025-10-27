@@ -18,7 +18,7 @@ type Settings = {
 		name: string;
 	};
 	segments: number;
-	style: 'style1' | 'style2';
+	style: 'style1' | 'style2' | 'circular';
 };
 
 type ColorStop = {
@@ -69,11 +69,6 @@ class ColorStopsManager {
 		if (stops.length === 0) return [];
 		if (stops.length === 1) {
 			stops[0].offset = 0;
-			return this.cacheAndReturn(config, data, stops);
-		}
-		if (stops.length === 2) {
-			stops[0].offset = 0;
-			stops[1].offset = 1;
 			return this.cacheAndReturn(config, data, stops);
 		}
 
@@ -185,6 +180,8 @@ class AdvancedGaugeWidgetScript {
 	private colorStopsManager: ColorStopsManager;
 	private spinnerTimeout: NodeJS.Timeout | null | undefined;
 	private chart!: echarts.ECharts;
+	private lastColorStops: ColorStop[] | null = null;
+	private cachedSplitResult: { firstHalf: ColorStop[]; secondHalf: ColorStop[] } | null = null;
 
 	/**
 	 * Creates a new instance of the AdvancedGaugeWidgetScript class.
@@ -210,7 +207,7 @@ class AdvancedGaugeWidgetScript {
 			color4: '#FF0000', // Red
 		};
 	}
-
+	
 	/**
 	 * Updates the gauge with the current data.
 	 */
@@ -231,7 +228,7 @@ class AdvancedGaugeWidgetScript {
 							endAngle: 0,
 							splitNumber: this.settings.segments,
 							radius: '100%',
-							center: ['50%', '180px'],
+							center: ['50%', '75%'],
 							detail: {
 								valueAnimation: true,
 								formatter: (value: number): string => {
@@ -309,7 +306,7 @@ class AdvancedGaugeWidgetScript {
 							endAngle: 0,
 							splitNumber: this.settings.segments,
 							radius: '100%',
-							center: ['50%', '180px'],
+							center: ['50%', '75%'],
 							detail: {
 								valueAnimation: true,
 								formatter: (value: number): string => {
@@ -369,7 +366,7 @@ class AdvancedGaugeWidgetScript {
 							startAngle: -180,
 							endAngle: 0,
 							radius: '90%',
-							center: ['50%', '180px'],
+							center: ['50%', '75%'],
 							min: this.data.min,
 							max: this.data.max,
 							itemStyle: {
@@ -402,6 +399,127 @@ class AdvancedGaugeWidgetScript {
 									value: this.data.value,
 								},
 							],
+						},
+					],
+				});
+				break;
+			}
+			case 'circular': {
+				const { firstHalf, secondHalf } = await this.splitColorStops(colorStops);
+				this.chart.setOption({
+					series: [
+						// Main gauge
+						{
+							type: 'gauge',
+							startAngle: 90,
+							endAngle: -270,
+							splitNumber: this.settings.segments,
+							radius: '100%',
+							detail: {
+								valueAnimation: true,
+								formatter: (value: number): string => {
+									if (this.data.label != null && this.data.label != '') return this.data.label;
+									if (this.data.unit == null) return `${value}`;
+
+									return this.data.unitPosition === 'prefix'
+										? `${this.data.unit} ${value}`
+										: `${value} ${this.data.unit}`;
+								},
+								fontSize: 20,
+								offsetCenter: [0, 0],
+								color: homeyTextColor,
+							},
+							pointer: {
+								icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+								length: '12%',
+								width: 10,
+								offsetCenter: [0, '-80%'],
+								itemStyle: {
+									color: homeyTextColor,
+								},
+							},
+							splitLine: {
+								distance: 7,
+								length: 10,
+							},
+							axisTick: {
+								distance: 7,
+							},
+							axisLabel: {
+								formatter: (value: number): string => {
+									if (value === this.data.max) return '';
+									const precision = value % 1 === 0 ? 0 : 2;
+									return value.toFixed(precision);
+								},
+								color: homeyLightTextColor,
+							},
+							axisLine: {
+								lineStyle: {
+									color: [[1, 'rgba(0,0,0,0)']], // transparent, only pointer visible
+								}
+							},
+
+							min: this.data.min,
+							max: this.data.max,
+							data: [
+								{
+									value: parseFloat(this.data.value.toFixed(2)),
+								},
+							],
+						},
+
+						// Right part of the gauge
+						{
+							type: 'gauge',
+							startAngle: 90,
+							endAngle: -90,
+							splitNumber: this.settings.segments,
+							radius: '100%',
+							pointer: { show: false },
+							progress: { show: false },
+							axisTick: { show: false },
+							splitLine: { show: false },
+							axisLabel: { show: false },
+							detail: { show: false },
+							axisLine: {
+								lineStyle: {
+									color: [
+										[
+											1,
+											// @ts-expect-error This is expexted
+											new echarts.graphic.LinearGradient(0, 0, 0, 1, firstHalf, false),
+										]
+									],
+									width: 10,
+								},
+							}
+						},
+
+						// Left part of the gauge
+						{
+							type: 'gauge',
+							startAngle: -90,
+							endAngle: -270,
+							splitNumber: this.settings.segments,
+							radius: '100%',
+							pointer: { show: false },
+							progress: { show: false },
+							axisTick: { show: false },
+							splitLine: { show: false },
+							axisLabel: { show: false },
+							detail: { show: false },
+							axisLine: {
+								lineStyle: {
+									color: [
+										[
+											1,
+											// @ts-expect-error This is expexted
+											new echarts.graphic.LinearGradient(0, 1, 0, 0, secondHalf, false),
+										]
+									],
+									width: 10,
+								},
+							}
 						},
 					],
 				});
@@ -458,6 +576,101 @@ class AdvancedGaugeWidgetScript {
 	}
 
 	/**
+	 * Splits a ColorStop array at the 0.5 midpoint into two arrays, each normalized from 0 to 1.
+	 * Calculates the interpolated color at 0.5 to use as the junction point.
+	 * Uses caching to avoid recalculating when the same colorStops array is passed.
+	 * @param colorStops - The input color stops array to split
+	 * @returns An object containing the first half (0-0.5) and second half (0.5-1) as separate arrays
+	 */
+	private async splitColorStops(colorStops: ColorStop[]): Promise<{ firstHalf: ColorStop[]; secondHalf: ColorStop[] }> {
+		if (this.cachedSplitResult && this.lastColorStops && this.areColorStopsEqual(this.lastColorStops, colorStops)) {
+			return this.cachedSplitResult;
+		}
+
+		if (colorStops.length === 0) {
+			const result = { firstHalf: [], secondHalf: [] };
+			this.updateSplitCache(colorStops, result);
+			return result;
+		}
+
+		// Sort stops by offset
+		const sortedStops = [...colorStops].sort((a, b) => (a.offset ?? 0) - (b.offset ?? 0));
+		
+		// Find the interpolated color at 0.5 and the color at 0
+		const midpointColor = await this.interpolateColorAt(sortedStops, 0.5);
+		const startColor = await this.interpolateColorAt(sortedStops, 0);
+
+		// Create first half (0 to 0.5 rescaled to 0 to 1)
+		const firstHalf: ColorStop[] = [];
+		for (const stop of sortedStops) {
+			const offset = stop.offset ?? 0;
+			if (offset <= 0.5) {
+				firstHalf.push({
+					offset: offset * 2, // Scale 0-0.5 to 0-1
+					color: stop.color
+				});
+			}
+		}
+		// Add the midpoint color as the end of first half
+		if (firstHalf.length === 0 || firstHalf[firstHalf.length - 1].offset !== 1) {
+			firstHalf.push({ offset: 1, color: midpointColor });
+		}
+
+		// Create second half (0.5 to 1 rescaled to 0 to 1)
+		const secondHalf: ColorStop[] = [{ offset: 0, color: midpointColor }];
+		for (const stop of sortedStops) {
+			const offset = stop.offset ?? 0;
+			if (offset > 0.5) {
+				secondHalf.push({
+					offset: (offset - 0.5) * 2, // Scale 0.5-1 to 0-1
+					color: stop.color
+				});
+			}
+		}
+		// Add the start color (from offset 0 of input) as the end of second half
+		if (secondHalf.length === 0 || secondHalf[secondHalf.length - 1].offset !== 1) {
+			secondHalf.push({ offset: 1, color: startColor });
+		}
+
+		void this.logMessage(`Splitting color stops: ${JSON.stringify(colorStops)}`, false);
+		void this.logMessage(`Midpoint color at 0.5: ${midpointColor}, Start color at 0: ${startColor}`, false);
+		void this.logMessage(`First half color stops: ${JSON.stringify(firstHalf)}`, false);
+		void this.logMessage(`Second half color stops: ${JSON.stringify(secondHalf)}`, false);
+
+		const result = { firstHalf, secondHalf };
+		this.updateSplitCache(colorStops, result);
+		return result;
+	}
+
+	/**
+	 * Compares two ColorStop arrays for equality.
+	 */
+	private areColorStopsEqual(stops1: ColorStop[], stops2: ColorStop[]): boolean {
+		if (stops1.length !== stops2.length) return false;
+		
+		return stops1.every((stop1, index) => {
+			const stop2 = stops2[index];
+			return stop1.offset === stop2.offset && stop1.color === stop2.color;
+		});
+	}
+
+	/**
+	 * Updates the split cache with new input and result.
+	 */
+	private updateSplitCache(colorStops: ColorStop[], result: { firstHalf: ColorStop[]; secondHalf: ColorStop[] }): void {
+		this.lastColorStops = colorStops.map(stop => ({ ...stop })); // Deep copy
+		this.cachedSplitResult = {
+			firstHalf: result.firstHalf.map(stop => ({ ...stop })),
+			secondHalf: result.secondHalf.map(stop => ({ ...stop }))
+		};
+	}
+
+	private async interpolateColorAt(sortedStops: ColorStop[], targetOffset: number): Promise<string> {
+		const result = (await this.homey.api('POST', '/interpolateColorAt', { sortedStops, targetOffset })) as string;
+		return result;
+	}
+
+	/**
 	 * Called when the Homey API is ready.
 	 */
 	public async onHomeyReady(): Promise<void> {
@@ -472,7 +685,22 @@ class AdvancedGaugeWidgetScript {
 			this.chart = window.echarts.init(document.getElementById('gauge'), null, {
 				renderer: 'svg'
 			});
-			const height = this.settings.style === 'style1' ? 200 : 165;
+
+			let height: number;
+			document.body.classList.add(this.settings.style);
+			this.chart.resize();
+
+			switch (this.settings.style) {
+				case 'style1':
+					height = 200;
+					break;
+				case 'style2':
+					height = 165;
+					break;
+				case 'circular':
+					height = 300;
+					break;
+			}
 			this.homey.ready({ height });
 
 			if (this.settings.datasource?.id == null) {

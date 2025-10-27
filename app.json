@@ -571,6 +571,13 @@
                 "en": "Style 2",
                 "nl": "Stijl 2"
               }
+            },
+            {
+              "id": "circular",
+              "title": {
+                "en": "Circular",
+                "nl": "Circulair"
+              }
             }
           ]
         },
@@ -596,6 +603,10 @@
         "logError": {
           "method": "POST",
           "path": "/logError"
+        },
+        "interpolateColorAt": {
+          "method": "POST",
+          "path": "/interpolateColorAt"
         }
       },
       "id": "advanced-gauge"
@@ -1872,6 +1883,13 @@
                 "en": "Style 2",
                 "nl": "Stijl 2"
               }
+            },
+            {
+              "id": "circular",
+              "title": {
+                "en": "Circular",
+                "nl": "Circulair"
+              }
             }
           ]
         },
@@ -2372,6 +2390,10 @@
         "logError": {
           "method": "POST",
           "path": "/logError"
+        },
+        "interpolateColorAt": {
+          "method": "POST",
+          "path": "/interpolateColorAt"
         }
       },
       "id": "simple-gauge"
