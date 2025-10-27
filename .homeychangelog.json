@@ -106,5 +106,8 @@
   },
   "1.0.0": {
     "en": "Added support for rolling periods in the line chart widget"
+  },
+  "1.1.0": {
+    "en": "Added circular gauge style, contrast color options for widgets, tooltip font size setting for line charts, and various minor fixes"
   }
 }
