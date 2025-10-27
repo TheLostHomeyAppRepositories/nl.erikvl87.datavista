@@ -1,6 +1,7 @@
 {
 	"name": {
-		"en": "Line chart"
+		"en": "Line chart",
+		"nl": "Lijndiagram"
 	},
 	"height": 280,
 	"transparent": true,

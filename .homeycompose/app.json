@@ -36,7 +36,11 @@
       "checkbox",
       "switch",
       "toggle",
-      "toggle switch"
+      "toggle switch",
+      "data",
+      "visualization",
+      "line chart",
+      "chart"
     ],
     "nl": [
       "dashboard",
@@ -45,7 +49,11 @@
       "label",
       "voortgangsbalk",
       "checkbox",
-      "schakelaar"
+      "schakelaar",
+      "data",
+      "visualisatie",
+      "lijndiagram",
+      "diagram"
     ]
   },
   "brandColor": "#1E3A8A",
