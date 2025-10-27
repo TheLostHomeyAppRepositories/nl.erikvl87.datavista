@@ -10,7 +10,7 @@ The widget can be used to display an existing **text capability**, a **Homey var
 
 ## Adding the widget to your dashboard
 
-To add the progress bar widget to your dashboard, follow these simple steps:
+To add the label widget to your dashboard, follow these simple steps:
 
 1. Open your Homey app and go to the **Dashboards** section.
 2. Enter **Edit Mode** and select the **"Add Widget"** button.
