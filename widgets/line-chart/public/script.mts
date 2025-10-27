@@ -56,6 +56,13 @@ class LineChartWidgetScript {
 	constructor(homey: HomeyWidget) {
 		this.settings = homey.getSettings() as Settings;
 
+		const contrastColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--homey-color-mono-1000')
+			.trim();
+
+		if (this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
+		if (this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
+
 		// If no datasource2 is set, use datasource1 so the 2nd dataset can be the previous period.
 		if (!this.settings.datasource2?.id && this.settings.period1 !== this.settings.period2) {
 			this.settings.datasource2 = this.settings.datasource1;

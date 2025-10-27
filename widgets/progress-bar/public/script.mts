@@ -48,6 +48,14 @@ class ProgressBarWidgetScript {
 	constructor(homey: HomeyWidget) {
 		this.homey = homey;
 		this.settings = homey.getSettings() as Settings;
+
+		const contrastColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--homey-color-mono-1000')
+			.trim();
+
+		if (this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
+		if (this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
+		if (this.settings.color3 === 'contrast') this.settings.color3 = contrastColor;
 	}
 
 	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {

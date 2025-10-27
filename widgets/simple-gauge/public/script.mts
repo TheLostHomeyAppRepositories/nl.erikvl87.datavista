@@ -64,6 +64,14 @@ class SimpleGaugeWidgetScript {
 				{ offset: 1, color: '#FF0000' },
 			];
 		} else {
+			const contrastColor = getComputedStyle(document.documentElement)
+				.getPropertyValue('--homey-color-mono-1000')
+				.trim();
+
+			if (this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
+			if (this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
+			if (this.settings.color3 === 'contrast') this.settings.color3 = contrastColor;
+
 			this.colors = [];
 			if (this.settings.color1 != null && this.settings.color1 != '')
 				this.colors.push({ offset: 0, color: this.settings.color1 });
