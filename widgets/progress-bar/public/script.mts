@@ -81,7 +81,6 @@ class ProgressBarWidgetScript {
 	): Promise<void> {
 		const previousValue = this.value;
 		this.value = value;
-		await this.stopConfigurationAnimation();
 
 		const progressBar = document.getElementById('progressBar')!;
 		const progressPercentage = document.getElementById('progressPercentage')!;
@@ -154,6 +153,8 @@ class ProgressBarWidgetScript {
 			await this.logMessage('No datasource is set', false);
 			await this.startConfigurationAnimation();
 			return;
+		} else {
+			await this.stopConfigurationAnimation();
 		}
 
 		const payload = await this.fetchDataSourcePayload();
@@ -454,6 +455,8 @@ class ProgressBarWidgetScript {
 						await this.syncData();
 					});
 				}
+			} else {
+				await this.startConfigurationAnimation();
 			}
 
 			// The title height is 23px
