@@ -53,6 +53,8 @@ class LineChartWidgetScript {
 	language: string | undefined;
 	dateMin: Date | null = null;
 	dateMax: Date | null = null;
+	windowStart: Date | null = null;
+	windowEnd: Date | null = null;
 
 	constructor(homey: HomeyWidget) {
 		this.settings = homey.getSettings() as Settings;
@@ -212,15 +214,15 @@ class LineChartWidgetScript {
 	}
 
 	private getFriendlyResolutionTranslationId(resolution: string, period: Period): string {
-		if (this.settings.timeframe !== 'hour') return resolution;
-		{
-			if (period === 'this') {
-				return 'thisHour';
-			} else if (period === 'last') {
-				return 'lastHour';
-			} else {
-				return 'rollingHour';
-			}
+		if (this.settings.timeframe !== 'hour') 
+			return resolution;
+
+		if (period === 'this') {
+			return 'thisHour';
+		} else if (period === 'last') {
+			return 'lastHour';
+		} else {
+			return 'rollingHour';
 		}
 	}
 
@@ -263,6 +265,8 @@ class LineChartWidgetScript {
 			name2?: string;
 			units1?: string;
 			units2?: string;
+			windowStart: Date | null;
+			windowEnd: Date | null;
 		};
 
 		if (result.data1 !== null) {
@@ -281,6 +285,9 @@ class LineChartWidgetScript {
 			if (this.settings.showRefreshCountdown) document.getElementById('progress')!.style.display = 'block';
 			this.scheduleCountdown(result.updatesIn);
 		}
+
+		this.windowStart = result.windowStart;
+		this.windowEnd = result.windowEnd;
 
 		await this.setData(result.data1, result.units1 ?? '', result.data2, result.units2 ?? '');
 	}
@@ -779,6 +786,8 @@ class LineChartWidgetScript {
 			},
 			xAxis: {
 				type: 'time',
+				min: this.windowStart,
+				max: this.windowEnd,
 				splitNumber: splitNumber,
 				splitLine: {
 					show: false,
