@@ -14,6 +14,58 @@ type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24h
 type Period = 'this' | 'last';
 
 class LineChartWidgetApi extends BaseWidgetApi {
+	// Rolling resolutions map for quick checks
+	private static readonly rollingResolutionsSet = new Set([
+		'last60Minutes','this60Minutes','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
+	]);
+
+	// Internal mapping using camelCase keys for lint compliance; exposed timeframe strings map to these.
+	private static readonly periodShiftMap: Record<string, { unit: 'hours' | 'date' | 'month' | 'year'; value: number }> = {
+		'hour': { unit: 'hours', value: 1 },
+		'day': { unit: 'hours', value: 24 },
+		'week': { unit: 'date', value: 7 },
+		'month': { unit: 'month', value: 1 },
+		'year': { unit: 'year', value: 1 },
+		'sixtyMinutes': { unit: 'hours', value: 1 },
+		'twentyFourHours': { unit: 'date', value: 1 },
+		'sevenDays': { unit: 'date', value: 7 },
+		'thirtyOneDays': { unit: 'date', value: 31 },
+		'threeHundredSixtyFiveDays': { unit: 'date', value: 365 },
+	};
+
+	private static mapTimeframeKey(tf: Timeframe): string {
+		switch (tf) {
+			case '60minutes': return 'sixtyMinutes';
+			case '24hours': return 'twentyFourHours';
+			case '7days': return 'sevenDays';
+			case '31days': return 'thirtyOneDays';
+			case '365days': return 'threeHundredSixtyFiveDays';
+			default: return tf;
+		}
+	}
+
+	private applyNormalizationShift(date: Date, timeframe: Timeframe, shouldShift: boolean, isThisPeriod: boolean): Date {
+		if (!shouldShift) return date;
+		const cfg = LineChartWidgetApi.periodShiftMap[LineChartWidgetApi.mapTimeframeKey(timeframe)];
+		const d = new Date(date.getTime());
+		const dir = isThisPeriod ? -1 : 1; // replicate previous logic: 'this' moved backwards
+		switch (cfg.unit) {
+			case 'hours':
+				d.setHours(d.getHours() + dir * cfg.value);
+				break;
+			case 'date':
+				d.setDate(d.getDate() + dir * cfg.value);
+				break;
+			case 'month':
+				d.setMonth(d.getMonth() + dir * cfg.value);
+				break;
+			case 'year':
+				d.setFullYear(d.getFullYear() + dir * cfg.value);
+				break;
+		}
+		return d;
+	}
+
 	public async datasource({ homey, body }: ApiRequest): Promise<{
 		data1: [Date, number | '-'][];
 		data2: [Date, number | '-'][];
@@ -48,82 +100,33 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		const insights1 = (results1 as InsightWidgetDataPayload | null)?.data.logs ?? null;
 		const insights2 = (results2 as InsightWidgetDataPayload | null)?.data.logs ?? null;
 
-		// Apply window trimming for specific resolutions (moved from BaseWidgetApi original behavior)
-		// Track original input windows for rolling resolutions so final window reflects intended range, not data-derived range
-		const trimmingWindows: Record<string, { start: Date; end: Date }> = {};
-		const applyTrimming = (insights: ExtendedInsightsLogs | null, resolution: string | undefined): ExtendedInsightsLogs | null => {
-			if (!insights || !resolution) return insights;
-			const now = Date.now();
+		// Helper to build rolling window definitions
+		const buildWindow = (now: number, timeframe: string): { start: Date; end: Date; context: boolean } | null => {
 			const minuteMs = 60 * 1000;
 			const hourMs = 60 * 60 * 1000;
 			const dayMs = 24 * hourMs;
-			switch (resolution) {
-				case 'this60Minutes': {
-					const start = new Date(now - 60 * minuteMs);
-					const end = new Date(now);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'last60Minutes': {
-					// Include one point before and after the window for better continuity
-					const start = new Date(now - 120 * minuteMs);
-					const end = new Date(now - 60 * minuteMs);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end, true)?.logs ?? null;
-				}
-				case 'this24Hours': {
-					const start = new Date(now - 24 * hourMs);
-					const end = new Date(now);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'last24Hours': {
-					// Include one point before and after the window for better continuity
-					const start = new Date(now - 48 * hourMs);
-					const end = new Date(now - 24 * hourMs);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end, true)?.logs ?? null;
-				}
-				case 'this7Days': {
-					const start = new Date(now - 7 * dayMs);
-					const end = new Date(now);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'last7Days': {
-					// Include one point before and after the window for better continuity
-					const start = new Date(now - 14 * dayMs);
-					const end = new Date(now - 7 * dayMs);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end, true)?.logs ?? null;
-				}
-				case 'this31Days': {
-					const start = new Date(now - 31 * dayMs);
-					const end = new Date(now);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'last31Days': {
-					const start = new Date(now - 62 * dayMs);
-					const end = new Date(now - 31 * dayMs);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'this365Days': {
-					const start = new Date(now - 365 * dayMs);
-					const end = new Date(now);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				case 'last365Days': {
-					const start = new Date(now - 730 * dayMs);
-					const end = new Date(now - 365 * dayMs);
-					trimmingWindows[resolution] = { start, end };
-					return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, start, end)?.logs ?? null;
-				}
-				default:
-					return insights;
+			switch (timeframe) {
+				case 'this60Minutes': return { start: new Date(now - 60 * minuteMs), end: new Date(now), context: false };
+				case 'last60Minutes': return { start: new Date(now - 120 * minuteMs), end: new Date(now - 60 * minuteMs), context: true };
+				case 'this24Hours': return { start: new Date(now - 24 * hourMs), end: new Date(now), context: false };
+				case 'last24Hours': return { start: new Date(now - 48 * hourMs), end: new Date(now - 24 * hourMs), context: true };
+				case 'this7Days': return { start: new Date(now - 7 * dayMs), end: new Date(now), context: false };
+				case 'last7Days': return { start: new Date(now - 14 * dayMs), end: new Date(now - 7 * dayMs), context: true };
+				case 'this31Days': return { start: new Date(now - 31 * dayMs), end: new Date(now), context: false };
+				case 'last31Days': return { start: new Date(now - 62 * dayMs), end: new Date(now - 31 * dayMs), context: false };
+				case 'this365Days': return { start: new Date(now - 365 * dayMs), end: new Date(now), context: false };
+				case 'last365Days': return { start: new Date(now - 730 * dayMs), end: new Date(now - 365 * dayMs), context: false };
+				default: return null;
 			}
+		};
+
+		const trimmingWindows: Record<string, { start: Date; end: Date }> = {};
+		const applyTrimming = (insights: ExtendedInsightsLogs | null, resolution: string | undefined): ExtendedInsightsLogs | null => {
+			if (!insights || !resolution) return insights;
+			const def = buildWindow(Date.now(), resolution);
+			if (!def) return insights; // not a rolling resolution
+			trimmingWindows[resolution] = { start: def.start, end: def.end };
+			return this.trimInsightToWindow({ logs: insights, insight: { title: '' } as ExtendedLog }, def.start, def.end, def.context)?.logs ?? null;
 		};
 
 		// Replace insights variables with trimmed logs where applicable
@@ -195,44 +198,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 				entries2 = filterEntries(entries2, settings.period2);
 		}
 
-		// Central helper to apply normalization shift (avoids duplicated switch logic)
-		const applyNormalizationShift = (date: Date, period: Period): Date => {
-			if (!(differentTimeframes && period === timeframeToAdjust)) return date;
-			const d = new Date(date.getTime());
-			switch (settings.timeframe) {
-				case 'hour':
-					d.setHours(d.getHours() + (period === 'this' ? -1 : 1));
-					break;
-				case 'day':
-					d.setHours(d.getHours() + (period === 'this' ? -24 : 24));
-					break;
-				case 'week':
-					d.setDate(d.getDate() + (period === 'this' ? -7 : 7));
-					break;
-				case 'month':
-					d.setMonth(d.getMonth() + (period === 'this' ? -1 : 1));
-					break;
-				case 'year':
-					d.setFullYear(d.getFullYear() + (period === 'this' ? -1 : 1));
-					break;
-				case '60minutes':
-					d.setHours(d.getHours() + (period === 'this' ? -1 : 1));
-					break;
-				case '24hours':
-					d.setDate(d.getDate() + (period === 'this' ? -1 : 1));
-					break;
-				case '7days':
-					d.setDate(d.getDate() + (period === 'this' ? -7 : 7));
-					break;
-				case '31days':
-					d.setDate(d.getDate() + (period === 'this' ? -31 : 31));
-					break;
-				case '365days':
-					d.setDate(d.getDate() + (period === 'this' ? -365 : 365));
-					break;
-			}
-			return d;
-		};
+		const shouldShift = differentTimeframes;
 
 		const normalizeData = (
 			period: Period,
@@ -240,7 +206,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 			_periodToAdjust: Period, // retained for signature compatibility; no longer needed internally
 		): [Date, number | '-'] => {
 			let date = new Date(point.t);
-			date = applyNormalizationShift(date, period);
+			date = this.applyNormalizationShift(date, settings.timeframe, shouldShift && period === timeframeToAdjust, period === 'this');
 			if (point.v == null) return [date, '-'];
 			return [date, parseFloat(point.v.toFixed(2))];
 		};
@@ -260,9 +226,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		const units1 = (results1 && (results1 as InsightWidgetDataPayload).data?.insight?.units) ? (results1 as InsightWidgetDataPayload).data.insight.units! : '';
 		const units2 = (results2 && (results2 as InsightWidgetDataPayload).data?.insight?.units) ? (results2 as InsightWidgetDataPayload).data.insight.units! : '';
 		// Determine window boundaries per datasource
-		const rollingResolutions = new Set([
-			'last60Minutes','this60Minutes','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
-		]);
+		const rollingResolutions = LineChartWidgetApi.rollingResolutionsSet;
 		const resolveWindow = (
 			trimmed: ExtendedInsightsLogs | null,
 			original: ExtendedInsightsLogs | null,
@@ -287,8 +251,11 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		// Adjust per-datasource window boundaries if normalization (timeframe shift) was applied
 		const adjustWindow = (start: Date | null, end: Date | null, period: Period): { start: Date | null; end: Date | null } => {
 			if (!start || !end) return { start, end };
-			if (!(differentTimeframes && period === timeframeToAdjust)) return { start, end };
-			return { start: applyNormalizationShift(start, period), end: applyNormalizationShift(end, period) };
+			if (!(shouldShift && period === timeframeToAdjust)) return { start, end };
+			return {
+				start: this.applyNormalizationShift(start, settings.timeframe, true, period === 'this'),
+				end: this.applyNormalizationShift(end, settings.timeframe, true, period === 'this'),
+			};
 		};
 
 		const adjW1 = adjustWindow(w1.start, w1.end, settings.period1);
