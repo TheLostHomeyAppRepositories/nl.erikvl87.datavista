@@ -37,7 +37,17 @@ export type DataSource = {
 	| 'last3Months'
 	| 'last6Months'
 	| 'lastYear'
-	| 'last365Days' // This is custom, not from Homey
+	// Customly added for rolling periods
+	| 'this60Minutes'
+	| 'last60Minutes'
+	| 'this24Hours'
+	| 'last24Hours'
+	| 'this7Days'
+	| 'last7Days'
+	| 'this31Days'
+	| 'last31Days'
+	| 'this365Days'
+	| 'last365Days'
 	;
 };
 
@@ -177,9 +187,14 @@ export class BaseWidget {
 										capability.units !== undefined &&
 										capability.units === '%'
 									) {
+										const min = capability.min ?? 0;
+										const max = capability.max ?? 100;
+										const currentValue = capability.value as number ?? 0;
+										const percentageValue = max !== min ? Math.round(((currentValue - min) / (max - min)) * 100) : 0;
+
 										results.push({
 											name: capability.title ?? '[No name]',
-											description: `${device.name} (${capability.value ?? '0'}%)`,
+											description: `${device.name} (${percentageValue}%)`,
 											deviceName: device.name,
 											id: capability.id,
 											deviceId: device.id,

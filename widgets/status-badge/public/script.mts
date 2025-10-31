@@ -34,6 +34,13 @@ class StatusBadgeWidgetScript {
 	constructor(homey: HomeyWidget) {
 		this.homey = homey;
 		this.settings = homey.getSettings() as Settings;
+		
+		const contrastColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--homey-color-mono-1000')
+			.trim();
+
+		if (this.settings.trueColor === 'contrast') this.settings.trueColor = contrastColor;
+		if (this.settings.falseColor === 'contrast') this.settings.falseColor = contrastColor;
 	}
 
 	private async logMessage(message: string, logToSentry: boolean, ...optionalParams: any[]): Promise<void> {

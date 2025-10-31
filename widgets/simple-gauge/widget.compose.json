@@ -90,6 +90,13 @@
 						"en": "Style 2",
 						"nl": "Stijl 2"
 					}
+				},
+				{
+					"id": "circular",
+					"title": {
+						"en": "Circular",
+						"nl": "Circulair"
+					}
 				}
 			]
 		},
@@ -130,7 +137,8 @@
 				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
 				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
 				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
-				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } },
+				{ "id": "contrast", "title": { "en": "Contrast", "nl": "Contrast" } }
 			]
 		},
 		{
@@ -161,7 +169,8 @@
 				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
 				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
 				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
-				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } },
+				{ "id": "contrast", "title": { "en": "Contrast", "nl": "Contrast" } }
 			]
 		},
 		{
@@ -192,7 +201,8 @@
 				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
 				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
 				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
-				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } },
+				{ "id": "contrast", "title": { "en": "Contrast", "nl": "Contrast" } }
 			]
 		}
 	],
@@ -212,6 +222,10 @@
 		"logError": {
 			"method": "POST",
 			"path": "/logError"
+		},
+		"interpolateColorAt": {
+			"method": "POST",
+			"path": "/interpolateColorAt"
 		}
 	}
 }

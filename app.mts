@@ -22,6 +22,7 @@ import { ExtendedError } from './common/ExtendedError.mjs';
 import LineChartWidget from './widgets/line-chart/LineChartWidget.mjs';
 import ActionSetProgressBarConfiguration from './actions/ActionSetProgressBarConfiguration.mjs';
 import { ProgressBarWidgetData, ProgressBarWidgetSettings } from './datavistasettings/ProgressBarWidgetSettings.mjs';
+import ColorUtils from './common/ColorUtils.mjs';
 
 let fetch: typeof globalThis.fetch;
 
@@ -38,6 +39,7 @@ void (async (): Promise<void> => {
 export default class DataVista extends Homey.App {
 	homeyApi!: ExtendedHomeyAPIV3Local;
 	logger!: DataVistaLogger;
+	colorUtils!: ColorUtils;
 
 	public override async onInit(): Promise<void> {
 		this.logger = await DataVistaLogger.initialize(this.homey, this.log, this.error);
@@ -46,6 +48,8 @@ export default class DataVista extends Homey.App {
 		this.homeyApi = await HomeyAPI.createAppAPI({
 			homey: this.homey,
 		});
+
+		this.colorUtils = ColorUtils.initialize(this.homey, this.logger);
 
 		await SimpleGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);
 		await AdvancedGaugeWidget.initialize(this.homey, this.homeyApi, this.logger);

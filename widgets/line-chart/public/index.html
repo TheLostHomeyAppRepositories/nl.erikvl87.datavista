@@ -3,6 +3,10 @@
 		<link href="./fontawesome/css/all.min.css" rel="stylesheet" />
 
 		<style>
+			:root {
+				--tooltip-font-size: '1em';
+			}
+
 			.homey-widget {
 				height: 100%;
 				display: flex;
@@ -38,6 +42,10 @@
 				flex-direction: column;
 				align-items: center;
 				justify-content: center;
+			}
+
+			.tooltip {
+				font-size: var(--tooltip-font-size);
 			}
 
 			#toggle1,

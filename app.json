@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.erikvl87.datavista",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "support": "https://datavista.erikvl87.nl/",
   "homeyCommunityTopicId": 121482,
   "bugs": {
@@ -37,7 +37,11 @@
       "checkbox",
       "switch",
       "toggle",
-      "toggle switch"
+      "toggle switch",
+      "data",
+      "visualization",
+      "line chart",
+      "chart"
     ],
     "nl": [
       "dashboard",
@@ -46,7 +50,11 @@
       "label",
       "voortgangsbalk",
       "checkbox",
-      "schakelaar"
+      "schakelaar",
+      "data",
+      "visualisatie",
+      "lijndiagram",
+      "diagram"
     ]
   },
   "brandColor": "#1E3A8A",
@@ -571,6 +579,13 @@
                 "en": "Style 2",
                 "nl": "Stijl 2"
               }
+            },
+            {
+              "id": "circular",
+              "title": {
+                "en": "Circular",
+                "nl": "Circulair"
+              }
             }
           ]
         },
@@ -596,6 +611,10 @@
         "logError": {
           "method": "POST",
           "path": "/logError"
+        },
+        "interpolateColorAt": {
+          "method": "POST",
+          "path": "/interpolateColorAt"
         }
       },
       "id": "advanced-gauge"
@@ -700,7 +719,8 @@
     },
     "line-chart": {
       "name": {
-        "en": "Line chart"
+        "en": "Line chart",
+        "nl": "Lijndiagram"
       },
       "height": 280,
       "transparent": true,
@@ -748,6 +768,41 @@
                 "en": "Year",
                 "nl": "Jaar"
               }
+            },
+            {
+              "id": "60minutes",
+              "title": {
+                "en": "60 minutes",
+                "nl": "60 minuten"
+              }
+            },
+            {
+              "id": "24hours",
+              "title": {
+                "en": "24 hours",
+                "nl": "24 uur"
+              }
+            },
+            {
+              "id": "7days",
+              "title": {
+                "en": "7 days",
+                "nl": "7 dagen"
+              }
+            },
+            {
+              "id": "31days",
+              "title": {
+                "en": "31 days",
+                "nl": "31 dagen"
+              }
+            },
+            {
+              "id": "365days",
+              "title": {
+                "en": "365 days",
+                "nl": "365 dagen"
+              }
             }
           ]
         },
@@ -780,13 +835,6 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
-              }
-            },
-            {
-              "id": "rolling",
-              "title": {
-                "en": "Rolling period",
-                "nl": "Rollende periode"
               }
             }
           ]
@@ -931,6 +979,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ],
           "value": "#32cd32"
@@ -973,13 +1028,6 @@
               "title": {
                 "en": "Last period",
                 "nl": "Vorige periode"
-              }
-            },
-            {
-              "id": "rolling",
-              "title": {
-                "en": "Rolling period",
-                "nl": "Rollende periode"
               }
             }
           ]
@@ -1124,6 +1172,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ],
           "value": "#1e90ff"
@@ -1174,6 +1229,54 @@
               "title": {
                 "en": "Force the same axis",
                 "nl": "Forceer dezelfde as"
+              }
+            }
+          ]
+        },
+        {
+          "id": "hideLegend",
+          "type": "checkbox",
+          "title": {
+            "en": "Hide legend",
+            "nl": "Verberg legenda"
+          },
+          "value": false
+        },
+        {
+          "id": "tooltipFontSize",
+          "type": "dropdown",
+          "title": {
+            "en": "Tooltip font size",
+            "nl": "Lettergrootte tooltip"
+          },
+          "value": "1em",
+          "values": [
+            {
+              "id": "0.8em",
+              "title": {
+                "en": "Small",
+                "nl": "Klein"
+              }
+            },
+            {
+              "id": "1em",
+              "title": {
+                "en": "Normal",
+                "nl": "Normaal"
+              }
+            },
+            {
+              "id": "1.3em",
+              "title": {
+                "en": "Large",
+                "nl": "Groot"
+              }
+            },
+            {
+              "id": "1.5em",
+              "title": {
+                "en": "Extra large",
+                "nl": "Extra groot"
               }
             }
           ]
@@ -1406,6 +1509,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ]
         },
@@ -1563,6 +1673,13 @@
               "title": {
                 "en": "Deep Pink",
                 "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
               }
             }
           ]
@@ -1842,6 +1959,13 @@
                 "en": "Style 2",
                 "nl": "Stijl 2"
               }
+            },
+            {
+              "id": "circular",
+              "title": {
+                "en": "Circular",
+                "nl": "Circulair"
+              }
             }
           ]
         },
@@ -2008,6 +2132,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ]
         },
@@ -2164,6 +2295,13 @@
               "title": {
                 "en": "Deep Pink",
                 "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
               }
             }
           ]
@@ -2322,6 +2460,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ]
         }
@@ -2342,6 +2487,10 @@
         "logError": {
           "method": "POST",
           "path": "/logError"
+        },
+        "interpolateColorAt": {
+          "method": "POST",
+          "path": "/interpolateColorAt"
         }
       },
       "id": "simple-gauge"
@@ -2678,6 +2827,13 @@
                 "en": "Deep Pink",
                 "nl": "Dieproze"
               }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
             }
           ],
           "value": "#32cd32"
@@ -2821,6 +2977,13 @@
               "title": {
                 "en": "Deep Pink",
                 "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
               }
             }
           ],
@@ -3016,6 +3179,13 @@
               "title": {
                 "en": "Deep Pink",
                 "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
               }
             }
           ],

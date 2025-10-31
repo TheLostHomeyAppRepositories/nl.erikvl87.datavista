@@ -9,7 +9,7 @@ export type WidgetDataPayload = {
 	type: 'capability' | 'variable' | 'advanced' | 'insight';
 	name: string;
 	fallbackIcon?: string | null;
-	data: any;
+	data: unknown;
 };
 
 export class BaseWidgetApi {
@@ -47,6 +47,16 @@ export class BaseWidgetApi {
 
 				if (device == null || capability == null) return null;
 
+				if (capability.type === 'number' && capability.units !== undefined && capability.units === '%') {
+					const min = capability.min ?? 0;
+					const max = capability.max ?? 100;
+					const currentValue = capability.value as number ?? 0;
+					const percentageValue = max !== min ? Math.round(((currentValue - min) / (max - min)) * 100) : 0;
+					capability.min = 0;
+					capability.max = 100;
+					capability.value = percentageValue;
+				}
+
 				return {
 					type: 'capability',
 					name: `${device.name} - ${capability.title}`,
@@ -76,14 +86,55 @@ export class BaseWidgetApi {
 			}
 			case 'insight': {
 				let result = null;
-				if (datasource.insightResolution == 'last365Days') {
-					const partialResult1 = await this.getInsight(app, datasource.id, 'thisYear');
-					const partialResult2 = await this.getInsight(app, datasource.id, 'lastYear');
-					// Generic merge (no trimming); order older (lastYear) then newer (thisYear)
-					result = this.mergeInsights(partialResult2, partialResult1);
-
-				} else {
-					result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+				switch (datasource.insightResolution) {
+					case 'this365Days': {
+						const partialResult1 = await this.getInsight(app, datasource.id, 'thisYear');
+						const partialResult2 = await this.getInsight(app, datasource.id, 'lastYear');
+						result = this.mergeInsights(partialResult2, partialResult1);
+						break;
+					}
+					case 'last365Days': {
+						const partialResult1 = await this.getInsight(app, datasource.id, 'lastYear');
+						const partialResult2 = await this.getInsight(app, datasource.id, 'last2Years');
+						result = this.mergeInsights(partialResult2, partialResult1);
+						break;
+					}
+					case 'this60Minutes': {
+						result = await this.getInsight(app, datasource.id, 'lastHour');
+						break;
+					}
+					case 'last60Minutes': {
+						result = await this.getInsight(app, datasource.id, 'last6Hours');
+						break;
+					}
+					case 'this24Hours': {
+						result = await this.getInsight(app, datasource.id, 'last24Hours');
+						break;
+					}
+					case 'last24Hours': {
+						result = await this.getInsight(app, datasource.id, 'last3Days');
+						break;
+					}
+					case 'this7Days': {
+						result = await this.getInsight(app, datasource.id, 'last7Days');
+						break;
+					}
+					case 'last7Days': {
+						result = await this.getInsight(app, datasource.id, 'last14Days');
+						break;
+					}
+					case 'this31Days': {
+						result = await this.getInsight(app, datasource.id, 'last31Days');
+						break;
+					}
+					case 'last31Days': {
+						result = await this.getInsight(app, datasource.id, 'last3Months');
+						break;
+					}
+					default: {
+						result = await this.getInsight(app, datasource.id, datasource.insightResolution!);
+						break;
+					}
 				}
 				
 				if (result == null) return null;
@@ -248,6 +299,7 @@ export class BaseWidgetApi {
 			| 'last3Months'
 			| 'last6Months'
 			| 'lastYear'
+			| 'last2Years'
 	): Promise<{ logs: ExtendedInsightsLogs; insight: ExtendedLog } | null> {
 		const insight = await app.homeyApi.insights.getLog({ id: id });
 		const logs = await app.homeyApi.insights.getLogEntries({ id: id, resolution });
@@ -344,5 +396,15 @@ export class BaseWidgetApi {
 	public async getIcon({ homey, query }: ApiRequest): Promise<string> {
 		const svgSource = await homey.app.getSvgForUrl(query.url, query.color);
 		return svgSource;
+	}
+
+
+	/**
+	 * Interpolates the color at a specific offset within a ColorStop array.
+	 */
+	public interpolateColorAt({ homey, body }: ApiRequest): string {
+		const sortedStops: { offset?: number; color: string }[] = body.sortedStops;
+		const targetOffset: number = body.targetOffset;
+		return homey.app.colorUtils.interpolateColorAt(sortedStops, targetOffset);
 	}
 }

@@ -3,8 +3,8 @@ import type * as echarts from 'echarts';
 
 // TODO: Merge all datasource type definitions!
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year';
-type Period = 'this' | 'last' | 'rolling';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Period = 'this' | 'last';
 
 type Settings = {
 	showRefreshCountdown: boolean;
@@ -30,6 +30,8 @@ type Settings = {
 	period1: Period;
 	period2: Period;
 	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
+	hideLegend: boolean;
+	tooltipFontSize: string;
 };
 
 class LineChartWidgetScript {
@@ -51,9 +53,18 @@ class LineChartWidgetScript {
 	language: string | undefined;
 	dateMin: Date | null = null;
 	dateMax: Date | null = null;
+	windowStart: Date | null = null;
+	windowEnd: Date | null = null;
 
 	constructor(homey: HomeyWidget) {
 		this.settings = homey.getSettings() as Settings;
+
+		const contrastColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--homey-color-mono-1000')
+			.trim();
+
+		if (this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
+		if (this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
 
 		// If no datasource2 is set, use datasource1 so the 2nd dataset can be the previous period.
 		if (!this.settings.datasource2?.id && this.settings.period1 !== this.settings.period2) {
@@ -101,8 +112,6 @@ class LineChartWidgetScript {
 						return 'today';
 					case 'last':
 						return 'yesterday';
-					case 'rolling':
-						return 'last24Hours';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -112,8 +121,6 @@ class LineChartWidgetScript {
 						return 'thisWeek';
 					case 'last':
 						return 'lastWeek';
-					case 'rolling':
-						return 'last7Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -123,8 +130,6 @@ class LineChartWidgetScript {
 						return 'thisMonth';
 					case 'last':
 						return 'lastMonth';
-					case 'rolling':
-						return 'last31Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -134,7 +139,50 @@ class LineChartWidgetScript {
 						return 'thisYear';
 					case 'last':
 						return 'lastYear';
-					case 'rolling':
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '60minutes':
+				switch (period) {
+					case 'this':
+						return 'this60Minutes';
+					case 'last':
+						return 'last60Minutes';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '24hours':
+				switch (period) {
+					case 'this':
+						return 'this24Hours';
+					case 'last':
+						return 'last24Hours';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '7days':
+				switch (period) {
+					case 'this':
+						return 'this7Days';
+					case 'last':
+						return 'last7Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '31days':
+				switch (period) {
+					case 'this':
+						return 'this31Days';
+					case 'last':
+						return 'last31Days';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '365days':
+				switch (period) {
+					case 'this':
+						return 'this365Days';
+					case 'last':
 						return 'last365Days';
 					default:
 						throw new Error(`Unknown period: ${period}`);
@@ -166,15 +214,15 @@ class LineChartWidgetScript {
 	}
 
 	private getFriendlyResolutionTranslationId(resolution: string, period: Period): string {
-		if (this.settings.timeframe !== 'hour') return resolution;
-		{
-			if (period === 'this') {
-				return 'thisHour';
-			} else if (period === 'last') {
-				return 'lastHour';
-			} else {
-				return 'rollingHour';
-			}
+		if (this.settings.timeframe !== 'hour') 
+			return resolution;
+
+		if (period === 'this') {
+			return 'thisHour';
+		} else if (period === 'last') {
+			return 'lastHour';
+		} else {
+			return 'rollingHour';
 		}
 	}
 
@@ -217,6 +265,8 @@ class LineChartWidgetScript {
 			name2?: string;
 			units1?: string;
 			units2?: string;
+			windowStart: Date | null;
+			windowEnd: Date | null;
 		};
 
 		if (result.data1 !== null) {
@@ -235,6 +285,9 @@ class LineChartWidgetScript {
 			if (this.settings.showRefreshCountdown) document.getElementById('progress')!.style.display = 'block';
 			this.scheduleCountdown(result.updatesIn);
 		}
+
+		this.windowStart = result.windowStart;
+		this.windowEnd = result.windowEnd;
 
 		await this.setData(result.data1, result.units1 ?? '', result.data2, result.units2 ?? '');
 	}
@@ -420,24 +473,24 @@ class LineChartWidgetScript {
 
 		const options: Intl.DateTimeFormatOptions = {
 			timeZone: this.timezone,
-			weekday: this.settings.timeframe === 'week' ? (friendly ? 'long' : 'short') : undefined,
-			day: this.settings.timeframe === 'month' ? 'numeric' : undefined,
-			month: this.settings.timeframe === 'year' ? (friendly ? 'long' : 'short') : undefined,
+			weekday: this.settings.timeframe === 'week' || this.settings.timeframe === '7days' ? (friendly ? 'long' : 'short') : undefined,
+			day: this.settings.timeframe === 'month' || this.settings.timeframe === '31days' ? 'numeric' : undefined,
+			month: this.settings.timeframe === 'year' || this.settings.timeframe === '365days' ? (friendly ? 'long' : 'short') : undefined,
 			hour: (
 				friendly
-					? this.settings.timeframe !== 'year' && this.settings.timeframe !== 'hour'
-					: this.settings.timeframe === 'day'
+					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes'
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours'
 			)
 				? 'numeric'
 				: undefined,
 			minute: (
 				friendly
-					? this.settings.timeframe !== 'year'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === 'hour'
+					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days'
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes'
 			)
 				? '2-digit'
 				: undefined,
-			hourCycle: this.settings.timeframe === 'day' ? 'h23' : undefined,
+			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' ? 'h23' : undefined,
 		};
 
 		if (!friendly && this.potentiallyNotComplete() && this.dateMin && this.dateMax) {
@@ -450,14 +503,17 @@ class LineChartWidgetScript {
 		if (friendly) {
 			switch (this.settings.timeframe) {
 				case 'hour':
+				case '60minutes':
 					formattedDate = this.homey.__('minute') + ' ' + formattedDate;
 					break;
 				case 'month':
+				case '31days':
 					formattedDate = this.homey.__('day') + ' ' + formattedDate;
 					break;
 			}
 		} else {
-			if (options.hour || options.minute) formattedDate = formattedDate.replace(' ', '\n');
+			if (options.hour || options.minute) 
+				formattedDate = formattedDate.replace(' ', '\n');
 		}
 		return capitalizeFirstLetter(formattedDate);
 	}
@@ -545,20 +601,25 @@ class LineChartWidgetScript {
 		let splitNumber = 1;
 		switch (this.settings.timeframe) {
 			case 'hour':
+			case '60minutes':
 				splitNumber = 6;
 				break;
 			case 'day':
+			case '24hours':
 				splitNumber = 6;
 				break;
 			case 'week':
+			case '7days':
 				splitNumber = 7;
 				break;
-			case 'month': {
+			case 'month':
+			case '31days': {
 				const daysInMonth = new Date(this.data1![0][0].getFullYear(), this.data1![0][0].getMonth() + 1, 0).getDate();
 				splitNumber = Math.ceil(daysInMonth / 2);
 				break;
 			}
 			case 'year':
+			case '365days':
 				splitNumber = 12;
 				break;
 		}
@@ -588,26 +649,26 @@ class LineChartWidgetScript {
 
 		const yAxis = this.isOffTheScale
 			? [
-					primaryAxisY,
-					{
-						type: 'value',
-						name: this.units2,
-						nameTextStyle: {
-							color: this.settings.color2,
-							align: 'right',
-						},
-						scale: true,
-						splitLine: {
-							show: false,
-							lineStyle: {
-								color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-								width: 1,
-								opacity: 0.5,
-								type: 'dashed',
-							},
+				primaryAxisY,
+				{
+					type: 'value',
+					name: this.units2,
+					nameTextStyle: {
+						color: this.settings.color2,
+						align: 'right',
+					},
+					scale: true,
+					splitLine: {
+						show: false,
+						lineStyle: {
+							color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
+							width: 1,
+							opacity: 0.5,
+							type: 'dashed',
 						},
 					},
-			  ]
+				},
+			]
 			: primaryAxisY;
 
 		const legendData = [];
@@ -707,7 +768,7 @@ class LineChartWidgetScript {
 					});
 
 					// Combine the title and series data
-					return `<strong>${formattedTitle}</strong><br/>${seriesData.join('<br/>')}`;
+					return `<div class="tooltip"><strong>${formattedTitle}</strong><br/>${seriesData.join('<br/>')}</div>`;
 				},
 			},
 			grid: {
@@ -725,6 +786,8 @@ class LineChartWidgetScript {
 			},
 			xAxis: {
 				type: 'time',
+				min: this.windowStart,
+				max: this.windowEnd,
 				splitNumber: splitNumber,
 				splitLine: {
 					show: false,
@@ -733,20 +796,17 @@ class LineChartWidgetScript {
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel: true,
-					showMaxLabel:
-						this.settings.timeframe === 'hour' ||
-						this.settings.timeframe === 'day' ||
-						this.settings.timeframe === 'month'
-							? this.potentiallyNotComplete()
-								? false
-								: true
-							: false,
-					alignMinLabel: this.settings.timeframe !== 'month' ? 'center' : 'left',
-					alignMaxLabel: this.settings.timeframe !== 'month' ? 'center' : 'right',
-					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== 'hour' ? 45 : 0,
+					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
+					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
+						this.potentiallyNotComplete()
+							? false
+							: true
+						: false,
+					alignMinLabel: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 'center' : 'left',
+					alignMaxLabel: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 'center' : 'right',
+					rotate: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes' ? 45 : 0,
 					align: 'center',
-					margin: this.settings.timeframe !== 'month' ? 20 : 8,
+					margin: this.settings.timeframe !== 'month' && this.settings.timeframe !== '31days' ? 20 : 8,
 				},
 			},
 			yAxis: yAxis,
@@ -756,7 +816,7 @@ class LineChartWidgetScript {
 		this.chart.setOption(option);
 
 		// render/update the legend toggles
-		if (this.settings.datasource1?.id) {
+		if (!this.settings.hideLegend && this.settings.datasource1?.id) {
 			document.querySelector('#toggle1 .label')!.textContent = this.name1;
 			(document.querySelector('#toggle1 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color1;
 			document.getElementById('toggle1')!.style.display = 'block';
@@ -764,7 +824,7 @@ class LineChartWidgetScript {
 			document.getElementById('toggle1')!.style.display = 'none';
 		}
 
-		if (this.settings.datasource2?.id) {
+		if (!this.settings.hideLegend && this.settings.datasource2?.id) {
 			document.querySelector('#toggle2 .label')!.textContent = this.name2;
 			(document.querySelector('#toggle2 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color2;
 			document.getElementById('toggle2')!.style.display = 'block';
@@ -792,7 +852,7 @@ class LineChartWidgetScript {
 			if (data.length > 20) data.shift();
 			await this.setData(data, 'Demo', [], '');
 			this.resolution1 = 'today';
-			this.units1 = 'Demo mode';
+			this.units1 = 'Configure me';
 
 			// TODO
 			this.settings.timeframe = 'day';
@@ -898,6 +958,8 @@ class LineChartWidgetScript {
 				renderer: 'svg',
 			});
 			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
+
+			document.documentElement.style.setProperty('--tooltip-font-size', `${this.settings.tooltipFontSize}`);
 
 			this.homey.ready();
 			await this.render();

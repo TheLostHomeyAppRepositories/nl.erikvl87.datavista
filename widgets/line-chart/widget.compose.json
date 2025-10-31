@@ -1,6 +1,7 @@
 {
 	"name": {
-		"en": "Line chart"
+		"en": "Line chart",
+		"nl": "Lijndiagram"
 	},
 	"height": 280,
 	"transparent": true,
@@ -18,7 +19,12 @@
 				{ "id": "day", "title": { "en": "Day", "nl": "Dag" } },
 				{ "id": "week", "title": { "en": "Week", "nl": "Week" } },
 				{ "id": "month", "title": { "en": "Month", "nl": "Maand" } },
-				{ "id": "year", "title": { "en": "Year", "nl": "Jaar" } }
+				{ "id": "year", "title": { "en": "Year", "nl": "Jaar" } },
+				{ "id": "60minutes", "title": { "en": "60 minutes", "nl": "60 minuten" } },
+				{ "id": "24hours", "title": { "en": "24 hours", "nl": "24 uur" } },
+				{ "id": "7days", "title": { "en": "7 days", "nl": "7 dagen" } },
+				{ "id": "31days", "title": { "en": "31 days", "nl": "31 dagen" } },
+				{ "id": "365days", "title": { "en": "365 days", "nl": "365 dagen" } }
 			]
 		},
 		{
@@ -39,8 +45,7 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
-				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
 			]
 		},
 		{
@@ -69,7 +74,8 @@
 				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
 				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
 				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
-				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } },
+				{ "id": "contrast", "title": { "en": "Contrast", "nl": "Contrast" } }
 			],
 			"value": "#32cd32"
 		},
@@ -100,8 +106,7 @@
 			"value": "this",
 			"values": [
 				{ "id": "this", "title": { "en": "This period", "nl": "Deze periode" } },
-				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } },
-				{ "id": "rolling", "title": { "en": "Rolling period", "nl": "Rollende periode" } }
+				{ "id": "last", "title": { "en": "Last period", "nl": "Vorige periode" } }
 			]
 		},
 		{
@@ -130,7 +135,8 @@
 				{ "id": "#daa520", "title": { "en": "Goldenrod", "nl": "Goudgeel" } },
 				{ "id": "#8b4513", "title": { "en": "Saddle Brown", "nl": "Zadelbruin" } },
 				{ "id": "#48d1cc", "title": { "en": "Medium Turquoise", "nl": "Turkoois" } },
-				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } }
+				{ "id": "#ff1493", "title": { "en": "Deep Pink", "nl": "Dieproze" } },
+				{ "id": "contrast", "title": { "en": "Contrast", "nl": "Contrast" } }
 			],
 			"value": "#1e90ff"
 		},
@@ -182,6 +188,30 @@
 						"nl": "Forceer dezelfde as"
 					}
 				}
+			]
+		},
+		{
+			"id": "hideLegend",
+			"type": "checkbox",
+			"title": {
+				"en": "Hide legend",
+				"nl": "Verberg legenda"
+			},
+			"value": false
+		},
+		{
+			"id": "tooltipFontSize",
+			"type": "dropdown",
+			"title": {
+				"en": "Tooltip font size",
+				"nl": "Lettergrootte tooltip"
+			},
+			"value": "1em",
+			"values": [
+				{ "id": "0.8em", "title": { "en": "Small", "nl": "Klein" } },
+				{ "id": "1em", "title": { "en": "Normal", "nl": "Normaal" } },
+				{ "id": "1.3em", "title": { "en": "Large", "nl": "Groot" } },
+				{ "id": "1.5em", "title": { "en": "Extra large", "nl": "Extra groot" } }
 			]
 		}
 	],
