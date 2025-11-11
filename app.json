@@ -777,6 +777,13 @@
               }
             },
             {
+              "id": "6hours",
+              "title": {
+                "en": "6 hours",
+                "nl": "6 uur"
+              }
+            },
+            {
               "id": "24hours",
               "title": {
                 "en": "24 hours",

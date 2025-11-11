@@ -3,7 +3,7 @@ import type * as echarts from 'echarts';
 
 // TODO: Merge all datasource type definitions!
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '6hours' | '24hours' | '7days' | '31days' | '365days';
 type Period = 'this' | 'last';
 
 type Settings = {
@@ -148,6 +148,15 @@ class LineChartWidgetScript {
 						return 'this60Minutes';
 					case 'last':
 						return 'last60Minutes';
+					default:
+						throw new Error(`Unknown period: ${period}`);
+				}
+			case '6hours':
+				switch (period) {
+					case 'this':
+						return 'this6Hours';
+					case 'last':
+						return 'last6Hours';
 					default:
 						throw new Error(`Unknown period: ${period}`);
 				}
@@ -479,18 +488,18 @@ class LineChartWidgetScript {
 			hour: (
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours'
-			)
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === '6hours'
+				)
 				? 'numeric'
 				: undefined,
 			minute: (
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes'
-			)
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours'
+				)
 				? '2-digit'
 				: undefined,
-			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' ? 'h23' : undefined,
+			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours' ? 'h23' : undefined,
 		};
 
 		if (!friendly && this.potentiallyNotComplete() && this.dateMin && this.dateMax) {

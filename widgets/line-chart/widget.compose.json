@@ -21,6 +21,7 @@
 				{ "id": "month", "title": { "en": "Month", "nl": "Maand" } },
 				{ "id": "year", "title": { "en": "Year", "nl": "Jaar" } },
 				{ "id": "60minutes", "title": { "en": "60 minutes", "nl": "60 minuten" } },
+				{ "id": "6hours", "title": { "en": "6 hours", "nl": "6 uur" } },
 				{ "id": "24hours", "title": { "en": "24 hours", "nl": "24 uur" } },
 				{ "id": "7days", "title": { "en": "7 days", "nl": "7 dagen" } },
 				{ "id": "31days", "title": { "en": "31 days", "nl": "31 dagen" } },

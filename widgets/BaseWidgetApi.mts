@@ -107,6 +107,14 @@ export class BaseWidgetApi {
 						result = await this.getInsight(app, datasource.id, 'last6Hours');
 						break;
 					}
+					case 'this6Hours': {
+						result = await this.getInsight(app, datasource.id, 'last6Hours');
+						break;
+					}
+					case 'last6Hours': {
+						result = await this.getInsight(app, datasource.id, 'last24Hours');
+						break;
+					}
 					case 'this24Hours': {
 						result = await this.getInsight(app, datasource.id, 'last24Hours');
 						break;

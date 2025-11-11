@@ -22,6 +22,8 @@
 	"minute": "minute",
 	"this60Minutes": "last 60 minutes",
 	"last60Minutes": "previous 60 minutes",
+	"this6Hours": "last 6 hours",
+	"last6Hours": "previous 6 hours",
 	"this24Hours": "last 24 hours",
 	"last24Hours": "previous 24 hours",
 	"this7Days": "last 7 days",

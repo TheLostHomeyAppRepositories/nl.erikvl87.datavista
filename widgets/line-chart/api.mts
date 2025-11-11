@@ -16,7 +16,7 @@ type Period = 'this' | 'last';
 class LineChartWidgetApi extends BaseWidgetApi {
 	// Rolling resolutions map for quick checks
 	private static readonly rollingResolutionsSet = new Set([
-		'last60Minutes','this60Minutes','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
+		'last60Minutes','this60Minutes','this6Hours','last6Hours','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
 	]);
 
 	// Internal mapping using camelCase keys for lint compliance; exposed timeframe strings map to these.
@@ -27,6 +27,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		'month': { unit: 'month', value: 1 },
 		'year': { unit: 'year', value: 1 },
 		'sixtyMinutes': { unit: 'hours', value: 1 },
+		'sixHours': { unit: 'hours', value: 6 },
 		'twentyFourHours': { unit: 'date', value: 1 },
 		'sevenDays': { unit: 'date', value: 7 },
 		'thirtyOneDays': { unit: 'date', value: 31 },
@@ -108,6 +109,8 @@ class LineChartWidgetApi extends BaseWidgetApi {
 			switch (timeframe) {
 				case 'this60Minutes': return { start: new Date(now - 60 * minuteMs), end: new Date(now), context: false };
 				case 'last60Minutes': return { start: new Date(now - 120 * minuteMs), end: new Date(now - 60 * minuteMs), context: true };
+				case 'this6Hours': return { start: new Date(now - 6 * hourMs), end: new Date(now), context: false };
+				case 'last6Hours': return { start: new Date(now - 12 * hourMs), end: new Date(now - 6 * hourMs), context: true };
 				case 'this24Hours': return { start: new Date(now - 24 * hourMs), end: new Date(now), context: false };
 				case 'last24Hours': return { start: new Date(now - 48 * hourMs), end: new Date(now - 24 * hourMs), context: true };
 				case 'this7Days': return { start: new Date(now - 7 * dayMs), end: new Date(now), context: false };
