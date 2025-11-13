@@ -10,13 +10,13 @@ interface InsightWidgetDataPayload {
 	name: string;
 }
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '6hours' | '12hours' | '24hours' | '7days' | '31days' | '365days';
 type Period = 'this' | 'last';
 
 class LineChartWidgetApi extends BaseWidgetApi {
 	// Rolling resolutions map for quick checks
 	private static readonly rollingResolutionsSet = new Set([
-		'last60Minutes','this60Minutes','this6Hours','last6Hours','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
+		'last60Minutes','this60Minutes','this6Hours','last6Hours','this12Hours','last12Hours','last24Hours','this24Hours','last7Days','this7Days','last31Days','this31Days','last365Days','this365Days'
 	]);
 
 	// Internal mapping using camelCase keys for lint compliance; exposed timeframe strings map to these.
@@ -28,6 +28,7 @@ class LineChartWidgetApi extends BaseWidgetApi {
 		'year': { unit: 'year', value: 1 },
 		'sixtyMinutes': { unit: 'hours', value: 1 },
 		'sixHours': { unit: 'hours', value: 6 },
+		'twelveHours': { unit: 'hours', value: 12 },
 		'twentyFourHours': { unit: 'date', value: 1 },
 		'sevenDays': { unit: 'date', value: 7 },
 		'thirtyOneDays': { unit: 'date', value: 31 },
@@ -37,6 +38,8 @@ class LineChartWidgetApi extends BaseWidgetApi {
 	private static mapTimeframeKey(tf: Timeframe): string {
 		switch (tf) {
 			case '60minutes': return 'sixtyMinutes';
+			case '6hours': return 'sixHours';
+			case '12hours': return 'twelveHours';
 			case '24hours': return 'twentyFourHours';
 			case '7days': return 'sevenDays';
 			case '31days': return 'thirtyOneDays';
@@ -111,6 +114,8 @@ class LineChartWidgetApi extends BaseWidgetApi {
 				case 'last60Minutes': return { start: new Date(now - 120 * minuteMs), end: new Date(now - 60 * minuteMs), context: true };
 				case 'this6Hours': return { start: new Date(now - 6 * hourMs), end: new Date(now), context: false };
 				case 'last6Hours': return { start: new Date(now - 12 * hourMs), end: new Date(now - 6 * hourMs), context: true };
+				case 'this12Hours': return { start: new Date(now - 12 * hourMs), end: new Date(now), context: false };
+				case 'last12Hours': return { start: new Date(now - 24 * hourMs), end: new Date(now - 12 * hourMs), context: true };
 				case 'this24Hours': return { start: new Date(now - 24 * hourMs), end: new Date(now), context: false };
 				case 'last24Hours': return { start: new Date(now - 48 * hourMs), end: new Date(now - 24 * hourMs), context: true };
 				case 'this7Days': return { start: new Date(now - 7 * dayMs), end: new Date(now), context: false };

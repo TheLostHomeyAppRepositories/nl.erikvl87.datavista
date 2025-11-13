@@ -784,6 +784,13 @@
               }
             },
             {
+              "id": "12hours",
+              "title": {
+                "en": "12 hours",
+                "nl": "12 uur"
+              }
+            },
+            {
               "id": "24hours",
               "title": {
                 "en": "24 hours",
