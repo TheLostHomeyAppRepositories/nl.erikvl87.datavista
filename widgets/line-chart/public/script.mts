@@ -611,6 +611,7 @@ class LineChartWidgetScript {
 		switch (this.settings.timeframe) {
 			case 'hour':
 			case '60minutes':
+			case '6hours':
 				splitNumber = 6;
 				break;
 			case 'day':
@@ -805,8 +806,8 @@ class LineChartWidgetScript {
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
-					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
+					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '6hours' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
+					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '6hours' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
 						this.potentiallyNotComplete()
 							? false
 							: true
