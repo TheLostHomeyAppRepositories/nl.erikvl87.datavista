@@ -40,6 +40,10 @@ export type DataSource = {
 	// Customly added for rolling periods
 	| 'this60Minutes'
 	| 'last60Minutes'
+	| 'this6Hours'
+	| 'last6Hours'
+	| 'this12Hours'
+	| 'last12Hours'
 	| 'this24Hours'
 	| 'last24Hours'
 	| 'this7Days'

@@ -112,5 +112,8 @@
   },
   "1.1.1": {
     "en": "Fix precision of rolling periods for the line chart widget"
+  },
+  "1.2.0": {
+    "en": "Added the option for a 6 hours timeframe in the line chart widget"
   }
 }

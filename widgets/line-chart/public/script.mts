@@ -3,7 +3,7 @@ import type * as echarts from 'echarts';
 
 // TODO: Merge all datasource type definitions!
 
-type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '24hours' | '7days' | '31days' | '365days';
+type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '6hours' | '12hours' | '24hours' | '7days' | '31days' | '365days';
 type Period = 'this' | 'last';
 
 type Settings = {
@@ -40,6 +40,52 @@ class LineChartWidgetScript {
 	private chart!: echarts.ECharts;
 	private isOffTheScale: boolean = false;
 	private configurationAnimationTimeout: NodeJS.Timeout | null | undefined;
+	private static readonly RESOLUTION_LOOKUP: Record<Exclude<Timeframe, 'hour'>, Record<Period, string>> = {
+		day: {
+			this: 'today',
+			last: 'yesterday',
+		},
+		week: {
+			this: 'thisWeek',
+			last: 'lastWeek',
+		},
+		month: {
+			this: 'thisMonth',
+			last: 'lastMonth',
+		},
+		year: {
+			this: 'thisYear',
+			last: 'lastYear',
+		},
+		'60minutes': {
+			this: 'this60Minutes',
+			last: 'last60Minutes',
+		},
+		'6hours': {
+			this: 'this6Hours',
+			last: 'last6Hours',
+		},
+		'12hours': {
+			this: 'this12Hours',
+			last: 'last12Hours',
+		},
+		'24hours': {
+			this: 'this24Hours',
+			last: 'last24Hours',
+		},
+		'7days': {
+			this: 'this7Days',
+			last: 'last7Days',
+		},
+		'31days': {
+			this: 'this31Days',
+			last: 'last31Days',
+		},
+		'365days': {
+			this: 'this365Days',
+			last: 'last365Days',
+		},
+	};
 	resolution1: string;
 	resolution2: string;
 	data1?: [Date, number | '-'][];
@@ -103,91 +149,14 @@ class LineChartWidgetScript {
 	 * @returns The resolution string (e.g., 'today', 'thisWeek').
 	 */
 	private static getResolution(timeframe: Timeframe, period: Period): string {
-		switch (timeframe) {
-			case 'hour':
-				return 'last6Hours';
-			case 'day':
-				switch (period) {
-					case 'this':
-						return 'today';
-					case 'last':
-						return 'yesterday';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case 'week':
-				switch (period) {
-					case 'this':
-						return 'thisWeek';
-					case 'last':
-						return 'lastWeek';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case 'month':
-				switch (period) {
-					case 'this':
-						return 'thisMonth';
-					case 'last':
-						return 'lastMonth';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case 'year':
-				switch (period) {
-					case 'this':
-						return 'thisYear';
-					case 'last':
-						return 'lastYear';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case '60minutes':
-				switch (period) {
-					case 'this':
-						return 'this60Minutes';
-					case 'last':
-						return 'last60Minutes';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case '24hours':
-				switch (period) {
-					case 'this':
-						return 'this24Hours';
-					case 'last':
-						return 'last24Hours';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case '7days':
-				switch (period) {
-					case 'this':
-						return 'this7Days';
-					case 'last':
-						return 'last7Days';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case '31days':
-				switch (period) {
-					case 'this':
-						return 'this31Days';
-					case 'last':
-						return 'last31Days';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-			case '365days':
-				switch (period) {
-					case 'this':
-						return 'this365Days';
-					case 'last':
-						return 'last365Days';
-					default:
-						throw new Error(`Unknown period: ${period}`);
-				}
-		}
+		if (timeframe === 'hour') return 'last6Hours';
+
+		const resolutionByPeriod = LineChartWidgetScript.RESOLUTION_LOOKUP[timeframe];
+		if (!resolutionByPeriod) throw new Error(`Unknown timeframe: ${timeframe}`);
+
+		const resolution = resolutionByPeriod[period];
+		if (!resolution) throw new Error(`Unknown period: ${period}`);
+		return resolution;
 	}
 
 	/**
@@ -479,18 +448,18 @@ class LineChartWidgetScript {
 			hour: (
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours'
-			)
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours'
+				)
 				? 'numeric'
 				: undefined,
 			minute: (
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days'
-					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes'
-			)
+					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours'
+				)
 				? '2-digit'
 				: undefined,
-			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' ? 'h23' : undefined,
+			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours' ? 'h23' : undefined,
 		};
 
 		if (!friendly && this.potentiallyNotComplete() && this.dateMin && this.dateMax) {
@@ -602,8 +571,8 @@ class LineChartWidgetScript {
 		switch (this.settings.timeframe) {
 			case 'hour':
 			case '60minutes':
-				splitNumber = 6;
-				break;
+			case '6hours':
+			case '12hours':
 			case 'day':
 			case '24hours':
 				splitNumber = 6;
@@ -796,8 +765,8 @@ class LineChartWidgetScript {
 				axisLabel: {
 					formatter: (value: string): string => this.formatXAxisValue(value),
 					hideOverlap: true,
-					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
-					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
+					showMinLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '6hours' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days',
+					showMaxLabel: this.settings.timeframe !== '60minutes' && this.settings.timeframe !== '6hours' && this.settings.timeframe !== '24hours' && this.settings.timeframe !== '7days' && this.settings.timeframe !== '365days' ?
 						this.potentiallyNotComplete()
 							? false
 							: true

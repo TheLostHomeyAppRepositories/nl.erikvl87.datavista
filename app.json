@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.erikvl87.datavista",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "support": "https://datavista.erikvl87.nl/",
   "homeyCommunityTopicId": 121482,
   "bugs": {
@@ -774,6 +774,20 @@
               "title": {
                 "en": "60 minutes",
                 "nl": "60 minuten"
+              }
+            },
+            {
+              "id": "6hours",
+              "title": {
+                "en": "6 hours",
+                "nl": "6 uur"
+              }
+            },
+            {
+              "id": "12hours",
+              "title": {
+                "en": "12 hours",
+                "nl": "12 uur"
               }
             },
             {
