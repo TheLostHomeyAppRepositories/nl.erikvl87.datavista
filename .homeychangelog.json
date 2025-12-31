@@ -115,5 +115,8 @@
   },
   "1.2.0": {
     "en": "Added the option for a 6 hours timeframe in the line chart widget"
+  },
+  "1.3.0": {
+    "en": "Extended the line chart widget to 4 series. Added the 12 hour timeframe to the line chart widget. Fixed an axis ticks issue for last 6 hours in the line chart widget."
   }
 }
