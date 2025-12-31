@@ -1207,6 +1207,392 @@
           "value": ""
         },
         {
+          "id": "datasource3",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource 3",
+            "nl": "Databron 3"
+          }
+        },
+        {
+          "id": "period3",
+          "type": "dropdown",
+          "title": {
+            "en": "Period 3",
+            "nl": "Periode 3"
+          },
+          "value": "this",
+          "values": [
+            {
+              "id": "this",
+              "title": {
+                "en": "This period",
+                "nl": "Deze periode"
+              }
+            },
+            {
+              "id": "last",
+              "title": {
+                "en": "Last period",
+                "nl": "Vorige periode"
+              }
+            }
+          ]
+        },
+        {
+          "id": "color3",
+          "type": "dropdown",
+          "title": {
+            "en": "Color 3",
+            "nl": "Kleur 3"
+          },
+          "values": [
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
+            }
+          ],
+          "value": "#ff1493"
+        },
+        {
+          "id": "overwriteName3",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name 3",
+            "nl": "Overschrijf naam 3"
+          },
+          "value": ""
+        },
+        {
+          "id": "datasource4",
+          "type": "autocomplete",
+          "title": {
+            "en": "Datasource 4",
+            "nl": "Databron 4"
+          }
+        },
+        {
+          "id": "period4",
+          "type": "dropdown",
+          "title": {
+            "en": "Period 4",
+            "nl": "Periode 4"
+          },
+          "value": "this",
+          "values": [
+            {
+              "id": "this",
+              "title": {
+                "en": "This period",
+                "nl": "Deze periode"
+              }
+            },
+            {
+              "id": "last",
+              "title": {
+                "en": "Last period",
+                "nl": "Vorige periode"
+              }
+            }
+          ]
+        },
+        {
+          "id": "color4",
+          "type": "dropdown",
+          "title": {
+            "en": "Color 4",
+            "nl": "Kleur 4"
+          },
+          "values": [
+            {
+              "id": "#00ff00",
+              "title": {
+                "en": "Green",
+                "nl": "Groen"
+              }
+            },
+            {
+              "id": "#ff0000",
+              "title": {
+                "en": "Red",
+                "nl": "Rood"
+              }
+            },
+            {
+              "id": "#ffff00",
+              "title": {
+                "en": "Yellow",
+                "nl": "Geel"
+              }
+            },
+            {
+              "id": "#0000ff",
+              "title": {
+                "en": "Blue",
+                "nl": "Blauw"
+              }
+            },
+            {
+              "id": "#ffa500",
+              "title": {
+                "en": "Orange",
+                "nl": "Oranje"
+              }
+            },
+            {
+              "id": "#808080",
+              "title": {
+                "en": "Gray",
+                "nl": "Grijs"
+              }
+            },
+            {
+              "id": "#800080",
+              "title": {
+                "en": "Purple",
+                "nl": "Paars"
+              }
+            },
+            {
+              "id": "#a52a2a",
+              "title": {
+                "en": "Brown",
+                "nl": "Bruin"
+              }
+            },
+            {
+              "id": "#000000",
+              "title": {
+                "en": "Black",
+                "nl": "Zwart"
+              }
+            },
+            {
+              "id": "#00ffff",
+              "title": {
+                "en": "Cyan",
+                "nl": "Cyaan"
+              }
+            },
+            {
+              "id": "#ff00ff",
+              "title": {
+                "en": "Magenta",
+                "nl": "Magenta"
+              }
+            },
+            {
+              "id": "#32cd32",
+              "title": {
+                "en": "Lime Green",
+                "nl": "Limoengroen"
+              }
+            },
+            {
+              "id": "#ff4500",
+              "title": {
+                "en": "Orange Red",
+                "nl": "Oranjerood"
+              }
+            },
+            {
+              "id": "#1e90ff",
+              "title": {
+                "en": "Dodger Blue",
+                "nl": "Hemelsblauw"
+              }
+            },
+            {
+              "id": "#4b0082",
+              "title": {
+                "en": "Indigo",
+                "nl": "Indigo"
+              }
+            },
+            {
+              "id": "#daa520",
+              "title": {
+                "en": "Goldenrod",
+                "nl": "Goudgeel"
+              }
+            },
+            {
+              "id": "#8b4513",
+              "title": {
+                "en": "Saddle Brown",
+                "nl": "Zadelbruin"
+              }
+            },
+            {
+              "id": "#48d1cc",
+              "title": {
+                "en": "Medium Turquoise",
+                "nl": "Turkoois"
+              }
+            },
+            {
+              "id": "#ff1493",
+              "title": {
+                "en": "Deep Pink",
+                "nl": "Dieproze"
+              }
+            },
+            {
+              "id": "contrast",
+              "title": {
+                "en": "Contrast",
+                "nl": "Contrast"
+              }
+            }
+          ],
+          "value": "#48d1cc"
+        },
+        {
+          "id": "overwriteName4",
+          "type": "text",
+          "title": {
+            "en": "Overwrite name 4",
+            "nl": "Overschrijf naam 4"
+          },
+          "value": ""
+        },
+        {
           "id": "showRefreshCountdown",
           "type": "checkbox",
           "title": {

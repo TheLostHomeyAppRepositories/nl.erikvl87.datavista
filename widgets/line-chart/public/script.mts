@@ -6,39 +6,63 @@ import type * as echarts from 'echarts';
 type Timeframe = 'hour' | 'day' | 'week' | 'month' | 'year' | '60minutes' | '6hours' | '12hours' | '24hours' | '7days' | '31days' | '365days';
 type Period = 'this' | 'last';
 
+type Datasource = {
+	deviceId: string;
+	deviceName: string;
+	id: string;
+	name: string;
+	type: 'insight';
+};
+
 type Settings = {
 	showRefreshCountdown: boolean;
-	datasource1?: {
-		deviceId: string;
-		deviceName: string;
-		id: string;
-		name: string;
-		type: 'insight';
-	};
+	datasource1?: Datasource;
 	color1: string;
 	overwriteName1: string;
-	datasource2?: {
-		deviceId: string;
-		deviceName: string;
-		id: string;
-		name: string;
-		type: 'insight';
-	};
+	datasource2?: Datasource;
 	color2: string;
 	overwriteName2: string;
+	datasource3?: Datasource;
+	color3?: string;
+	overwriteName3?: string;
+	datasource4?: Datasource;
+	color4?: string;
+	overwriteName4?: string;
 	timeframe: Timeframe;
 	period1: Period;
 	period2: Period;
+	period3?: Period;
+	period4?: Period;
 	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
 	hideLegend: boolean;
 	tooltipFontSize: string;
 };
 
+type TooltipParam = {
+	marker: string;
+	seriesName: string;
+	seriesIndex: number;
+	value: [string | number | Date, number | '-'];
+};
+
+interface AxisDefinition {
+	unit: string;
+	color: string;
+	min: number;
+	max: number;
+	datasetIndices: number[];
+}
+
 class LineChartWidgetScript {
 	private settings: Settings;
 	private homey: HomeyWidget;
 	private chart!: echarts.ECharts;
-	private isOffTheScale: boolean = false;
+	private axisAssignments: number[] = [-1, -1, -1, -1];
+	private axisDefinitions: AxisDefinition[] = [];
+	private seriesNameByDatasetIndex: Array<string | undefined> = [];
+	private displayNameByLegendName: Record<string, string> = {};
+	private axisLabelCache: string[] = [];
+	private seriesVisibility: boolean[] = [true, true, true, true];
 	private configurationAnimationTimeout: NodeJS.Timeout | null | undefined;
 	private static readonly RESOLUTION_LOOKUP: Record<Exclude<Timeframe, 'hour'>, Record<Period, string>> = {
 		day: {
@@ -86,21 +110,30 @@ class LineChartWidgetScript {
 			last: 'last365Days',
 		},
 	};
-	resolution1: string;
-	resolution2: string;
+	resolution1!: string;
+	resolution2!: string;
+	resolution3!: string;
+	resolution4!: string;
 	data1?: [Date, number | '-'][];
 	data2?: [Date, number | '-'][];
+	data3?: [Date, number | '-'][];
+	data4?: [Date, number | '-'][];
 	units1: string = '';
 	units2: string = '';
+	units3: string = '';
+	units4: string = '';
 	refreshSyncDataTimeout: NodeJS.Timeout | null | undefined;
 	name1: string = 'datasource1';
 	name2: string = 'datasource2';
+	name3: string = 'datasource3';
+	name4: string = 'datasource4';
 	timezone: string | undefined;
 	language: string | undefined;
 	dateMin: Date | null = null;
 	dateMax: Date | null = null;
 	windowStart: Date | null = null;
 	windowEnd: Date | null = null;
+	shiftOffsetMs: number[] = [0, 0, 0, 0];
 
 	constructor(homey: HomeyWidget) {
 		this.settings = homey.getSettings() as Settings;
@@ -109,8 +142,10 @@ class LineChartWidgetScript {
 			.getPropertyValue('--homey-color-mono-1000')
 			.trim();
 
-		if (this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
-		if (this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
+		if (!this.settings.color1 || this.settings.color1 === 'contrast') this.settings.color1 = contrastColor;
+		if (!this.settings.color2 || this.settings.color2 === 'contrast') this.settings.color2 = contrastColor;
+		if (!this.settings.color3 || this.settings.color3 === 'contrast') this.settings.color3 = contrastColor;
+		if (!this.settings.color4 || this.settings.color4 === 'contrast') this.settings.color4 = contrastColor;
 
 		// If no datasource2 is set, use datasource1 so the 2nd dataset can be the previous period.
 		if (!this.settings.datasource2?.id && this.settings.period1 !== this.settings.period2) {
@@ -120,6 +155,8 @@ class LineChartWidgetScript {
 		this.homey = homey;
 		this.resolution1 = LineChartWidgetScript.getResolution(this.settings.timeframe, this.settings.period1);
 		this.resolution2 = LineChartWidgetScript.getResolution(this.settings.timeframe, this.settings.period2);
+		this.resolution3 = LineChartWidgetScript.getResolution(this.settings.timeframe, this.settings.period3 ?? this.settings.period1);
+		this.resolution4 = LineChartWidgetScript.getResolution(this.settings.timeframe, this.settings.period4 ?? this.settings.period1);
 	}
 
 	/**
@@ -195,20 +232,40 @@ class LineChartWidgetScript {
 		}
 	}
 
+	/**
+	 * Reverses the normalization shift for a date to get the original timestamp.
+	 * Uses the shift offset provided by the backend.
+	 */
+	private reverseNormalizationShift(date: Date, seriesIndex: number): Date | null {
+		const offset = this.shiftOffsetMs[seriesIndex];
+		if (offset === 0) {
+			return null;
+		}
+
+		// Subtract the offset to get the original timestamp
+		return new Date(date.getTime() - offset);
+	}
+
 	private async getData(): Promise<void> {
 		const request: {
 			datasource1?: { id: string; insightResolution: string };
 			datasource2?: { id: string; insightResolution: string };
+			datasource3?: { id: string; insightResolution: string };
+			datasource4?: { id: string; insightResolution: string };
 			settings: {
 				timeframe: Timeframe;
 				period1: Period;
 				period2: Period;
+				period3?: Period;
+				period4?: Period;
 			};
 		} = {
 			settings: {
 				timeframe: this.settings.timeframe,
 				period1: this.settings.period1,
 				period2: this.settings.period2,
+				period3: this.settings.period3,
+				period4: this.settings.period4,
 			},
 		};
 
@@ -219,35 +276,77 @@ class LineChartWidgetScript {
 			};
 		}
 
-		if (this.settings.datasource2?.id.trim()) {
+		if (this.settings.datasource2?.id?.trim()) {
 			request.datasource2 = {
 				...this.settings.datasource2,
 				insightResolution: this.resolution2,
 			};
 		}
 
+		if (this.settings.datasource3?.id?.trim()) {
+			request.datasource3 = {
+				...this.settings.datasource3,
+				insightResolution: this.resolution3,
+			};
+		}
+
+		if (this.settings.datasource4?.id?.trim()) {
+			request.datasource4 = {
+				...this.settings.datasource4,
+				insightResolution: this.resolution4,
+			};
+		}
+
 		const result = (await this.homey.api('POST', `/datasource`, request)) as {
 			data1: [Date, number | '-'][];
 			data2: [Date, number | '-'][];
+			data3: [Date, number | '-'][];
+			data4: [Date, number | '-'][];
 			updatesIn: number;
 			name1?: string;
 			name2?: string;
+			name3?: string;
+			name4?: string;
 			units1?: string;
 			units2?: string;
+			units3?: string;
+			units4?: string;
 			windowStart: Date | null;
 			windowEnd: Date | null;
+			shiftOffsetMs1: number;
+			shiftOffsetMs2: number;
+			shiftOffsetMs3: number;
+			shiftOffsetMs4: number;
 		};
 
-		if (result.data1 !== null) {
+		// TODO: if all is null
+
+		if (result.data1 !== null && this.settings.datasource1?.id) {
+			const fallbackName = result.name1 ?? this.settings.datasource1.name ?? this.name1;
 			this.name1 = (this.settings.overwriteName1?.trim())
 				? this.settings.overwriteName1
-				: result.name1 + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution1, this.settings.period1)) + ')';
+				: `${fallbackName} (${this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution1, this.settings.period1))})`;
 		}
 
-		if (result.data2 !== null) {
+		if (result.data2 !== null && this.settings.datasource2?.id) {
+			const fallbackName = result.name2 ?? this.settings.datasource2.name ?? this.name2;
 			this.name2 = (this.settings.overwriteName2?.trim())
 				? this.settings.overwriteName2
-				: result.name2 + ' (' + this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution2, this.settings.period2)) + ')';
+				: `${fallbackName} (${this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution2, this.settings.period2))})`;
+		}
+
+		if (result.data3 !== null && this.settings.datasource3?.id) {
+			const fallbackName = result.name3 ?? this.settings.datasource3.name ?? this.name3;
+			this.name3 = (this.settings.overwriteName3?.trim())
+				? this.settings.overwriteName3
+				: `${fallbackName} (${this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution3, this.settings.period3 ?? this.settings.period1))})`;
+		}
+
+		if (result.data4 !== null && this.settings.datasource4?.id) {
+			const fallbackName = result.name4 ?? this.settings.datasource4.name ?? this.name4;
+			this.name4 = (this.settings.overwriteName4?.trim())
+				? this.settings.overwriteName4
+				: `${fallbackName} (${this.homey.__(this.getFriendlyResolutionTranslationId(this.resolution4, this.settings.period4 ?? this.settings.period1))})`;
 		}
 
 		if (result.updatesIn !== Number.MAX_SAFE_INTEGER) {
@@ -257,8 +356,18 @@ class LineChartWidgetScript {
 
 		this.windowStart = result.windowStart;
 		this.windowEnd = result.windowEnd;
+		this.shiftOffsetMs = [result.shiftOffsetMs1, result.shiftOffsetMs2, result.shiftOffsetMs3, result.shiftOffsetMs4];
 
-		await this.setData(result.data1, result.units1 ?? '', result.data2, result.units2 ?? '');
+		await this.setData(
+			result.data1,
+			result.units1 ?? '',
+			result.data2,
+			result.units2 ?? '',
+			result.data3,
+			result.units3 ?? '',
+			result.data4,
+			result.units4 ?? '',
+		);
 	}
 
 	private async setData(
@@ -266,6 +375,10 @@ class LineChartWidgetScript {
 		units1: string,
 		data2: [Date, number | '-'][],
 		units2: string,
+		data3?: [Date, number | '-'][],
+		units3: string = '',
+		data4?: [Date, number | '-'][],
+		units4: string = '',
 	): Promise<void> {
 		const normalize = (data: [Date | string, number | '-'][] | undefined): [Date, number | '-'][] => {
 			if (!data) return [];
@@ -273,28 +386,47 @@ class LineChartWidgetScript {
 		};
 		this.data1 = normalize(data1);
 		this.data2 = normalize(data2);
+		this.data3 = normalize(data3);
+		this.data4 = normalize(data4);
 
 		this.units1 = units1;
 		this.units2 = units2;
+		this.units3 = units3;
+		this.units4 = units4;
 
-		if (this.data1 != null && this.data2 != null)
-			this.isOffTheScale = await this.determineOffTheScale(this.data1, this.data2);
+		const datasetsForScale: [Date, number | '-'][][] = [
+			this.data1 ?? [],
+			this.data2 ?? [],
+			this.data3 ?? [],
+			this.data4 ?? [],
+		];
+		const unitsForScale = [this.units1, this.units2, this.units3, this.units4];
+		const colorsForScale = [
+			this.settings.color1,
+			this.settings.color2 ?? this.settings.color1,
+			this.settings.color3 ?? this.settings.color1,
+			this.settings.color4 ?? this.settings.color1,
+		];
+		const activeDatasetCount = datasetsForScale.filter(dataset => dataset.length > 0).length;
+		if (activeDatasetCount > 0) {
+			const layout = await this.determineAxisLayout(datasetsForScale, unitsForScale, colorsForScale);
+			this.axisAssignments = layout.assignments;
+			this.axisDefinitions = layout.axes;
+		} else {
+			this.axisAssignments = [-1, -1, -1, -1];
+			this.axisDefinitions = [];
+		}
 
-		const lowestDate1 = this.data1?.length ? new Date(this.data1[0][0]) : null;
-		const lowestDate2 = this.data2?.length ? new Date(this.data2[0][0]) : null;
-
-		this.dateMin =
-			lowestDate1 && lowestDate2
-				? new Date(Math.min(lowestDate1.getTime(), lowestDate2.getTime()))
-				: lowestDate1 ?? lowestDate2;
-
-		const highestDate1 = this.data1?.length ? new Date(this.data1[this.data1.length - 1][0]) : null;
-		const highestDate2 = this.data2?.length ? new Date(this.data2[this.data2.length - 1][0]) : null;
-
-		this.dateMax =
-			highestDate1 && highestDate2
-				? new Date(Math.max(highestDate1.getTime(), highestDate2.getTime()))
-				: highestDate1 ?? highestDate2;
+		const allDates = [this.data1, this.data2, this.data3, this.data4]
+			.flatMap(dataset => (dataset ?? []).map(point => point[0]))
+			.filter((value): value is Date => value instanceof Date);
+		if (allDates.length) {
+			this.dateMin = new Date(Math.min(...allDates.map(date => date.getTime())));
+			this.dateMax = new Date(Math.max(...allDates.map(date => date.getTime())));
+		} else {
+			this.dateMin = null;
+			this.dateMax = null;
+		}
 	}
 
 	/**
@@ -449,14 +581,14 @@ class LineChartWidgetScript {
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days' && this.settings.timeframe !== 'hour' && this.settings.timeframe !== '60minutes'
 					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours'
-				)
+			)
 				? 'numeric'
 				: undefined,
 			minute: (
 				friendly
 					? this.settings.timeframe !== 'year' && this.settings.timeframe !== '365days'
 					: this.settings.timeframe === 'day' || this.settings.timeframe === '24hours' || this.settings.timeframe === 'hour' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours'
-				)
+			)
 				? '2-digit'
 				: undefined,
 			hourCycle: this.settings.timeframe === 'day' || this.settings.timeframe === '60minutes' || this.settings.timeframe === '6hours' || this.settings.timeframe === '12hours' ? 'h23' : undefined,
@@ -480,9 +612,8 @@ class LineChartWidgetScript {
 					formattedDate = this.homey.__('day') + ' ' + formattedDate;
 					break;
 			}
-		} else {
-			if (options.hour || options.minute) 
-				formattedDate = formattedDate.replace(' ', '\n');
+		} else if (options.hour || options.minute) {
+			formattedDate = formattedDate.replace(' ', '\n');
 		}
 		return capitalizeFirstLetter(formattedDate);
 	}
@@ -493,65 +624,126 @@ class LineChartWidgetScript {
 	 * @param data2 - The second dataset.
 	 * @returns True if a second axis is required, otherwise false.
 	 */
-	private async determineOffTheScale(data1: [Date, number | '-'][], data2: [Date, number | '-'][]): Promise<boolean> {
-		// Helper function to calculate the range of a dataset
-		const calculateRange = async (data: [Date, number | '-'][]): Promise<number> => {
-			const numericValues = data.filter(point => typeof point[1] === 'number').map(point => point[1] as number);
+	private async determineAxisLayout(
+		datasets: [Date, number | '-'][][],
+		units: string[],
+		colors: (string | undefined)[],
+	): Promise<{ assignments: number[]; axes: AxisDefinition[] }> {
+		const assignments: number[] = [-1, -1, -1, -1];
+		const activeDatasets = datasets
+			.map((data, index) => ({
+				index,
+				data,
+				unit: units[index] ?? '',
+				color: colors[index],
+			}))
+			.filter(entry => entry.data.length > 0);
 
-			// Early exit if no numeric values exist
-			if (numericValues.length === 0) return 0;
+		if (!activeDatasets.length) return { assignments, axes: [] };
 
-			// Apply IQR method if selected
+		const computeMetrics = (data: [Date, number | '-'][]): { min: number; max: number; range: number } => {
+			const numericValues = data
+				.map(point => point[1])
+				.filter((value): value is number => typeof value === 'number');
+			if (!numericValues.length) return { min: 0, max: 0, range: 0 };
+
+			let values = numericValues;
 			if (this.settings.yAxisCalculationMethod === 'iqr') {
-				const sortedValues = numericValues.sort((a, b) => a - b);
+				const sortedValues = [...numericValues].sort((a, b) => a - b);
 				const q1 = sortedValues[Math.floor(sortedValues.length / 4)];
 				const q3 = sortedValues[Math.floor((sortedValues.length * 3) / 4)];
 				const iqr = q3 - q1;
-
 				const lowerBound = q1 - 1.5 * iqr;
 				const upperBound = q3 + 1.5 * iqr;
-
-				// Filter values within bounds
-				const filteredValues = numericValues.filter(value => value >= lowerBound && value <= upperBound);
-
-				// Calculate the range of the filtered dataset
-				return Math.max(...filteredValues) - Math.min(...filteredValues);
+				const bounded = numericValues.filter(value => value >= lowerBound && value <= upperBound);
+				if (bounded.length) values = bounded;
 			}
 
-			// If not using IQR, calculate the full range
-			return Math.max(...numericValues) - Math.min(...numericValues);
+			const min = Math.min(...values);
+			const max = Math.max(...values);
+			return { min, max, range: max - min };
 		};
 
-		// Early exit if both datasets are empty
-		if (data1.length === 0 && data2.length === 0) return false;
+		const datasetMetrics = activeDatasets.map(entry => ({
+			...entry,
+			metrics: computeMetrics(entry.data),
+		}));
 
-		// Handle "Force Same Axis" option
-		if (this.settings.yAxisCalculationMethod === 'sameAxis') return false; // Force same axis, no second axis needed
-
-		// Calculate ranges for both datasets
-		const range1 = await calculateRange(data1);
-		const range2 = await calculateRange(data2);
-
-		// Handle cases where both ranges are 0
-		if (range1 === 0 && range2 === 0) return false;
-
-		// Handle cases where one range is 0
-		if (range1 === 0 || range2 === 0) return true;
-
-		// Check if units are different
-		if (this.units1 !== this.units2) return true; // Different units always require a second axis
-
-		// Calculate the range ratio
-		const rangeRatio = Math.max(range1, range2) / Math.min(range1, range2);
-
-		// Log the range ratio for debugging
-		await this.logMessage(
-			`${this.settings.datasource1?.name} Range ratio: ${rangeRatio} (Dataset 1: ${range1}, Dataset 2: ${range2})`,
-			false,
-		);
+		if (this.settings.yAxisCalculationMethod === 'sameAxis' || datasetMetrics.length === 1) {
+			datasetMetrics.forEach(entry => {
+				assignments[entry.index] = 0;
+			});
+			const primary = datasetMetrics[0];
+			const aggregated = datasetMetrics.reduce(
+				(acc, entry) => ({
+					min: Math.min(acc.min, entry.metrics.min),
+					max: Math.max(acc.max, entry.metrics.max),
+				}),
+				{ min: primary.metrics.min, max: primary.metrics.max },
+			);
+			return {
+				assignments,
+				axes: [
+					{
+						unit: primary.unit,
+						color: primary.color ?? this.settings.color1,
+						min: aggregated.min,
+						max: aggregated.max,
+						datasetIndices: datasetMetrics.map(entry => entry.index),
+					},
+				],
+			};
+		}
 
 		const threshold = 10;
-		return rangeRatio > threshold;
+		const axes: AxisDefinition[] = [];
+		const tryAssignToAxis = (axis: AxisDefinition, metrics: { min: number; max: number; range: number }): boolean => {
+			const axisRange = axis.max - axis.min;
+			const combinedMin = Math.min(axis.min, metrics.min);
+			const combinedMax = Math.max(axis.max, metrics.max);
+			const combinedRange = combinedMax - combinedMin;
+			const largestIndividualRange = Math.max(axisRange, metrics.range);
+
+			if (largestIndividualRange === 0) return combinedRange === 0;
+			if (axisRange > 0 && metrics.range > 0) {
+				const rangeRatio = Math.max(axisRange, metrics.range) / Math.min(axisRange, metrics.range);
+				if (rangeRatio > threshold) return false;
+			}
+
+			return combinedRange / largestIndividualRange <= threshold;
+		};
+
+		for (const entry of datasetMetrics) {
+			let axisIndex = -1;
+			for (let index = 0; index < axes.length; index += 1) {
+				const axis = axes[index];
+				if (axis.unit !== entry.unit) continue;
+				if (tryAssignToAxis(axis, entry.metrics)) {
+					axisIndex = index;
+					break;
+				}
+			}
+
+			if (axisIndex === -1) {
+				axisIndex = axes.length;
+				axes.push({
+					unit: entry.unit,
+					color: entry.color ?? this.settings.color1,
+					min: entry.metrics.min,
+					max: entry.metrics.max,
+					datasetIndices: [entry.index],
+				});
+			} else {
+				const axis = axes[axisIndex];
+				axis.min = Math.min(axis.min, entry.metrics.min);
+				axis.max = Math.max(axis.max, entry.metrics.max);
+				axis.datasetIndices.push(entry.index);
+			}
+
+			assignments[entry.index] = axisIndex;
+		}
+
+		return { assignments, axes };
 	}
 
 	/**
@@ -559,7 +751,38 @@ class LineChartWidgetScript {
 	 * Updates the chart options and legend toggles.
 	 */
 	private async render(): Promise<void> {
-		if (!this.data1 && !this.data2) {
+		const datasets = [
+			{
+				data: this.data1 ?? [],
+				name: this.name1,
+				color: this.settings.color1,
+				datasource: this.settings.datasource1,
+				units: this.units1,
+			},
+			{
+				data: this.data2 ?? [],
+				name: this.name2,
+				color: this.settings.color2,
+				datasource: this.settings.datasource2,
+				units: this.units2,
+			},
+			{
+				data: this.data3 ?? [],
+				name: this.name3,
+				color: this.settings.color3 ?? this.settings.color1,
+				datasource: this.settings.datasource3,
+				units: this.units3,
+			},
+			{
+				data: this.data4 ?? [],
+				name: this.name4,
+				color: this.settings.color4 ?? this.settings.color1,
+				datasource: this.settings.datasource4,
+				units: this.units4,
+			},
+		];
+
+		if (!datasets.some(dataset => dataset.data.length > 0)) {
 			await this.logMessage('The payload is null', false);
 			await this.startConfigurationAnimation();
 			return;
@@ -568,6 +791,7 @@ class LineChartWidgetScript {
 		await this.stopConfigurationAnimation();
 
 		let splitNumber = 1;
+		const referenceData = datasets.find(dataset => dataset.data.length)?.data ?? [];
 		switch (this.settings.timeframe) {
 			case 'hour':
 			case '60minutes':
@@ -583,8 +807,11 @@ class LineChartWidgetScript {
 				break;
 			case 'month':
 			case '31days': {
-				const daysInMonth = new Date(this.data1![0][0].getFullYear(), this.data1![0][0].getMonth() + 1, 0).getDate();
-				splitNumber = Math.ceil(daysInMonth / 2);
+				if (referenceData.length) {
+					const referenceDate = referenceData[0][0];
+					const daysInMonth = new Date(referenceDate.getFullYear(), referenceDate.getMonth() + 1, 0).getDate();
+					splitNumber = Math.ceil(daysInMonth / 2);
+				}
 				break;
 			}
 			case 'year':
@@ -593,118 +820,147 @@ class LineChartWidgetScript {
 				break;
 		}
 
-		const primaryAxisY = {
-			type: 'value',
-			name: this.units1,
-			nameTextStyle: {
-				align: 'left',
-				color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-			},
-			scale: true,
-			splitLine: {
-				show: true,
-				lineStyle: {
-					color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-					width: 1,
-					opacity: 0.5,
-					type: 'dashed',
-				},
-			},
-		};
-
-		if (this.isOffTheScale) {
-			primaryAxisY.nameTextStyle.color = this.settings.color1;
-		}
-
-		const yAxis = this.isOffTheScale
-			? [
-				primaryAxisY,
+		const mono200 = getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim();
+		const axisDefinitions = this.axisDefinitions.length
+			? this.axisDefinitions
+			: [
 				{
-					type: 'value',
-					name: this.units2,
-					nameTextStyle: {
-						color: this.settings.color2,
-						align: 'right',
-					},
-					scale: true,
-					splitLine: {
-						show: false,
-						lineStyle: {
-							color: getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim(),
-							width: 1,
-							opacity: 0.5,
-							type: 'dashed',
-						},
-					},
-				},
-			]
-			: primaryAxisY;
-
-		const legendData = [];
-
-		const series = [];
-		if (this.settings.datasource1?.id) {
-			legendData.push(this.name1);
-
-			series.push({
-				name: this.name1,
-				type: 'line',
-				data: this.data1,
-				sampling: this.settings.timeframe === 'year' ? 'lttb' : undefined,
-				showSymbol: false,
-				itemStyle: {
+					unit: this.units1,
 					color: this.settings.color1,
+					min: 0,
+					max: 0,
+					datasetIndices: [0],
 				},
-				areaStyle: {
-					color: new window.echarts.graphic.LinearGradient(0, 0, 0, 1, [
-						{
-							offset: 0.1,
-							color: LineChartWidgetScript.hexToRgba(this.settings.color1, 0.5),
-						},
-						{
-							offset: 0.9,
-							color: LineChartWidgetScript.hexToRgba(this.settings.color1, 0),
-						},
-					]),
-				},
-				lineStyle: {
-					width: 1.5,
-				},
-				yAxisIndex: 0,
-			});
-		}
+			];
+		this.axisLabelCache = axisDefinitions.map(definition => definition.unit ?? '');
+		const baseMargin = 45; // Space for single axis labels
+		const extraMarginPerAxis = 45; // Additional space for each extra axis
 
-		if (this.settings.datasource2) {
-			legendData.push(this.name2);
+		// Determine which axes have data (will be visible on initial render)
+		const axisHasData = axisDefinitions.map((_, axisIndex) => {
+			return datasets.some((dataset, datasetIndex) => {
+				const datasourceId = dataset.datasource?.id?.trim();
+				if (!datasourceId || !dataset.data.length) return false;
+				return this.axisAssignments[datasetIndex] === axisIndex;
+			});
+		});
+
+		// Count axes with data on each side
+		const leftAxesWithData = axisHasData.filter((hasData, idx) => hasData && idx % 2 === 0).length;
+		const rightAxesWithData = axisHasData.filter((hasData, idx) => hasData && idx % 2 !== 0).length;
+
+		// Calculate grid margins based on axes with data
+		const gridLeft = leftAxesWithData > 0 ? baseMargin + (leftAxesWithData - 1) * extraMarginPerAxis : 10;
+		const gridRight = rightAxesWithData > 0 ? baseMargin + (rightAxesWithData - 1) * extraMarginPerAxis : 10;
+
+		let leftAxisIndex = 0;
+		let rightAxisIndex = 0;
+		const yAxis = axisDefinitions.map((axis, axisIndex) => {
+			const isLeft = axisIndex % 2 === 0;
+			const axisColor = axis.color && axis.color.trim().length > 0 ? axis.color : mono200;
+			// Calculate offset: first axis on each side gets 0, subsequent axes get stacked
+			let offset = 0;
+			if (isLeft) {
+				offset = leftAxisIndex * extraMarginPerAxis;
+				leftAxisIndex++;
+			} else {
+				offset = rightAxisIndex * extraMarginPerAxis;
+				rightAxisIndex++;
+			}
+			return {
+				type: 'value',
+				name: axis.unit,
+				nameLocation: 'end',
+				position: isLeft ? 'left' : 'right',
+				offset,
+				nameTextStyle: {
+					align: isLeft ? 'right' : 'left',
+					// align: 'left',
+					color: axisColor,
+					padding: isLeft ? [0, 4, 0, 0] :  [0, 0, 0, 4],
+				},
+				axisLine: {
+					show: false,
+				},
+				axisTick: {
+					show: false,
+				},
+				axisLabel: {
+					margin: 4,
+				},
+				scale: true,
+				alignTicks: true,
+				splitLine: {
+					show: axisIndex === 0,
+					lineStyle: {
+						color: mono200,
+						width: 1,
+						opacity: 0.5,
+						type: 'dashed',
+					},
+				},
+			};
+		});
+
+		const legendData: string[] = [];
+		const unitMap: Record<string, string> = {};
+		const series: unknown[] = [];
+		this.seriesNameByDatasetIndex = [undefined, undefined, undefined, undefined];
+		this.displayNameByLegendName = {};
+		const legendNameCounts = new Map<string, number>();
+
+		datasets.forEach((dataset, index) => {
+			const datasourceId = dataset.datasource?.id?.trim();
+			if (!datasourceId || !dataset.data.length) return;
+
+			const baseName = dataset.name && dataset.name.trim().length > 0 ? dataset.name : `Series ${index + 1}`;
+			const occurrence = legendNameCounts.get(baseName) ?? 0;
+			const legendName = occurrence === 0 ? baseName : `${baseName} (${occurrence + 1})`;
+			legendNameCounts.set(baseName, occurrence + 1);
+			legendData.push(legendName);
+			unitMap[legendName] = dataset.units ?? '';
+			this.seriesNameByDatasetIndex[index] = legendName;
+			this.displayNameByLegendName[legendName] = baseName;
+			const assignedAxis = this.axisAssignments[index];
+			const resolvedAxisIndex = typeof assignedAxis === 'number' && assignedAxis >= 0 ? assignedAxis : 0;
+
 			series.push({
-				name: this.name2,
+				name: legendName,
 				type: 'line',
-				data: this.data2,
+				data: dataset.data,
 				sampling: this.settings.timeframe === 'year' ? 'lttb' : undefined,
 				showSymbol: false,
 				itemStyle: {
-					color: LineChartWidgetScript.hexToRgba(this.settings.color2, 0.7),
+					color: index === 0 ? dataset.color : LineChartWidgetScript.hexToRgba(dataset.color, 0.7),
 				},
 				areaStyle: {
 					color: new window.echarts.graphic.LinearGradient(0, 0, 0, 1, [
 						{
 							offset: 0.1,
-							color: LineChartWidgetScript.hexToRgba(this.settings.color2, 0.5),
+							color: LineChartWidgetScript.hexToRgba(dataset.color, 0.5),
 						},
 						{
 							offset: 0.9,
-							color: LineChartWidgetScript.hexToRgba(this.settings.color2, 0),
+							color: LineChartWidgetScript.hexToRgba(dataset.color, 0),
 						},
 					]),
 				},
 				lineStyle: {
 					width: 1.5,
 				},
-				yAxisIndex: this.isOffTheScale ? 1 : 0,
+				yAxisIndex: resolvedAxisIndex,
 			});
-		}
+		});
+
 
 		const { interval } = this.getTimeframeOptions(this.settings.timeframe);
+		const axisColorForDataset = (datasetIndex: number, datasetColor: string): string => {
+			const assignment = this.axisAssignments[datasetIndex];
+			if (assignment == null || assignment < 0) return datasetColor;
+			const axis = axisDefinitions[assignment];
+			const candidate = axis?.color?.trim();
+			return candidate && candidate.length ? candidate : datasetColor;
+		};
 
 		const option = {
 			legend: {
@@ -719,34 +975,44 @@ class LineChartWidgetScript {
 					fontSize: 10,
 					overflow: 'truncate',
 				},
-				formatter: (params: any): string => {
-					const formattedTitle = this.formatXAxisValue(params[0].value[0], true);
+				formatter: (params: TooltipParam[]): string => {
+					if (!params.length) return '';
+					const firstValue = params[0].value[0];
+					const firstDate = new Date(firstValue);
+					const formattedTitle = this.formatXAxisValue(firstDate.toISOString(), true);
 
-					// Format the Y-axis values for each series
-					const seriesData = params.map((item: any) => {
-						const marker = item.marker; // Colored indicator (HTML)
-						const seriesName = item.seriesName; // Name of the series
-						const yValue = item.value[1]; // Y-axis value
-
-						const unit = item.seriesIndex === 0 ? this.units1 : this.units2;
-
+					const seriesData = params.map(item => {
+						const marker = item.marker;
+						const seriesName = item.seriesName;
+						const displayName = this.displayNameByLegendName[seriesName] ?? seriesName;
+						const yValue = item.value[1];
+						const unit = unitMap[seriesName] ?? '';
 						const formattedYValue =
-							yValue !== '-' ? `${Number.isInteger(yValue) ? yValue : yValue.toFixed(2)} ${unit}` : '-';
+							yValue !== '-' && typeof yValue === 'number'
+								? `${Number.isInteger(yValue) ? yValue : yValue.toFixed(2)} ${unit}`
+								: '-';
 
-						return `${marker}<strong>${seriesName}</strong>: ${formattedYValue}`;
+						// Show original date for shifted series (calendar timeframes only)
+						const seriesIndex = item.seriesIndex;
+						const itemDate = new Date(item.value[0]);
+						const originalDate = this.reverseNormalizationShift(itemDate, seriesIndex);
+						const originalDateStr = originalDate
+							? ` <span style="opacity:0.7">(${this.formatXAxisValue(originalDate.toISOString(), true)})</span>`
+							: '';
+
+						return `${marker}<strong>${displayName}</strong>: ${formattedYValue}${originalDateStr}`;
 					});
 
-					// Combine the title and series data
 					return `<div class="tooltip"><strong>${formattedTitle}</strong><br/>${seriesData.join('<br/>')}</div>`;
 				},
 			},
 			grid: {
 				top: '30',
-				left: '12',
-				right: '12',
-				bottom: '0',
+				left: gridLeft,
+				right: gridRight,
+				bottom: '20',
 				height: 'auto',
-				containLabel: true,
+				containLabel: false,
 			},
 			toolbox: {
 				feature: {
@@ -784,22 +1050,53 @@ class LineChartWidgetScript {
 
 		this.chart.setOption(option);
 
-		// render/update the legend toggles
-		if (!this.settings.hideLegend && this.settings.datasource1?.id) {
-			document.querySelector('#toggle1 .label')!.textContent = this.name1;
-			(document.querySelector('#toggle1 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color1;
-			document.getElementById('toggle1')!.style.display = 'block';
-		} else {
-			document.getElementById('toggle1')!.style.display = 'none';
-		}
+		// Re-apply hidden state for any series that were toggled off
+		this.seriesNameByDatasetIndex.forEach((legendName, index) => {
+			if (legendName && !this.seriesVisibility[index]) {
+				this.chart.dispatchAction({
+					type: 'legendUnSelect',
+					name: legendName,
+				});
+			}
+		});
 
-		if (!this.settings.hideLegend && this.settings.datasource2?.id) {
-			document.querySelector('#toggle2 .label')!.textContent = this.name2;
-			(document.querySelector('#toggle2 .toggle-icon')! as HTMLElement).style.backgroundColor = this.settings.color2;
-			document.getElementById('toggle2')!.style.display = 'block';
-		} else {
-			document.getElementById('toggle2')!.style.display = 'none';
-		}
+		this.updateAxisLabelVisibility();
+
+		// render/update the legend toggles
+		// Check if any series is tied to another series' axis
+		const seriesColors = [this.settings.color1, this.settings.color2, this.settings.color3 ?? this.settings.color1, this.settings.color4 ?? this.settings.color1];
+		const anySeriesSharingAxis = seriesColors.some((color, index) => {
+			const datasource = [this.settings.datasource1, this.settings.datasource2, this.settings.datasource3, this.settings.datasource4][index];
+			if (!datasource?.id) return false;
+			return axisColorForDataset(index, color) !== color;
+		});
+
+		const renderToggle = (index: number, datasource: Datasource | undefined, name: string, color: string, units: string): void => {
+			const toggleId = `toggle${index + 1}`;
+			if (!this.settings.hideLegend && datasource?.id) {
+				const toggleElement = document.getElementById(toggleId)!;
+				document.querySelector(`#${toggleId} .label`)!.textContent = name;
+				const toggleIcon = document.querySelector(`#${toggleId} .toggle-icon`)! as HTMLElement;
+				toggleIcon.style.backgroundColor = color;
+				const axisColor = axisColorForDataset(index, color);
+				const unitsSpan = document.querySelector(`#${toggleId} .units`)! as HTMLElement;
+				// Show units for all legends if any series is sharing an axis
+				if (units && anySeriesSharingAxis) {
+					unitsSpan.innerHTML = `<span style="color: ${axisColor}">${units}</span>`;
+				} else {
+					unitsSpan.textContent = '';
+				}
+				toggleElement.style.display = 'flex';
+				toggleElement.classList.toggle('hidden', !this.seriesVisibility[index]);
+			} else {
+				document.getElementById(toggleId)!.style.display = 'none';
+			}
+		};
+
+		renderToggle(0, this.settings.datasource1, this.name1, this.settings.color1, this.units1);
+		renderToggle(1, this.settings.datasource2, this.name2, this.settings.color2, this.units2);
+		renderToggle(2, this.settings.datasource3, this.name3, this.settings.color3 ?? this.settings.color1, this.units3);
+		renderToggle(3, this.settings.datasource4, this.name4, this.settings.color4 ?? this.settings.color1, this.units4);
 
 		// resize due to toggles being shown/hidden
 		this.chart.resize();
@@ -819,7 +1116,7 @@ class LineChartWidgetScript {
 			const randomValue = Math.floor(Math.random() * 101);
 			data.push([new Date(), randomValue]);
 			if (data.length > 20) data.shift();
-			await this.setData(data, 'Demo', [], '');
+			await this.setData(data, 'Demo', [], '', undefined, '', undefined, '');
 			this.resolution1 = 'today';
 			this.units1 = 'Configure me';
 
@@ -850,68 +1147,131 @@ class LineChartWidgetScript {
 
 	/**
 	 * Toggles the visibility of a series in the chart.
-	 * @param indexToToggle - The index of the series to toggle (0 or 1).
+	 * @param indexToToggle - The index of the dataset to toggle (0-3).
 	 */
 	private toggleSeries(indexToToggle: number): void {
-		const options: echarts.EChartsOption = this.chart.getOption() as echarts.EChartsOption;
+		const legendName = this.seriesNameByDatasetIndex[indexToToggle];
+		if (!legendName) return;
 
-		if (!options.series) return;
-
-		const series = Array.isArray(options.series) ? options.series : [options.series];
-		const legend = Array.isArray(options.legend) ? options.legend[0] : options.legend;
-
-		const visibleSeries: Map<number, echarts.SeriesOption> = new Map();
-		series.forEach((seriesItem, index) => {
-			if (legend?.selected?.[seriesItem!.name as string] !== false) {
-				visibleSeries.set(index, seriesItem);
-			}
-		});
-
-		const visibleKeys = Array.from(visibleSeries.keys());
-		let primaryVisible = visibleKeys.some(k => k === 0);
-		let secondaryVisible = visibleKeys.some(k => k === 1);
-
-		if (indexToToggle === 0) {
-			primaryVisible = !primaryVisible;
-		} else {
-			secondaryVisible = !secondaryVisible;
-		}
+		this.seriesVisibility[indexToToggle] = !this.seriesVisibility[indexToToggle];
+		const shouldBeVisible = this.seriesVisibility[indexToToggle];
 
 		this.chart.dispatchAction({
-			type: visibleKeys.some(k => k === indexToToggle) ? 'legendUnSelect' : 'legendSelect',
-			name: series[indexToToggle].name,
+			type: shouldBeVisible ? 'legendSelect' : 'legendUnSelect',
+			name: legendName,
 		});
 
-		let renderPrimarySplitLine = false;
-		let renderSecondarySplitLine = false;
-
-		if (primaryVisible && secondaryVisible) {
-			renderPrimarySplitLine = true;
-			renderSecondarySplitLine = false;
-		} else if (!this.isOffTheScale) {
-			primaryVisible = true;
-			renderPrimarySplitLine = true;
-		} else {
-			renderPrimarySplitLine = primaryVisible;
-			renderSecondarySplitLine = secondaryVisible;
+		const toggleElement = document.getElementById(`toggle${indexToToggle + 1}`);
+		if (toggleElement) {
+			toggleElement.classList.toggle('hidden', !shouldBeVisible);
 		}
 
-		this.chart.setOption({
-			yAxis: [
-				{
-					show: primaryVisible,
-					splitLine: {
-						show: renderPrimarySplitLine,
-					},
-				},
-				{
-					show: secondaryVisible,
-					splitLine: {
-						show: renderSecondarySplitLine,
-					},
-				},
-			],
+		this.updateAxisLabelVisibility();
+	}
+
+	private updateAxisLabelVisibility(): void {
+		if (!this.chart) return;
+
+		const datasets = [
+			this.data1 ?? [],
+			this.data2 ?? [],
+			this.data3 ?? [],
+			this.data4 ?? [],
+		];
+
+		const axisDefinitions = this.axisDefinitions.length
+			? this.axisDefinitions
+			: [{ unit: this.units1, color: this.settings.color1, min: 0, max: 0, datasetIndices: [0] }];
+
+		const mono200 = getComputedStyle(document.documentElement).getPropertyValue('--homey-color-mono-200').trim();
+		const baseMargin = 45; // Space for single axis labels
+		const extraMarginPerAxis = 45; // Additional space for each extra axis
+
+		// First pass: determine which axes are visible
+		const axisVisibility = axisDefinitions.map((_, axisIndex) => {
+			return this.seriesNameByDatasetIndex.some((legendName, datasetIndex) => {
+				if (!legendName) return false;
+				if (this.axisAssignments[datasetIndex] !== axisIndex) return false;
+				const dataset = datasets[datasetIndex];
+				if (!dataset?.length) return false;
+				return this.seriesVisibility[datasetIndex];
+			});
 		});
+
+		// Count visible axes on each side
+		const visibleLeftAxes = axisVisibility.filter((visible, idx) => visible && idx % 2 === 0).length;
+		const visibleRightAxes = axisVisibility.filter((visible, idx) => visible && idx % 2 !== 0).length;
+
+		// Calculate grid margins based on visible axes
+		const gridLeft = visibleLeftAxes > 0 ? baseMargin + (visibleLeftAxes - 1) * extraMarginPerAxis : 10;
+		const gridRight = visibleRightAxes > 0 ? baseMargin + (visibleRightAxes - 1) * extraMarginPerAxis : 10;
+
+		// Count visible axes on each side for offset calculation
+		let visibleLeftCount = 0;
+		let visibleRightCount = 0;
+
+		const updatedYAxis = axisDefinitions.map((axis, axisIndex) => {
+			const axisHasVisibleSeries = axisVisibility[axisIndex];
+			const isLeft = axisIndex % 2 === 0;
+			const axisColor = axis.color && axis.color.trim().length > 0 ? axis.color : mono200;
+			
+			// Calculate offset based on visible axes on the same side
+			let offset = 0;
+			if (axisHasVisibleSeries) {
+				if (isLeft) {
+					offset = visibleLeftCount * extraMarginPerAxis;
+					visibleLeftCount++;
+				} else {
+					offset = visibleRightCount * extraMarginPerAxis;
+					visibleRightCount++;
+				}
+			}
+
+			const cachedName = this.axisLabelCache[axisIndex] ?? '';
+
+			return {
+				type: 'value',
+				name: axisHasVisibleSeries ? cachedName : '',
+				nameLocation: 'end',
+				position: isLeft ? 'left' : 'right',
+				offset,
+				nameTextStyle: {
+					// align: 'left',
+					align: isLeft ? 'right' : 'left',
+					color: axisHasVisibleSeries ? axisColor : 'transparent',
+					padding: isLeft ? [0, 4, 0, 0] :  [0, 0, 0, 4],
+				},
+				axisLine: {
+					show: false,
+				},
+				axisTick: {
+					show: false,
+				},
+				axisLabel: {
+					show: axisHasVisibleSeries,
+					margin: 4,
+				},
+				scale: true,
+				alignTicks: true,
+				splitLine: {
+					show: axisIndex === 0 ? axisHasVisibleSeries : false,
+					lineStyle: {
+						color: mono200,
+						width: 1,
+						opacity: 0.5,
+						type: 'dashed',
+					},
+				},
+			};
+		});
+
+		this.chart.setOption({ 
+			yAxis: updatedYAxis,
+			grid: {
+				left: gridLeft,
+				right: gridRight,
+			}
+		}, { replaceMerge: ['yAxis'] });
 	}
 
 	/**
@@ -926,7 +1286,8 @@ class LineChartWidgetScript {
 			this.chart = window.echarts.init(document.getElementById('line-chart'), null, {
 				renderer: 'svg',
 			});
-			if (this.settings.datasource1 || this.settings.datasource2) await this.getData();
+			if (this.settings.datasource1 || this.settings.datasource2 || this.settings.datasource3 || this.settings.datasource4)
+				await this.getData();
 
 			document.documentElement.style.setProperty('--tooltip-font-size', `${this.settings.tooltipFontSize}`);
 
@@ -939,6 +1300,14 @@ class LineChartWidgetScript {
 
 			document.getElementById('toggle2')?.addEventListener('click', () => {
 				if (this.settings.datasource2) this.toggleSeries(1);
+			});
+
+			document.getElementById('toggle3')?.addEventListener('click', () => {
+				if (this.settings.datasource3) this.toggleSeries(2);
+			});
+
+			document.getElementById('toggle4')?.addEventListener('click', () => {
+				if (this.settings.datasource4) this.toggleSeries(3);
 			});
 		} catch (error) {
 			if (error instanceof Error) {

@@ -30,21 +30,14 @@ export default class LineChartWidget extends BaseWidget {
 	}
 
 	private async setup(): Promise<void> {
-		this.widget.registerSettingAutocompleteListener('datasource1', async (query: string) =>
-			this.autocompleteQuery({
-				query,
-				includeDataPoints: true,
-				fromInsights: true
-			}),
-		);
-
-		this.widget.registerSettingAutocompleteListener('datasource2', async (query: string) =>
-			this.autocompleteQuery({
-				query,
-				includeDataPoints: true,
-				fromInsights: true,
-				optional: true
-			}),
-		);
+		['datasource1', 'datasource2', 'datasource3', 'datasource4'].forEach((setting) => {
+			this.widget.registerSettingAutocompleteListener(setting, async (query: string) =>
+				this.autocompleteQuery({
+					query,
+					includeDataPoints: true,
+					fromInsights: true
+				}),
+			);
+		});
 	}
 }
