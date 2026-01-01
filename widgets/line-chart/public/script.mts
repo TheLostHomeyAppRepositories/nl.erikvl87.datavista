@@ -36,6 +36,7 @@ type Settings = {
 	yAxisCalculationMethod: 'fullRange' | 'iqr' | 'sameAxis';
 	hideLegend: boolean;
 	tooltipFontSize: string;
+	legendFontSize: string;
 };
 
 type TooltipParam = {
@@ -1291,6 +1292,7 @@ class LineChartWidgetScript {
 				await this.getData();
 
 			document.documentElement.style.setProperty('--tooltip-font-size', `${this.settings.tooltipFontSize}`);
+			document.documentElement.style.setProperty('--legend-font-size', `${this.settings.legendFontSize}`);
 
 			this.homey.ready();
 			await this.render();
