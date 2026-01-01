@@ -35,7 +35,8 @@ export default class LineChartWidget extends BaseWidget {
 				this.autocompleteQuery({
 					query,
 					includeDataPoints: true,
-					fromInsights: true
+					fromInsights: true,
+					optional: setting !== 'datasource1',
 				}),
 			);
 		});
