@@ -1063,9 +1063,10 @@ class LineChartWidgetScript {
 		this.updateAxisLabelVisibility();
 
 		// render/update the legend toggles
-		// Check if any series is tied to another series' axis
+		// Check if any series is tied to another series' axis and there are multiple axes
 		const seriesColors = [this.settings.color1, this.settings.color2, this.settings.color3 ?? this.settings.color1, this.settings.color4 ?? this.settings.color1];
-		const anySeriesSharingAxis = seriesColors.some((color, index) => {
+		const hasMultipleAxes = axisDefinitions.length > 1;
+		const anySeriesSharingAxis = hasMultipleAxes && seriesColors.some((color, index) => {
 			const datasource = [this.settings.datasource1, this.settings.datasource2, this.settings.datasource3, this.settings.datasource4][index];
 			if (!datasource?.id) return false;
 			return axisColorForDataset(index, color) !== color;
