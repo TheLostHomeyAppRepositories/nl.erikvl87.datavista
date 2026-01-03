@@ -30,12 +30,21 @@ export default class DataVistaLogger {
 		} else {
 			this.log(message);
 		}
-		if (logToSentry)
-			void this.sentryLog.captureMessage(message);
+		if (logToSentry) {
+			try {
+				await this.sentryLog.captureMessage(message);
+			} catch (err) {
+				this.error('Failed to send message to Sentry:', err);
+			}
+		}
 	}
 
 	public async logException(error: any): Promise<void> {
 		this.error(error);
-		await this.sentryLog.captureException(error);
+		try {
+			await this.sentryLog.captureException(error);
+		} catch (err) {
+			this.error('Failed to send exception to Sentry:', err);
+		}
 	}
 }

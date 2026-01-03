@@ -4,7 +4,7 @@
 		"project": "./tsconfig.json",
 		"sourceType": "module"
 	},
-	"ignorePatterns": ["widgets/*/public/*.js"],
+	"ignorePatterns": ["widgets/*/public/*.js", "website/**"],
 	"plugins": ["@typescript-eslint"],
 	"settings": {
 		"import/resolver": {
